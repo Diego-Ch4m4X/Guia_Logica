@@ -19,7 +19,7 @@ import { buildGuide, buildToc, buildDrawer } from './lib/navigation.js';
 import { applyTemplate, extractSlot, escapeHtml } from './lib/html.js';
 import { renderHomeTopicGrid } from './lib/home.js';
 
-const ASSET_VERSION = '1.1.0-rc.1';
+const ASSET_VERSION = '1.1.0';
 
 async function read(file) { return fs.readFile(file, 'utf8'); }
 async function write(file, content) { await fs.mkdir(path.dirname(file), { recursive:true }); await fs.writeFile(file, content, 'utf8'); }

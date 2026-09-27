@@ -759,3 +759,39 @@ Ações GitHub oficiais foram fixadas por SHA completo: `actions/checkout` v7.0.
 O repositório do projeto não estava disponível entre os repositórios GitHub conectados nesta sessão; portanto nenhum run hospedado foi inventado ou declarado. A Etapa L valida localmente o source/workflow e produz evidência compatível com o contrato do artefato Pages; a execução hospedada passa a ser pré-condição externa para o deploy da Etapa M.
 
 **Estado:** Etapa L / workflow e artefato Pages preparados; deploy não executado.
+
+---
+
+## 30. GitHub Actions hospedado — Etapa L — 2026-09-27
+
+O source foi publicado em `Diego-Ch4m4X/Guia_Logica`. O run hospedado canônico da Etapa L executou Node 24.21.0, `npm ci`, preflight, build, validate, testes 4/4, `validate:pages` e upload do artefato `github-pages`, todos com PASS. O artefato hospedado continha 83 arquivos e foi confirmado byte-for-byte contra o `dist/` validado.
+
+**Estado:** Etapa L PASS.
+
+---
+
+## 31. GitHub Pages e smoke de produção — Etapa M — 2026-09-27
+
+A fonte de publicação do GitHub Pages foi migrada para GitHub Actions. O workflow canônico passou a executar `actions/deploy-pages` com permissões restritas ao job de deploy (`pages: write` e `id-token: write`).
+
+Produção:
+
+`https://diego-ch4m4x.github.io/Guia_Logica/`
+
+O run `36290915400`, no commit `75144c3a3b47d0ae8b1cbb3d0cc966635dea73ca`, concluiu build, deploy e smoke de produção com PASS. O smoke HTTP verificou Home, T01, T24, T25, T35, CSS, JavaScript, Mermaid local, Highlight.js local, `topics.json`, `search-index.json`, `data/package.json` e o cache-buster da RC. O artefato final da Etapa M manteve 83/83 arquivos byte-for-byte em relação ao artefato aprovado.
+
+**Estado:** Etapa M PASS.
+
+---
+
+## 32. Promoção para release final — Etapa N — 2026-09-27
+
+Após os gates hospedados de CI/CD e produção, a candidata `v1.1.0-rc.1` foi autorizada a ser promovida para a release final `v1.1.0`, mantendo a classificação interna **MINOR**.
+
+A promoção altera somente metadata/versionamento/cache-busters correntes e documentação de estado. O corpus T01–T35, as fixtures históricas v1.0.54, os componentes, o conteúdo Web e os assets funcionais permanecem preservados.
+
+A nova baseline canônica Web passa a ser `v1.1.0` somente após o manifesto e os artefatos finais da Etapa N passarem pela reabertura e verificação integral.
+
+
+**Última atualização:** 2026-09-27
+**Estado corrente:** Etapa N — promoção final v1.1.0 em fechamento.

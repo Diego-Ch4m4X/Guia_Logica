@@ -1,2 +1,2 @@
-import { announce } from './theme.js?v=1.1.0-rc.1';
+import { announce } from './theme.js?v=1.1.0';
 export function initChecklists(){const boxes=[...document.querySelectorAll('.interactive-check[data-check-key]')];if(!boxes.length)return;const storageKey='logic.t25.checks.v1';let state={};try{const stored=JSON.parse(localStorage.getItem(storageKey)||'{}');state=stored&&typeof stored==='object'&&!Array.isArray(stored)?stored:{}}catch(error){}boxes.forEach(box=>{const key=box.dataset.checkKey;box.checked=Boolean(state[key]);box.addEventListener('change',()=>{state[key]=box.checked;try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(error){}announce(box.checked?'Item marcado como concluído.':'Item desmarcado.')})})}

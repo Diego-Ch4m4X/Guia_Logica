@@ -1,4 +1,4 @@
-import { initCodeBlocks } from './code.js?v=1.1.0-rc.1';
+import { initCodeBlocks } from './code.js?v=1.1.0';
 
 export function initTabs(){
   const groups=[...document.querySelectorAll('[data-tabs]')];

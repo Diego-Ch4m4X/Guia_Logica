@@ -55,8 +55,9 @@
       "version": "1.0.54",
       "sha256": "fc741f7d451eadc4b085eb4bccf10763e3883040b0eb39862eeb9a72ad6cd009"
     },
-    "publicationStatus": "not_published",
-    "stage": "L"
+    "publicationStatus": "published_and_superseded_by_final_release",
+    "stage": "K-M",
+    "finalizedAs": "1.1.0"
   },
   "githubActions": {
     "workflow": ".github/workflows/pages.yml",
@@ -79,8 +80,29 @@
         "sha": "fc324d3547104276b827a68afc52ff2a11cc49c9"
       }
     },
-    "deployIncluded": false,
+    "deployIncluded": true,
     "artifactPath": "dist",
-    "artifactName": "github-pages"
+    "artifactName": "github-pages",
+    "smokeIncluded": true,
+    "deployAction": {
+      "version": "v5.0.1",
+      "sha": "368f82528645a54fb793d4d04e342629a3f51346"
+    },
+    "deployPermissions": {
+      "pages": "write",
+      "id-token": "write"
+    },
+    "productionUrl": "https://diego-ch4m4x.github.io/Guia_Logica/"
+  },
+  "finalRelease": {
+    "version": "1.1.0",
+    "classification": "MINOR",
+    "status": "canonical",
+    "date": "2026-09-27",
+    "sourceCommitBase": "75144c3a3b47d0ae8b1cbb3d0cc966635dea73ca",
+    "productionUrl": "https://diego-ch4m4x.github.io/Guia_Logica/",
+    "productionSmoke": "PASS",
+    "supersedesCandidate": "1.1.0-rc.1",
+    "supersedesWebBaseline": "1.0.54"
   }
 }
