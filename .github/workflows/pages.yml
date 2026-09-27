@@ -77,7 +77,58 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy GitHub Pages artifact
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  smoke:
+    name: Smoke production site
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      BASE_URL: ${{ needs.deploy.outputs.page_url }}
+      EXPECTED_VERSION: 1.1.0-rc.1
+    steps:
+      - name: Verify production routes and assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${BASE_URL%/}/"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+
+          fetch() {
+            local path="$1"
+            local out="$2"
+            curl --fail --location --silent --show-error               --retry 10 --retry-delay 3 --retry-all-errors               --connect-timeout 10 --max-time 45               "${base}${path}" -o "$out"
+            test -s "$out"
+          }
+
+          for route in "" "topicos/t01/" "topicos/t24/" "topicos/t25/" "topicos/t35/"; do
+            name="${route//\//_}"
+            test -n "$name" || name="home"
+            fetch "$route" "$tmp/$name.html"
+            grep -qi '<!doctype html' "$tmp/$name.html"
+          done
+
+          fetch "assets/css/base.css?v=${EXPECTED_VERSION}" "$tmp/base.css"
+          fetch "assets/js/app.js?v=${EXPECTED_VERSION}" "$tmp/app.js"
+          fetch "assets/vendor/mermaid-11.17.2.min.js" "$tmp/mermaid.js"
+          fetch "assets/vendor/highlight-11.12.0.min.js" "$tmp/highlight.js"
+          fetch "data/topics.json" "$tmp/topics.json"
+          fetch "data/search-index.json" "$tmp/search-index.json"
+          fetch "data/package.json" "$tmp/package.json"
+
+          grep -q "?v=${EXPECTED_VERSION}" "$tmp/home.html"
+          grep -q '"version": "1.1.0-rc.1"' "$tmp/package.json"
+          grep -q '"number": 35' "$tmp/topics.json"
+
+          echo "PRODUCTION_SMOKE: PASS"
+          echo "base_url=$base"
