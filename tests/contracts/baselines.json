@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "plan": {
+    "name": "PLANO_CRIACAO_SITE_GITHUB_T01_T35_v1.3.0.md",
+    "version": "1.3.0"
+  },
+  "contentBaseline": {
+    "logicalName": "TOPICOS_01_35_GATE_GLOBAL_FINAL.zip",
+    "validatedPhysicalName": "TOPICOS_01_35_GATE_GLOBAL_FINAL_E_PATCH01.zip",
+    "sha256": "cc6c79034ab08ca209f87ce6f645d32ea480338a4cfe5234c9970d5cb1a61e37",
+    "topics": 35,
+    "supersedes": {
+      "validatedPhysicalName": "TOPICOS_01_35_GATE_GLOBAL_FINAL(3).zip",
+      "sha256": "fb2974ecdcd492a220bbd9e021d4e5b1a1470183e03d22a696d2a59aa13ac04c"
+    },
+    "patch": {
+      "id": "E_PATCH01",
+      "date": "2026-09-26",
+      "authorizedTopics": [
+        "T08",
+        "T24"
+      ],
+      "closedFindings": [
+        "E-HTML-001",
+        "E-UTF8-NFC-001"
+      ]
+    }
+  },
+  "webGoldenMaster": {
+    "name": "LOGICA_HOME_T25_PILOTO_v1.0.54.zip",
+    "version": "1.0.54",
+    "sha256": "fc741f7d451eadc4b085eb4bccf10763e3883040b0eb39862eeb9a72ad6cd009"
+  },
+  "fixtures": {
+    "home": {
+      "path": "tests/fixtures/home/golden.html",
+      "sha256": "f1c6b8cfdec2fb63ede904d230b2869a4c35f033a37d81dcffc298017ef36d3a"
+    },
+    "t25": {
+      "path": "tests/fixtures/t25/golden.html",
+      "sha256": "2efc1d6f857b5e64f72eefaf767f48a31ad338ec0f9876b569878bcedd08d4d1"
+    }
+  },
+  "policy": {
+    "fixturesAreReferenceOutputs": true,
+    "fixturesAreNotEditableContentSources": true,
+    "distIsDerived": true
+  },
+  "releaseCandidate": {
+    "targetVersion": "1.1.0",
+    "candidateVersion": "1.1.0-rc.1",
+    "classification": "MINOR",
+    "basis": "expansao funcional de Home + T25 para Home + T01-T35",
+    "supersedesWebBaseline": {
+      "version": "1.0.54",
+      "sha256": "fc741f7d451eadc4b085eb4bccf10763e3883040b0eb39862eeb9a72ad6cd009"
+    },
+    "publicationStatus": "not_published",
+    "stage": "L"
+  },
+  "githubActions": {
+    "workflow": ".github/workflows/pages.yml",
+    "runner": "ubuntu-24.04",
+    "node": "24.21.0",
+    "permissions": {
+      "contents": "read"
+    },
+    "actions": {
+      "checkout": {
+        "version": "v7.0.1",
+        "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+      },
+      "setupNode": {
+        "version": "v7.0.0",
+        "sha": "820762786026740c76f36085b0efc47a31fe5020"
+      },
+      "uploadPagesArtifact": {
+        "version": "v5.0.0",
+        "sha": "fc324d3547104276b827a68afc52ff2a11cc49c9"
+      }
+    },
+    "deployIncluded": false,
+    "artifactPath": "dist",
+    "artifactName": "github-pages"
+  }
+}

@@ -1,0 +1,196 @@
+<!-- SLOT:HEAD_STYLES:BEGIN -->
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/tokens.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/fonts.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/base.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/components.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/footer.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/home.css?v={{ASSET_VERSION}}">
+  <link rel="stylesheet" href="{{SITE_ROOT}}assets/css/responsive-reference.css?v={{ASSET_VERSION}}">
+<!-- SLOT:HEAD_STYLES:END -->
+<!-- SLOT:HEADER:BEGIN -->
+<header class="site-header home-header" id="siteHeader">
+<div class="header-inner">
+<a aria-label="Lógica — Início" class="brand" href="{{SITE_ROOT}}"><svg aria-hidden="true" class="brand-mark" height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none"></path>
+<defs>
+<mask id="filomatia-logo-header-home">
+<path d="M8 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+<animate attributename="d" dur="3s" repeatcount="indefinite" values="M8 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4;M8 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4"></animate>
+</path>
+<path d="M4 7h16v0h-16v12h16v-32h-16Z">
+<animate attributename="d" begin="1s" dur="0.6s" fill="freeze" to="M4 2h16v5h-16v12h16v-24h-16Z"></animate>
+</path>
+</mask>
+</defs>
+<path d="M17 14v4c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-4Z" fill="currentColor" fill-opacity="0">
+<animate attributename="fill-opacity" begin="1.6s" dur="0.15s" fill="freeze" to=".3"></animate>
+</path>
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+<path d="M17 9v9c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-9Z" stroke-dasharray="48">
+<animate attributename="stroke-dashoffset" dur="0.6s" fill="freeze" values="48;0"></animate>
+</path>
+<path d="M17 9h3c0.55 0 1 0.45 1 1v3c0 0.55 -0.45 1 -1 1h-3" stroke-dasharray="16" stroke-dashoffset="16">
+<animate attributename="stroke-dashoffset" begin="0.6s" dur="0.3s" fill="freeze" to="0"></animate>
+</path>
+</g>
+<path d="M0 0h24v24H0z" fill="currentColor" mask="url(#filomatia-logo-header-home)"></path>
+</svg><span class="brand-word">LÓGICA</span></a>
+<nav aria-label="Navegação principal" class="home-primary-nav">
+<a aria-current="page" class="home-header-link" href="{{SITE_ROOT}}">Início</a>
+<button aria-controls="homeNavPanel" aria-expanded="false" class="home-nav-toggle" id="homeNavToggle" type="button"><span>Navegação</span><svg aria-hidden="true" viewbox="0 0 24 24"><path d="m7 9 5 5 5-5"></path></svg></button>
+</nav>
+<p class="header-context" id="headerContext">Lógica, fundamentos e algoritmos</p>
+<div class="header-actions">
+<button aria-haspopup="dialog" class="search-trigger" id="openSearch" type="button"><span aria-hidden="true">⌕</span><span>Buscar</span><kbd>Ctrl K</kbd></button>
+<button aria-label="Alternar tema" class="icon-btn theme-button" id="themeToggle" title="Alternar tema" type="button"><span aria-hidden="true" class="theme-icon" id="themeIcon"></span></button>
+</div>
+<nav aria-label="Seções da Home" class="home-nav-panel" hidden="" id="homeNavPanel"><a data-home-nav-link="" href="#01-sobre-o-projeto"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"></path></svg><span>Sobre o projeto</span></a><a data-home-nav-link="" href="#02-por-que-estudar-estes-fundamentos"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M9 18h6M10 22h4M8 14c-1.2-1-2-2.6-2-4.3A6 6 0 0 1 12 4a6 6 0 0 1 6 5.7c0 1.7-.8 3.4-2 4.3-.8.7-1 1.1-1.3 2H9.3c-.2-.9-.5-1.4-1.3-2Z"></path></svg><span>Por que estudar estes fundamentos</span></a><a data-home-nav-link="" href="#03-quatro-linguagens-os-mesmos-fundamentos"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M8 8 4 12l4 4M16 8l4 4-4 4M14 5l-4 14"></path></svg><span>Quatro linguagens, os mesmos fundamentos</span></a><a data-home-nav-link="" href="#04-como-usar-este-guia"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M6 4h12v16H6zM9 8h6M9 12h6M9 16h4"></path></svg><span>Como usar este guia</span></a><a data-home-nav-link="" href="#05-visão-panorâmica"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg><span>Visão panorâmica</span></a><a data-home-nav-link="" href="#mapa-curricular"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2zM8 4v13M16 7v13"></path></svg><span>Mapa curricular</span></a><a data-home-nav-link="" href="#06-os-35-tópicos"><svg aria-hidden="true" viewbox="0 0 24 24"><rect height="6" width="6" x="4" y="4"></rect><rect height="6" width="6" x="14" y="4"></rect><rect height="6" width="6" x="4" y="14"></rect><rect height="6" width="6" x="14" y="14"></rect></svg><span>Os 35 tópicos</span></a><a data-home-nav-link="" href="#07-como-o-conteúdo-é-construído"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"></path><circle cx="8" cy="7" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="10" cy="17" r="1"></circle></svg><span>Como o conteúdo é construído</span></a><a data-home-nav-link="" href="#08-fontes-normativas-e-oficiais"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M5 4h10l4 4v12H5zM15 4v5h5M8 13h8M8 17h6"></path></svg><span>Fontes normativas e oficiais</span></a></nav>
+</div>
+</header>
+<!-- SLOT:HEADER:END -->
+<!-- SLOT:MAIN:BEGIN -->
+<main class="home-main" id="conteudo-principal">
+<section aria-labelledby="home-title" class="home-hero">
+<div class="home-hero-copy">
+<p class="eyebrow">Coleção técnica · 35 tópicos</p>
+<h1 id="home-title">Lógica, Fundamentos, Algoritmos e Estruturas de Dados</h1>
+<p class="home-lead">35 tópicos para compreender como programas são pensados, construídos, verificados e analisados — antes de depender de uma linguagem específica.</p>
+<div class="home-actions"><a class="button primary" href="#06-os-35-tópicos">Explorar os tópicos</a><a class="button" href="#mapa-curricular">Mapa curricular</a></div>
+</div>
+<figure aria-labelledby="language-figure-caption" class="home-language-figure">
+<div class="hero-language-grid"><div class="hero-language"><span class="language-logo"><img alt="" src="assets/img/languages/python-mono.svg"/></span><span>Python</span></div><div class="hero-language"><span class="language-logo"><img alt="" src="assets/img/languages/javascript-mono.svg"/></span><span>JavaScript</span></div><div class="hero-language"><span class="language-logo"><img alt="" src="assets/img/languages/java-mono.svg"/></span><span>Java</span></div><div class="hero-language"><span class="language-logo"><img alt="" src="assets/img/languages/bash-mono.svg"/></span><span>GNU Bash</span></div></div>
+<figcaption id="language-figure-caption">Quatro perspectivas sobre os mesmos fundamentos.</figcaption>
+</figure>
+</section>
+<div class="home-content">
+<section aria-labelledby="sobre-title" class="home-section" id="01-sobre-o-projeto">
+<header class="home-section-head"><h2 id="sobre-title">Sobre o projeto</h2></header>
+<div class="home-reading"><p>Este projeto organiza <strong>Lógica de Programação, Fundamentos de Programação, Algoritmos e Estruturas de Dados</strong> em uma coleção progressiva de 35 tópicos. A proposta é permitir dois usos que normalmente aparecem separados: <strong>consulta rápida</strong> quando é preciso reencontrar um conceito e <strong>estudo aprofundado</strong> quando é preciso compreender como ele funciona, por que funciona e quais consequências surgem de cada escolha.</p><p>O material não foi estruturado como um curso preso a uma única linguagem. Python, JavaScript, Java e Shell/GNU Bash aparecem como perspectivas diferentes sobre os mesmos fundamentos. O objetivo é distinguir aquilo que pertence ao <strong>conceito</strong> daquilo que pertence à <strong>sintaxe, semântica ou ambiente de execução</strong> de cada tecnologia.</p><p>A coleção parte da resolução de problemas e avança por dados, tipos, expressões, controle de fluxo, repetição, modularização, execução, qualidade, testes, correção e complexidade; depois conecta esses fundamentos a Tipos Abstratos de Dados, estruturas, algoritmos clássicos, estratégias de resolução e decisões de modelagem.</p><blockquote>
+<p><strong>Linguagens mudam. Os fundamentos atravessam linguagens.</strong></p>
+</blockquote></div>
+</section>
+<section aria-labelledby="why-title" class="home-section" id="02-por-que-estudar-estes-fundamentos">
+<header class="home-section-head"><h2 id="why-title">Por que estudar estes fundamentos</h2></header>
+<div class="home-reading"><p>Aprender a escrever código e aprender a programar estão relacionados, mas não são exatamente a mesma coisa. A sintaxe permite expressar uma solução; os fundamentos ajudam a <strong>formular o problema, construir a solução, acompanhar sua execução, verificar se ela está correta e avaliar seus custos e limitações</strong>.</p><p>Na prática, esses conhecimentos reaparecem continuamente: ao escolher uma estrutura de dados, investigar um bug, validar uma entrada, decompor uma rotina, escrever testes, analisar um algoritmo, entender por que duas implementações se comportam de maneira diferente ou decidir entre alternativas com custos distintos.</p><p>Por isso, a coleção procura desenvolver uma base que continue útil quando a linguagem, a biblioteca, o framework ou a ferramenta mudarem.</p><blockquote>
+<p><strong>Aprender sintaxe permite escrever uma solução. Compreender os fundamentos permite raciocinar sobre ela.</strong></p>
+</blockquote></div>
+</section>
+<section aria-labelledby="languages-title" class="home-section" id="03-quatro-linguagens-os-mesmos-fundamentos">
+<header class="home-section-head"><h2 id="languages-title">Quatro linguagens, os mesmos fundamentos</h2><p>As quatro linguagens foram escolhidas para criar contraste pedagógico, não para transformar cada tópico em quatro cursos paralelos.</p></header>
+<div class="language-cards"><article class="language-card"><div class="language-card-head"><span class="language-logo language-logo--small"><img alt="" src="assets/img/languages/python-mono.svg"/></span><h3>Python</h3></div><p>Sintaxe concisa, abstrações de alto nível e uma forma direta de observar algoritmos, coleções, funções e estruturas sem excesso de cerimônia sintática.</p></article><article class="language-card"><div class="language-card-head"><span class="language-logo language-logo--small"><img alt="" src="assets/img/languages/javascript-mono.svg"/></span><h3>JavaScript</h3></div><p>Semântica dinâmica, coerção, funções, objetos, coleções e a relação entre uma linguagem de propósito geral e seus diferentes ambientes de execução, com destaque natural para a Web.</p></article><article class="language-card"><div class="language-card-head"><span class="language-logo language-logo--small"><img alt="" src="assets/img/languages/java-mono.svg"/></span><h3>Java</h3></div><p>Tipagem estática, declarações e contratos mais explícitos, distinções de tipos em tempo de compilação e uma perspectiva orientada a estruturas formais e à JVM.</p></article><article class="language-card"><div class="language-card-head"><span class="language-logo language-logo--small"><img alt="" src="assets/img/languages/bash-mono.svg"/></span><h3>GNU Bash</h3></div><p>Processos, comandos, exit status, streams, pipelines, texto e automação próximos ao sistema operacional. Quando uma característica for específica do Bash, ela deve ser identificada como tal, sem confundi-la com shell POSIX.</p></article></div>
+<div class="home-reading compact-reading"><p>A comparação entre linguagens não é um fim em si mesma. Ela funciona como instrumento para responder perguntas como:</p><ul>
+<li>isto é propriedade do algoritmo ou apenas desta linguagem?</li>
+<li>esta diferença ocorre na sintaxe, no sistema de tipos, no modelo de execução ou na biblioteca?</li>
+<li>duas implementações equivalentes produzem os mesmos efeitos e custos?</li>
+<li>uma abstração disponível em uma linguagem existe diretamente nas outras ou precisa ser construída de outra forma?</li>
+</ul></div>
+</section>
+<section aria-labelledby="use-title" class="home-section" id="04-como-usar-este-guia">
+<header class="home-section-head"><h2 id="use-title">Como usar este guia</h2><p>A coleção foi desenhada para quatro modos complementares de uso:</p></header>
+<div class="use-grid"><article class="use-card"><span aria-hidden="true" class="use-index">01</span><h3>Estudo sequencial</h3><p>seguir T01 → T35 para construir os conceitos em ordem progressiva.</p></article><article class="use-card"><span aria-hidden="true" class="use-index">02</span><h3>Consulta técnica</h3><p>abrir diretamente um tópico para revisar definições, comparações, código, tabelas e decisões rápidas.</p></article><article class="use-card"><span aria-hidden="true" class="use-index">03</span><h3>Comparação entre linguagens</h3><p>observar o mesmo fundamento em Python, JavaScript, Java e Shell/GNU Bash, separando princípio de implementação.</p></article><article class="use-card"><span aria-hidden="true" class="use-index">04</span><h3>Prática e verificação</h3><p>usar exemplos, LABs, exercícios, rastreamento, troubleshooting e referências para transformar leitura em execução observável.</p></article></div>
+<p class="home-section-note">Quem está começando pode seguir a ordem completa. Quem já programa pode usar o mapa como diagnóstico: localizar lacunas, revisar conceitos ou aprofundar os pontos em que “saber usar” ainda não significa “entender o mecanismo”.</p>
+</section>
+<section aria-labelledby="panorama-title" class="home-section" id="05-visão-panorâmica">
+<header class="home-section-head"><h2 id="panorama-title">Visão panorâmica</h2><p>Os fundamentos formam uma cadeia de raciocínio: cada etapa acrescenta uma pergunta que será reutilizada nas seguintes.</p></header>
+<ol aria-label="Progressão conceitual da coleção" class="panorama-flow">
+<li><span>Compreender o problema</span></li><li><span>Modelar uma solução</span></li><li><span>Representar dados e estado</span></li><li><span>Controlar a execução</span></li><li><span>Decompor e abstrair</span></li><li><span>Rastrear, depurar e testar</span></li><li><span>Provar e analisar algoritmos</span></li><li><span>Escolher estruturas e trade-offs</span></li>
+</ol>
+<p class="home-section-note">A coleção é cumulativa: tópicos posteriores reutilizam e refinam ideias anteriores.</p>
+</section>
+<section aria-labelledby="mapa-curricular-title" class="home-section" id="mapa-curricular">
+<header class="home-section-head"><h2 id="mapa-curricular-title">Mapa curricular</h2><p>Três partes organizam a progressão dos fundamentos para análise e escolha de estruturas.</p></header>
+<div class="curriculum-overview">
+<article><span class="curriculum-range">T01–T12</span><h3>Parte I — Lógica de Programação</h3><p>Transformar problemas em procedimentos verificáveis, acompanhando dados, estado e fluxo de execução.</p><a href="#topics-tab-1">Ver tópicos <span aria-hidden="true">→</span></a></article>
+<article><span class="curriculum-range">T13–T23</span><h3>Parte II — Fundamentos de Programação</h3><p>Aprofundar significado, estado, abstração, falhas, testes, qualidade e modelos de execução.</p><a href="#topics-tab-2">Ver tópicos <span aria-hidden="true">→</span></a></article>
+<article><span class="curriculum-range">T24–T35</span><h3>Parte III — Algoritmos e Estruturas de Dados</h3><p>Analisar soluções, escolher representações e relacionar requisitos, custos, estruturas e algoritmos.</p><a href="#topics-tab-3">Ver tópicos <span aria-hidden="true">→</span></a></article>
+</div>
+</section>
+<section aria-labelledby="topics-title" class="home-section" id="06-os-35-tópicos">
+<header class="home-section-head"><h2 id="topics-title">Os 35 tópicos</h2><p>Use as três partes para explorar a coleção sem transformar a Home em uma lista única e extensa.</p></header>
+<div class="home-tabs" data-home-tabs="">
+<div aria-label="Partes da coleção" class="home-tablist" role="tablist"><button aria-controls="topics-panel-1" aria-selected="true" id="topics-tab-1" role="tab" tabindex="0" type="button"><span>Parte I</span><small>T01–T12</small></button><button aria-controls="topics-panel-2" aria-selected="false" id="topics-tab-2" role="tab" tabindex="-1" type="button"><span>Parte II</span><small>T13–T23</small></button><button aria-controls="topics-panel-3" aria-selected="false" id="topics-tab-3" role="tab" tabindex="-1" type="button"><span>Parte III</span><small>T24–T35</small></button></div>
+<section aria-labelledby="topics-tab-1" class="topics-panel" id="topics-panel-1" role="tabpanel"><header class="topics-panel-head"><div><p class="panel-kicker">Parte I · T01–T12</p><h3 id="parte-i--lógica-de-programação--t01t12">Lógica de Programação</h3></div><span>12 tópicos</span></header><p class="topics-panel-intro">A primeira parte constrói a base para transformar problemas em procedimentos verificáveis. Ela começa antes da sintaxe e termina quando o leitor já consegue acompanhar a execução de um algoritmo e raciocinar sobre seu estado.</p><div class="topics-grid">{{TOPICS_GRID_1}}</div></section><section aria-labelledby="topics-tab-2" class="topics-panel" hidden="" id="topics-panel-2" role="tabpanel"><header class="topics-panel-head"><div><p class="panel-kicker">Parte II · T13–T23</p><h3 id="parte-ii--fundamentos-de-programação--t13t23">Fundamentos de Programação</h3></div><span>11 tópicos</span></header><p class="topics-panel-intro">A segunda parte aprofunda o que acontece por trás do código: significado, estado, escopo, abstração, falhas, qualidade, testes, persistência e modelos de execução.</p><div class="topics-grid">{{TOPICS_GRID_2}}</div></section><section aria-labelledby="topics-tab-3" class="topics-panel" hidden="" id="topics-panel-3" role="tabpanel"><header class="topics-panel-head"><div><p class="panel-kicker">Parte III · T24–T35</p><h3 id="parte-iii--algoritmos-e-estruturas-de-dados--t24t35">Algoritmos e Estruturas de Dados</h3></div><span>12 tópicos</span></header><p class="topics-panel-intro">A terceira parte transforma os fundamentos anteriores em ferramentas para analisar soluções, escolher representações, estudar estruturas clássicas e tomar decisões orientadas por requisitos e custos.</p><div class="topics-grid">{{TOPICS_GRID_3}}</div></section>
+</div>
+</section>
+<section aria-labelledby="construction-title" class="home-section" id="07-como-o-conteúdo-é-construído">
+<header class="home-section-head"><h2 id="construction-title">Como o conteúdo é construído</h2><p>A estrutura serve ao aprendizado: mapa antes dos detalhes, conceito antes da sintaxe e prática depois da compreensão.</p></header>
+<ol class="construction-flow">
+<li><h3>Mapa e decisão rápida</h3><p>Contextualizar o assunto e indicar as perguntas essenciais antes do aprofundamento.</p></li>
+<li><h3>Conceito e mecanismo</h3><p>Explicar definições, relações, invariantes, causas, limites e trade-offs.</p></li>
+<li><h3>Exemplos comparativos</h3><p>Usar Python, JavaScript, Java e GNU Bash quando a comparação melhora a compreensão.</p></li>
+<li><h3>Prática e validação</h3><p>Consolidar com código, LABs, exercícios, troubleshooting, testes e critérios verificáveis.</p></li>
+<li><h3>Referências</h3><p>Fechar o assunto com glossário, remissões e fontes normativas ou oficiais apropriadas.</p></li>
+</ol>
+</section>
+<section aria-labelledby="sources-title" class="home-section" id="08-fontes-normativas-e-oficiais">
+<header class="home-section-head"><h2 id="sources-title">Fontes normativas e oficiais</h2><p>Documentação normativa e fontes oficiais têm prioridade para definir comportamento, sintaxe, semântica e conformidade. Material secundário pode complementar a explicação, mas não substitui a fonte primária.</p></header>
+<div class="source-grid"><section aria-labelledby="python" class="source-card"><h3 id="python">Python</h3><ul>
+<li><a href="https://docs.python.org/3/reference/">Python Language Reference</a></li>
+<li><a href="https://docs.python.org/3/library/">Python Standard Library</a></li>
+<li><a href="https://peps.python.org/">Python Enhancement Proposals — PEPs</a></li>
+<li><a href="https://peps.python.org/pep-0001/">PEP 1 — PEP Purpose and Guidelines</a></li>
+<li><a href="https://peps.python.org/pep-0013/">PEP 13 — Python Language Governance / Steering Council</a></li>
+<li><a href="https://www.python.org/psf/">Python Software Foundation</a></li>
+</ul></section><section aria-labelledby="javascript--ecmascript" class="source-card"><h3 id="javascript--ecmascript">JavaScript / ECMAScript</h3><ul>
+<li><a href="https://ecma-international.org/publications-and-standards/standards/ecma-262/">ECMA-262 — ECMAScript Language Specification</a></li>
+<li><a href="https://tc39.es/ecma262/">TC39 — especificação ECMAScript em desenvolvimento</a></li>
+</ul></section><section aria-labelledby="java" class="source-card"><h3 id="java">Java</h3><ul>
+<li><a href="https://docs.oracle.com/javase/specs/">Java Language Specification — JLS</a></li>
+<li><a href="https://docs.oracle.com/javase/specs/">Java Virtual Machine Specification — JVMS</a></li>
+</ul></section><section aria-labelledby="shell--gnu-bash" class="source-card"><h3 id="shell--gnu-bash">Shell / GNU Bash</h3><ul>
+<li><a href="https://pubs.opengroup.org/onlinepubs/9799919799/">POSIX.1 — The Open Group Base Specifications</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/">GNU Bash Reference Manual</a></li>
+</ul></section><section aria-labelledby="json-e-yaml" class="source-card"><h3 id="json-e-yaml">JSON e YAML</h3><ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8259.html">RFC 8259 / STD 90 — The JavaScript Object Notation (JSON) Data Interchange Format</a></li>
+<li><a href="https://ecma-international.org/publications-and-standards/standards/ecma-404/">ECMA-404 — The JSON Data Interchange Syntax</a></li>
+<li><a href="https://www.iso.org/standard/71616.html">ISO/IEC 21778:2017 — The JSON Data Interchange Syntax</a></li>
+<li><a href="https://yaml.org/spec/1.2.2/">YAML 1.2.2 Specification</a></li>
+</ul></section><section aria-labelledby="web-e-publicação" class="source-card"><h3 id="web-e-publicação">Web e publicação</h3><ul>
+<li><a href="https://html.spec.whatwg.org/">WHATWG HTML Living Standard</a></li>
+<li><a href="https://dom.spec.whatwg.org/">WHATWG DOM Standard</a></li>
+<li><a href="https://www.w3.org/Style/CSS/">W3C / CSS Working Group</a></li>
+<li><a href="https://www.w3.org/TR/WCAG22/">WCAG 2.2</a></li>
+<li><a href="https://github.github.com/gfm/">GitHub Flavored Markdown Specification</a></li>
+</ul></section></div>
+<blockquote class="source-note"><p>A RFC 7159 é histórica e foi substituída pela RFC 8259. “RFC 715” não é usada como referência JSON neste projeto.</p></blockquote>
+</section>
+</div>
+</main>
+<!-- SLOT:MAIN:END -->
+<!-- SLOT:FOOTER:BEGIN -->
+<footer class="technical-footer"><div class="technical-footer-inner"><div class="footer-source"><a aria-label="Início" class="footer-mark" href="{{SITE_ROOT}}"><svg aria-hidden="true" height="1em" viewbox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none"></path>
+<defs>
+<mask id="filomatia-logo-footer-home">
+<path d="M8 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+<animate attributename="d" dur="3s" repeatcount="indefinite" values="M8 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 0c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4;M8 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M12 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4M16 -8c0 2 -2 2 -2 4s2 2 2 4s-2 2 -2 4s2 2 2 4"></animate>
+</path>
+<path d="M4 7h16v0h-16v12h16v-32h-16Z">
+<animate attributename="d" begin="1s" dur="0.6s" fill="freeze" to="M4 2h16v5h-16v12h16v-24h-16Z"></animate>
+</path>
+</mask>
+</defs>
+<path d="M17 14v4c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-4Z" fill="currentColor" fill-opacity="0">
+<animate attributename="fill-opacity" begin="1.6s" dur="0.15s" fill="freeze" to=".3"></animate>
+</path>
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+<path d="M17 9v9c0 1.66 -1.34 3 -3 3h-6c-1.66 0 -3 -1.34 -3 -3v-9Z" stroke-dasharray="48">
+<animate attributename="stroke-dashoffset" dur="0.6s" fill="freeze" values="48;0"></animate>
+</path>
+<path d="M17 9h3c0.55 0 1 0.45 1 1v3c0 0.55 -0.45 1 -1 1h-3" stroke-dasharray="16" stroke-dashoffset="16">
+<animate attributename="stroke-dashoffset" begin="0.6s" dur="0.3s" fill="freeze" to="0"></animate>
+</path>
+</g>
+<path d="M0 0h24v24H0z" fill="currentColor" mask="url(#filomatia-logo-footer-home)"></path>
+</svg></a><div class="footer-copy"><a href="#01-sobre-o-projeto">Sobre esta coleção</a><span>Correções, sugestões e erratas são bem-vindas.</span><span>35 tópicos · Python · JavaScript · Java · GNU Bash.</span><a class="footer-link" href="README.md">README</a></div></div><div class="footer-contextual"><span>Material educacional técnico independente.</span><nav aria-label="Perfis externos" class="footer-social"><a class="footer-social-link" href="https://diego-ch4m4x.github.io/" rel="me"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M12 .7a11.3 11.3 0 0 0-3.57 22c.57.1.77-.25.77-.55v-2.18c-3.16.69-3.82-1.34-3.82-1.34-.52-1.31-1.26-1.66-1.26-1.66-1.03-.71.08-.7.08-.7 1.14.08 1.74 1.17 1.74 1.17 1.01 1.73 2.65 1.23 3.3.94.1-.73.4-1.23.72-1.51-2.52-.29-5.17-1.26-5.17-5.59 0-1.24.44-2.25 1.17-3.04-.12-.29-.51-1.44.11-3 0 0 .95-.31 3.11 1.16A10.8 10.8 0 0 1 12 6.08c.96 0 1.92.13 2.83.38 2.15-1.47 3.1-1.16 3.1-1.16.62 1.56.23 2.71.12 3 .73.79 1.17 1.8 1.17 3.04 0 4.34-2.66 5.29-5.19 5.57.41.35.77 1.04.77 2.1v3.14c0 .3.21.66.78.55A11.3 11.3 0 0 0 12 .7Z"></path></svg><span>GitHub</span></a><a class="footer-social-link" href="https://www.linkedin.com/in/diegodsl/" rel="me"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M5.34 7.5H1.77V22h3.57V7.5ZM3.55 1.9a2.07 2.07 0 1 0 0 4.14 2.07 2.07 0 0 0 0-4.14ZM22.23 13.69c0-4.37-2.33-6.4-5.44-6.4-2.51 0-3.63 1.38-4.25 2.35V7.5H8.97c.05 1.42 0 14.5 0 14.5h3.57v-8.1c0-.43.03-.87.16-1.18.35-.87 1.15-1.77 2.5-1.77 1.76 0 2.46 1.34 2.46 3.31V22h3.57v-8.31Z"></path></svg><span>LinkedIn</span></a></nav></div></div><p class="footer-legal">Conteúdo educacional independente. Referências técnicas preservadas conforme as fontes do projeto.</p></footer>
+<!-- SLOT:FOOTER:END -->
+<!-- SLOT:PAGE_TEMPLATES:BEGIN -->
+
+<!-- SLOT:PAGE_TEMPLATES:END -->
+<!-- SLOT:SEARCH_DIALOG:BEGIN -->
+<dialog aria-labelledby="searchTitle" class="search-dialog" id="searchDialog"><span class="sr-only" id="searchTitle">Busca na coleção</span><div class="search-box"><label class="sr-only" for="searchInput">Buscar na coleção</label><input autocomplete="off" id="searchInput" placeholder="Buscar tópico ou seção…" type="search"/><button aria-label="Fechar busca" class="icon-btn" id="closeSearch" type="button">×</button></div><div id="searchResults"><p class="search-group-label">Busca na coleção</p><p class="search-empty">Digite para buscar nas páginas disponíveis.</p></div></dialog>
+<!-- SLOT:SEARCH_DIALOG:END -->
+<!-- SLOT:PAGE_SCRIPTS:BEGIN -->
+<script src="{{SITE_ROOT}}assets/js/app.js?v={{ASSET_VERSION}}" type="module"></script>
+<script src="{{SITE_ROOT}}assets/js/home.js?v={{ASSET_VERSION}}" type="module"></script>
+<!-- SLOT:PAGE_SCRIPTS:END -->

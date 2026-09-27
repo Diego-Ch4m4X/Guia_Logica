@@ -1,0 +1,28 @@
+<!doctype html>
+<html data-theme="system" lang="{{LANG}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="{{META_DESCRIPTION}}">
+  <meta name="site-root" content="{{SITE_ROOT}}">
+  <title>{{PAGE_TITLE}}</title>
+  <link rel="icon" type="image/svg+xml" sizes="any" href="{{SITE_ROOT}}assets/img/favicon.svg?v={{ASSET_VERSION}}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{SITE_ROOT}}assets/img/favicon-32.png?v={{ASSET_VERSION}}">
+{{HEAD_STYLES}}
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('lfad.theme')||'system'}catch(e){}</script>
+</head>
+<body class="{{BODY_CLASS}}">
+  <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo principal</a>
+{{HEADER}}
+<template id="themeIconMoon"><svg aria-hidden="true" focusable="false" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"></path><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6c0 6.08 4.92 11 11 11c.53 0 1.05-.04 1.56-.11C17.95 19.36 15.17 21 12 21c-4.97 0-9-4.03-9-9c0-3.17 1.64-5.95 4.11-7.56C7.04 4.95 7 5.47 7 6Z" fill="currentColor" fill-opacity="0" stroke-dasharray="56" stroke-width="2"><animate attributename="stroke-dashoffset" dur=".6s" fill="freeze" values="56;0"></animate><animate attributename="fill-opacity" begin=".7s" dur=".15s" fill="freeze" to=".3"></animate></path><g fill="none" stroke-dasharray="4" stroke-dashoffset="4"><path d="M12 5h1.5M12 5h-1.5M12 5v1.5M12 5v-1.5"><animate attributename="stroke-dashoffset" begin=".95s" dur="6s" keytimes="0;.08;.22;.3;1" repeatcount="indefinite" values="4;0;0;4;4"></animate></path><path d="M17 11h1.5M17 11h-1.5M17 11v1.5M17 11v-1.5"><animate attributename="stroke-dashoffset" begin="1.62s" dur="6s" keytimes="0;.08;.22;.3;1" repeatcount="indefinite" values="4;0;0;4;4"></animate></path><path d="M20 5h1.5M20 5h-1.5M20 5v1.5M20 5v-1.5"><animate attributename="stroke-dashoffset" begin="2.29s" dur="6s" keytimes="0;.08;.22;.3;1" repeatcount="indefinite" values="4;0;0;4;4"></animate></path></g></g></svg></template>
+<template id="themeIconSun"><svg aria-hidden="true" focusable="false" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"></path><defs><mask id="themeSunMask"><path d="M12 6c3.31 0 6 2.69 6 6s-2.69 6-6 6s-6-2.69-6-6s2.69-6 6-6Z" fill="#fff"><animate attributename="d" dur=".4s" fill="freeze" values="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12S6.48 2 12 2Z;M12 6c3.31 0 6 2.69 6 6s-2.69 6-6 6s-6-2.69-6-6s2.69-6 6-6Z"></animate></path><path d="M22-4c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6Z"><animate attributename="d" dur=".4s" fill="freeze" values="M18-4c5.52 0 10 4.48 10 10s-4.48 10-10 10S8 11.52 8 6s4.48-10 10-10Z;M22-4c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6Z"></animate><set attributename="opacity" begin=".4s" fill="freeze" to="0"></set></path></mask></defs><path d="M0 0h24v24H0z" fill="currentColor" mask="url(#themeSunMask)"></path><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 21v1M21 12h1M12 3v-1M3 12h-1" opacity="0"><animatetransform attributename="transform" dur="30s" repeatcount="indefinite" type="rotate" values="0 12 12;360 12 12"></animatetransform><set attributename="opacity" begin=".4s" fill="freeze" to="1"></set><animate attributename="d" begin=".4s" dur=".2s" fill="freeze" values="M12 19v1M19 12h1M12 5v-1M5 12h-1;M12 21v1M21 12h1M12 3v-1M3 12h-1"></animate></path><path d="M18.5 18.5l.5.5M18.5 5.5l.5-.5M5.5 5.5 5 5M5.5 18.5l-.5.5" opacity="0"><animatetransform attributename="transform" dur="30s" repeatcount="indefinite" type="rotate" values="0 12 12;360 12 12"></animatetransform><set attributename="opacity" begin=".6s" fill="freeze" to="1"></set></path></g></svg></template>
+{{MAIN}}
+{{FOOTER}}
+{{PAGE_TEMPLATES}}
+<button aria-label="Voltar ao topo" class="back-top" id="backTop" title="Voltar ao topo" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="m6 14 6-6 6 6"></path></svg></button>
+{{SEARCH_DIALOG}}
+<div aria-live="polite" class="sr-only" id="announcer"></div>
+{{PAGE_SCRIPTS}}
+</body>
+</html>

@@ -1,0 +1,22 @@
+/* Opening summary and overview cards for the technical topic. */
+.topic-overview{width:100%;min-width:0;margin:32px 0 0}
+.topic-overview .quick-answer{position:relative;width:100%;min-width:0;margin:0;padding:24px 26px 23px 28px;overflow:hidden;border:1px solid var(--fil-border);border-left:4px solid var(--fil-brand);border-radius:0 2px 2px 0;background:var(--fil-surface)}
+.topic-overview .quick-kicker{display:flex;align-items:center;gap:10px;margin:0 0 9px;color:var(--fil-brand);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.topic-overview .quick-symbol{display:inline-grid;width:20px;height:20px;place-items:center;transform:rotate(45deg);border:1px solid var(--fil-brand);border-radius:2px}
+.topic-overview .quick-symbol::after{width:6px;height:6px;background:var(--fil-brand);content:""}
+.topic-overview .quick-answer p{margin:0;color:var(--fil-text-secondary);font-size:17px;line-height:1.65}
+
+/* Two cards fill the available central column and become one column below 16rem. */
+.topic-overview .stat-grid{display:grid;width:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:10px;margin:18px 0 0}
+.topic-overview .stat-card{min-width:0;padding:14px 15px;border:1px solid var(--fil-border);border-radius:2px;background:var(--fil-surface)}
+.topic-overview .stat-card strong{display:block;margin-bottom:4px;color:var(--fil-text);font-size:20px;line-height:1.1}
+.topic-overview .stat-card span{display:block;color:var(--fil-text-muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.topic-overview .info-grid{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0 0}
+.topic-overview .info-card{min-width:0;padding:18px 18px 16px;border:1px solid var(--fil-border);border-radius:2px;background:var(--fil-surface)}
+.topic-overview .info-card h2{margin:0 0 11px;color:var(--fil-text-secondary);font-size:12px;letter-spacing:.11em;text-transform:uppercase}
+.topic-overview .info-card ul{margin:0;padding-left:1.35rem;color:var(--fil-text-secondary);font-size:14px}
+.topic-overview .info-card li+li{margin-top:6px}
+
+
+@container technicalArticle (max-width:620px){.topic-overview .quick-answer{padding:20px 19px 19px 22px}.topic-overview .info-grid{grid-template-columns:1fr}}
+@container technicalArticle (max-width:420px){.topic-overview .quick-answer p{font-size:16px}}

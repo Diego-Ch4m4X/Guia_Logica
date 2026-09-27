@@ -1,0 +1,66 @@
+name: Build GitHub Pages artifact
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and validate static site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          check-latest: false
+
+      - name: Verify pinned runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(tr -d '[:space:]' < .node-version)"
+          actual="$(node --version | sed 's/^v//')"
+          test "$actual" = "$expected"
+          node --version
+          npm --version
+
+      - name: Install dependencies from lockfile
+        run: npm ci --ignore-scripts
+
+      - name: Preflight canonical Markdown
+        run: npm run preflight
+
+      - name: Build Home and T01-T35
+        run: npm run build
+
+      - name: Validate generated site
+        run: npm run validate
+
+      - name: Run contract tests
+        run: npm test
+
+      - name: Validate Pages artifact input
+        run: npm run validate:pages
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ./dist
+          retention-days: 1
