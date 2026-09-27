@@ -1,4 +1,4 @@
-name: Build GitHub Pages artifact
+name: Build and deploy GitHub Pages
 
 on:
   push:
@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-build-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -64,3 +64,20 @@ jobs:
         with:
           path: ./dist
           retention-days: 1
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
