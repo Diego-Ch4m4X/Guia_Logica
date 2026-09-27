@@ -17,9 +17,12 @@ import {
 } from './lib/components.js';
 import { buildGuide, buildToc, buildDrawer } from './lib/navigation.js';
 import { applyTemplate, extractSlot, escapeHtml } from './lib/html.js';
+import { renderHomeSeoHead, renderTopicSeoHead, renderSitemap } from './lib/seo.js';
 import { renderHomeTopicGrid } from './lib/home.js';
 
-const ASSET_VERSION = '1.1.2';
+const ASSET_VERSION = '1.2.0';
+const HOME_TITLE = 'Lógica, Fundamentos, Algoritmos e Estruturas de Dados';
+const HOME_DESCRIPTION = 'Coleção técnica de 35 tópicos sobre lógica, fundamentos, algoritmos e estruturas de dados.';
 
 async function read(file) { return fs.readFile(file, 'utf8'); }
 async function write(file, content) { await fs.mkdir(path.dirname(file), { recursive:true }); await fs.writeFile(file, content, 'utf8'); }
@@ -164,7 +167,7 @@ async function renderTopic(topic, topics, base, topicTpl) {
   };
   const html = await renderPage(base, topicTpl, values, {
     LANG:'pt-BR', META_DESCRIPTION:topic.description, SITE_ROOT:'../../',
-    PAGE_TITLE:`${topic.id} — ${topic.title}`, ASSET_VERSION, BODY_CLASS:'topic-page',
+    PAGE_TITLE:`${topic.id} — ${topic.title}`, SEO_HEAD:renderTopicSeoHead(topic), ASSET_VERSION, BODY_CLASS:'topic-page',
   });
   await write(topicPath(topic), html);
   return { html, sourceHeadingText:built.sourceHeadingText };
@@ -202,8 +205,8 @@ async function main() {
     TOPICS_GRID_3:renderHomeTopicGrid(topics,3),
   };
   const homeHtml = await renderPage(base, homeTpl, homeValues, {
-    LANG:'pt-BR', META_DESCRIPTION:'Coleção técnica de 35 tópicos sobre lógica, fundamentos, algoritmos e estruturas de dados.',
-    SITE_ROOT:'./', PAGE_TITLE:'Lógica, Fundamentos, Algoritmos e Estruturas de Dados', ASSET_VERSION, BODY_CLASS:'home-page',
+    LANG:'pt-BR', META_DESCRIPTION:HOME_DESCRIPTION,
+    SITE_ROOT:'./', PAGE_TITLE:HOME_TITLE, SEO_HEAD:renderHomeSeoHead({ title:HOME_TITLE, description:HOME_DESCRIPTION }), ASSET_VERSION, BODY_CLASS:'home-page',
   });
   await write(path.join(distDir,'index.html'), homeHtml);
 
@@ -224,11 +227,13 @@ async function main() {
   search.push({ title:'Mapa curricular', section:'Home', summary:'Taxonomia canônica T01 a T35', url:'index.html#mapa-curricular' });
   await write(path.join(dataDir,'search-index.json'), `${JSON.stringify(search, null, 2)}\n`);
   await write(path.join(dataDir,'package.json'), `${JSON.stringify({ version:ASSET_VERSION }, null, 2)}\n`);
+  await write(path.join(distDir,'sitemap.xml'), renderSitemap(topics));
 
   console.log('BUILD: PASS');
   console.log('generated: Home + T01–T35');
   console.log('topics.json: 35');
   console.log(`search-index.json: ${search.length}`);
+  console.log('sitemap.xml: 36');
 }
 
 main().catch(error => { console.error(`BUILD: FAIL\n${error.stack || error}`); process.exitCode = 1; });

@@ -796,6 +796,7 @@ A nova baseline canônica Web passa a ser `v1.1.0` somente após o manifesto e o
 **Última atualização:** 2026-09-27
 **Estado corrente:** Etapa N — promoção final v1.1.0 em fechamento.
 
+
 ---
 
 ## 33. Manutenção editorial e footer — v1.1.1 — 2026-09-27
@@ -833,3 +834,27 @@ Destinos canônicos após esta correção:
 A tag `v1.1.1` permanece imutável como referência histórica.
 
 **Estado corrente:** linha de manutenção `v1.1.2`.
+
+
+---
+
+## 35. SEO técnico e descoberta — v1.2.0 — 2026-09-27
+
+A versão `v1.2.0` é classificada como **MINOR** sobre a baseline `v1.1.2`, pois adiciona uma capacidade transversal de SEO técnico e descoberta sem alterar o corpus pedagógico T01–T35, o layout, as fixtures históricas, CSS, vendor, fontes ou imagens.
+
+Capacidades adicionadas:
+
+- URLs canônicas absolutas e self-referential para Home + T01–T35;
+- metadados Open Graph e compatibilidade Twitter/X derivados do mesmo contrato de conteúdo;
+- dados estruturados JSON-LD, com `CollectionPage` na Home e `WebPage` + `Article` + `BreadcrumbList` nos tópicos;
+- vínculo semântico com o `WebSite` e a identidade `Person` já definidos no site raiz, sem criar um segundo `WebSite` para o subdiretório `/Guia_Logica/`;
+- geração automática de `dist/sitemap.xml` com 36 URLs canônicas;
+- gates de front matter, canonical, social metadata, JSON-LD e sitemap;
+- smoke de produção ampliado para verificar SEO e sitemap;
+- integração de descoberta com `robots.txt` e `sitemap.xml` do site raiz tratada como alteração separada daquele repositório.
+
+A sincronização `1.1.2 → 1.2.0` altera nos módulos JavaScript somente os cache-busters já existentes; nenhuma mudança funcional em JavaScript é autorizada por esta release.
+
+A baseline `v1.1.2` permanece preservada como referência histórica.
+
+**Estado corrente:** linha `v1.2.0` preparada para QA completo e publicação após aprovação dos gates.

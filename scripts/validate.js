@@ -38,7 +38,7 @@ async function brokenLocalRefs(rel, html) {
 }
 
 async function main() {
-  const expected = ['index.html','data/topics.json','data/search-index.json','data/package.json'];
+  const expected = ['index.html','sitemap.xml','data/topics.json','data/search-index.json','data/package.json'];
   for (let n=1; n<=35; n += 1) expected.push(`topicos/t${String(n).padStart(2,'0')}/index.html`);
   const missing = [];
   for (const rel of expected) if (!await exists(path.join(distDir, rel))) missing.push(rel);
@@ -55,8 +55,8 @@ async function main() {
     if (topics.find(x => x.number === n)?.url !== expectedUrl) errors.push(`T${String(n).padStart(2,'0')} url mismatch`);
   }
   if (!Array.isArray(search) || !search.length) errors.push('search index empty');
-  if (pkg.version !== '1.1.2') errors.push('data/package.json version mismatch');
-  const expectedVersion = '1.1.2';
+  if (pkg.version !== '1.2.0') errors.push('data/package.json version mismatch');
+  const expectedVersion = '1.2.0';
   const versionRef = /\?v=([0-9A-Za-z.-]+)/g;
   const versionMismatches = [];
   for (const rel of ['index.html', ...Array.from({length:35}, (_,i) => `topicos/t${String(i+1).padStart(2,'0')}/index.html`)]) {
