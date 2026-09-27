@@ -6,6 +6,12 @@ import { parseDocument, topicIdFromFilename } from './lib/metadata.js';
 const REQUIRED = ['title','slug','description','category','status','version','contract','taxonomy','languages','difficulty','tags','created','last_reviewed'];
 const ALLOWED_HTML = new Set(['a','details','summary','strong']);
 
+function validIsoDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
+}
+
 function findRawTagsOutsideFences(body) {
   const tags = [];
   const lines = body.replace(/\r\n?/g, '\n').split('\n');
@@ -32,6 +38,8 @@ async function main() {
   const names = (await fs.readdir(contentDir)).filter(n => n.endsWith('.md')).sort();
   const ids = [];
   const slugs = [];
+  const titles = [];
+  const descriptions = [];
   const errors = [];
   let unsupported = 0;
   let nfcErrors = 0;
@@ -42,9 +50,17 @@ async function main() {
     const file = topicIdFromFilename(name);
     ids.push(file.id);
     slugs.push(metadata.slug);
+    titles.push(metadata.title);
+    descriptions.push(metadata.description);
 
     for (const key of REQUIRED) if (!(key in metadata)) errors.push(`${name}: missing metadata ${key}`);
     if (metadata.version !== file.version) errors.push(`${name}: filename/frontmatter version mismatch`);
+    for (const key of ['title','description','category']) {
+      if (typeof metadata[key] !== 'string' || !metadata[key].trim()) errors.push(`${name}: invalid metadata ${key}`);
+    }
+    if (typeof metadata.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(metadata.slug)) errors.push(`${name}: invalid slug`);
+    if (!Array.isArray(metadata.tags) || !metadata.tags.length || metadata.tags.some(tag => typeof tag !== 'string' || !tag.trim())) errors.push(`${name}: invalid tags`);
+    for (const key of ['created','last_reviewed']) if (!validIsoDate(metadata[key])) errors.push(`${name}: invalid metadata ${key}`);
     if (source.normalize('NFC') !== source) { nfcErrors += 1; errors.push(`${name}: not NFC`); }
     const raw = findRawTagsOutsideFences(body);
     unsupported += raw.length;
@@ -56,6 +72,8 @@ async function main() {
   if (JSON.stringify([...ids].sort()) !== JSON.stringify(expected)) errors.push('topic ids are not exactly T01-T35');
   if (new Set(ids).size !== ids.length) errors.push('duplicate topic ids');
   if (new Set(slugs).size !== slugs.length) errors.push('duplicate slugs');
+  if (new Set(titles).size !== titles.length) errors.push('duplicate titles');
+  if (new Set(descriptions).size !== descriptions.length) errors.push('duplicate descriptions');
 
   if (errors.length) {
     console.error('PREFLIGHT: FAIL');

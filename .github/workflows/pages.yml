@@ -94,7 +94,7 @@ jobs:
       contents: read
     env:
       BASE_URL: ${{ needs.deploy.outputs.page_url }}
-      EXPECTED_VERSION: 1.1.2
+      EXPECTED_VERSION: 1.2.0
     steps:
       - name: Verify production routes and assets
         shell: bash
@@ -116,6 +116,9 @@ jobs:
             test -n "$name" || name="home"
             fetch "$route" "$tmp/$name.html"
             grep -qi '<!doctype html' "$tmp/$name.html"
+            grep -Fq 'rel="canonical"' "$tmp/$name.html"
+            grep -Fq 'application/ld+json' "$tmp/$name.html"
+            grep -Fq 'property="og:url"' "$tmp/$name.html"
           done
 
           fetch "assets/css/base.css?v=${EXPECTED_VERSION}" "$tmp/base.css"
@@ -125,10 +128,14 @@ jobs:
           fetch "data/topics.json" "$tmp/topics.json"
           fetch "data/search-index.json" "$tmp/search-index.json"
           fetch "data/package.json" "$tmp/package.json"
+          fetch "sitemap.xml" "$tmp/sitemap.xml"
 
           grep -q "?v=${EXPECTED_VERSION}" "$tmp/home.html"
-          grep -q '"version": "1.1.2"' "$tmp/package.json"
+          grep -q '"version": "1.2.0"' "$tmp/package.json"
           grep -q '"number": 35' "$tmp/topics.json"
+          test "$(grep -o '<loc>' "$tmp/sitemap.xml" | wc -l | tr -d ' ')" = "36"
+          grep -Fq '<loc>https://diego-ch4m4x.github.io/Guia_Logica/</loc>' "$tmp/sitemap.xml"
+          grep -Fq '<loc>https://diego-ch4m4x.github.io/Guia_Logica/topicos/t35/</loc>' "$tmp/sitemap.xml"
 
           echo "PRODUCTION_SMOKE: PASS"
           echo "base_url=$base"

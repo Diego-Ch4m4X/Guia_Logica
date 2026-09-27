@@ -115,5 +115,20 @@
       "botao GitHub da Home e dos topicos aponta para https://diego-ch4m4x.github.io/",
       "versionamento e cache-busters sincronizados"
     ]
+  },
+  "seoRelease": {
+    "version": "1.2.0",
+    "classification": "MINOR",
+    "date": "2026-09-27",
+    "supersedes": "1.1.2",
+    "scope": [
+      "canonical URLs",
+      "Open Graph metadata",
+      "Twitter/X card compatibility metadata",
+      "JSON-LD structured data",
+      "automatic Guide sitemap",
+      "SEO validation gates",
+      "root discovery integration"
+    ]
   }
 }

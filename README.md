@@ -460,8 +460,8 @@ A publicação é automatizada por GitHub Actions e GitHub Pages. O workflow exe
 | GitHub Actions | **ativo** |
 | GitHub Pages | **publicado** |
 | Smoke de produção | **PASS** |
-| Baseline Web anterior | **`v1.1.1`** |
-| Manutenção desta atualização | **`v1.1.2`** |
+| Baseline Web anterior | **`v1.1.2`** |
+| Versão corrente | **`v1.2.0`** |
 
 ---
 
