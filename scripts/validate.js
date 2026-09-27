@@ -55,8 +55,8 @@ async function main() {
     if (topics.find(x => x.number === n)?.url !== expectedUrl) errors.push(`T${String(n).padStart(2,'0')} url mismatch`);
   }
   if (!Array.isArray(search) || !search.length) errors.push('search index empty');
-  if (pkg.version !== '1.1.1') errors.push('data/package.json version mismatch');
-  const expectedVersion = '1.1.1';
+  if (pkg.version !== '1.1.2') errors.push('data/package.json version mismatch');
+  const expectedVersion = '1.1.2';
   const versionRef = /\?v=([0-9A-Za-z.-]+)/g;
   const versionMismatches = [];
   for (const rel of ['index.html', ...Array.from({length:35}, (_,i) => `topicos/t${String(i+1).padStart(2,'0')}/index.html`)]) {

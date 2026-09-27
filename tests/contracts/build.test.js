@@ -22,7 +22,7 @@ test('release metadata is synchronized', async () => {
   const distPkg = await readJson('dist/data/package.json');
   const nodeVersion = (await readFile(path.join(ROOT, '.node-version'), 'utf8')).trim();
 
-  assert.equal(pkg.version, '1.1.1');
+  assert.equal(pkg.version, '1.1.2');
   assert.equal(lock.version, pkg.version);
   assert.equal(lock.packages[''].version, pkg.version);
   assert.equal(distPkg.version, pkg.version);
@@ -34,6 +34,16 @@ test('all 35 topic routes exist and are published', async () => {
   const topics = await readJson('dist/data/topics.json');
   assert.equal(topics.length, 35);
 
+  const homeHtml = await readFile(path.join(ROOT, 'dist/index.html'), 'utf8');
+  assert.ok(
+    homeHtml.includes('<a class="footer-link" href="https://github.com/Diego-Ch4m4X/Guia_Logica">README</a>'),
+    'Home README footer link must target the Guia_Logica repository',
+  );
+  assert.ok(
+    homeHtml.includes('<a class="footer-social-link" href="https://diego-ch4m4x.github.io/">'),
+    'Home GitHub footer link must target the GitHub Pages profile',
+  );
+
   for (let n = 1; n <= 35; n += 1) {
     const expectedUrl = `topicos/t${String(n).padStart(2, '0')}/`;
     const topic = topics.find((item) => item.number === n);
@@ -42,6 +52,11 @@ test('all 35 topic routes exist and are published', async () => {
     const page = path.join(ROOT, 'dist', expectedUrl, 'index.html');
     const info = await stat(page);
     assert.ok(info.isFile(), `${expectedUrl}index.html must be a regular file`);
+    const topicHtml = await readFile(page, 'utf8');
+    assert.ok(
+      topicHtml.includes('<a class="footer-social-link" href="https://diego-ch4m4x.github.io/">'),
+      `${expectedUrl} GitHub footer link must target the GitHub Pages profile`,
+    );
   }
 });
 

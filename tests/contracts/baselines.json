@@ -106,13 +106,13 @@
     "supersedesWebBaseline": "1.0.54"
   },
   "maintenanceRelease": {
-    "version": "1.1.1",
+    "version": "1.1.2",
     "classification": "PATCH",
     "date": "2026-09-27",
-    "supersedes": "1.1.0",
+    "supersedes": "1.1.1",
     "scope": [
-      "README editorial atualizado com capa e estado corrente",
-      "footer GitHub corrigido para o repositorio Guia_Logica",
+      "botao README da Home aponta para o repositorio Guia_Logica",
+      "botao GitHub da Home e dos topicos aponta para https://diego-ch4m4x.github.io/",
       "versionamento e cache-busters sincronizados"
     ]
   }

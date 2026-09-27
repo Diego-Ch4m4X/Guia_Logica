@@ -27,7 +27,7 @@ async function getHighlighter(){
   if(window.hljs)return window.hljs;
   if(!loader){
     const root=document.querySelector('meta[name="site-root"]')?.content||'./';
-    const local=new URL(`${root}assets/vendor/highlight-11.12.0.min.js?v=1.1.1`,document.baseURI).href;
+    const local=new URL(`${root}assets/vendor/highlight-11.12.0.min.js?v=1.1.2`,document.baseURI).href;
     loader=loadScript('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js')
       .catch(()=>loadScript(local));
   }

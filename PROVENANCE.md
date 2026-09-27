@@ -814,3 +814,22 @@ Alterações desta manutenção:
 A baseline `v1.1.0` e sua tag permanecem imutáveis como referência histórica.
 
 **Estado corrente:** linha de manutenção `v1.1.1`.
+
+---
+
+## 34. Correção de destinos do footer — v1.1.2 — 2026-09-27
+
+A linha de manutenção `v1.1.2` é classificada como **PATCH** sobre a release `v1.1.1`. A correção resolve exclusivamente a inversão de intenção dos links do footer identificada após a publicação da `v1.1.1`, preservando o corpus técnico T01–T35, fixtures golden, vendor, CSS, layout e conteúdo pedagógico.
+
+Destinos canônicos após esta correção:
+
+- botão `README` da Home → `https://github.com/Diego-Ch4m4X/Guia_Logica`;
+- botão `GitHub` da Home → `https://diego-ch4m4x.github.io/`;
+- botão `GitHub` de T01–T35 → `https://diego-ch4m4x.github.io/`;
+- botão `LinkedIn` permanece inalterado;
+- sincronização do versionamento corrente, cache-busters, testes e smoke para `1.1.2`;
+- contrato de regressão reforçado para impedir nova inversão desses destinos.
+
+A tag `v1.1.1` permanece imutável como referência histórica.
+
+**Estado corrente:** linha de manutenção `v1.1.2`.
