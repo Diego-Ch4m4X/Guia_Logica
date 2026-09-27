@@ -795,3 +795,22 @@ A nova baseline canônica Web passa a ser `v1.1.0` somente após o manifesto e o
 
 **Última atualização:** 2026-09-27
 **Estado corrente:** Etapa N — promoção final v1.1.0 em fechamento.
+
+---
+
+## 33. Manutenção editorial e footer — v1.1.1 — 2026-09-27
+
+A linha de manutenção `v1.1.1` é classificada como **PATCH** sobre a baseline canônica `v1.1.0`. O escopo é deliberadamente restrito e não altera o corpus técnico T01–T35, fixtures golden, vendor, CSS, templates estruturais fora do footer ou conteúdo pedagógico publicado.
+
+Alterações desta manutenção:
+
+- substituição do README técnico interno por um README editorial público alinhado à Home e ao estado real da coleção;
+- uso do asset aprovado `src/assets/img/project-cover-hero.webp` no README;
+- remoção de qualquer menção a FILOMATIA no README;
+- correção do link GitHub no footer da Home e dos tópicos para `https://github.com/Diego-Ch4m4X/Guia_Logica`;
+- remoção de `rel="me"` apenas do link para o repositório GitHub;
+- sincronização do versionamento corrente, cache-busters, testes e smoke para `1.1.1`.
+
+A baseline `v1.1.0` e sua tag permanecem imutáveis como referência histórica.
+
+**Estado corrente:** linha de manutenção `v1.1.1`.

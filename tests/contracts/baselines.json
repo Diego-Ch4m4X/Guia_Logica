@@ -104,5 +104,16 @@
     "productionSmoke": "PASS",
     "supersedesCandidate": "1.1.0-rc.1",
     "supersedesWebBaseline": "1.0.54"
+  },
+  "maintenanceRelease": {
+    "version": "1.1.1",
+    "classification": "PATCH",
+    "date": "2026-09-27",
+    "supersedes": "1.1.0",
+    "scope": [
+      "README editorial atualizado com capa e estado corrente",
+      "footer GitHub corrigido para o repositorio Guia_Logica",
+      "versionamento e cache-busters sincronizados"
+    ]
   }
 }

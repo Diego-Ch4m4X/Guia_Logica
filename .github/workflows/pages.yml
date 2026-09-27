@@ -94,7 +94,7 @@ jobs:
       contents: read
     env:
       BASE_URL: ${{ needs.deploy.outputs.page_url }}
-      EXPECTED_VERSION: 1.1.0
+      EXPECTED_VERSION: 1.1.1
     steps:
       - name: Verify production routes and assets
         shell: bash
@@ -127,7 +127,7 @@ jobs:
           fetch "data/package.json" "$tmp/package.json"
 
           grep -q "?v=${EXPECTED_VERSION}" "$tmp/home.html"
-          grep -q '"version": "1.1.0"' "$tmp/package.json"
+          grep -q '"version": "1.1.1"' "$tmp/package.json"
           grep -q '"number": 35' "$tmp/topics.json"
 
           echo "PRODUCTION_SMOKE: PASS"
