@@ -14,12 +14,12 @@ export function initTopic(){
   const setToc=collapsed=>{body.classList.toggle('toc-collapsed',collapsed);writeSession(tocKey,collapsed?'1':'0')}
   if(readSession(guideKey)==='1')setGuide(true)
   if(readSession(tocKey)==='1')setToc(true)
-  document.getElementById('collapseGuide')?.addEventListener('click',()=>setGuide(true))
-  document.getElementById('reopenGuide')?.addEventListener('click',()=>setGuide(false))
-  document.getElementById('collapseToc')?.addEventListener('click',()=>setToc(true))
-  document.getElementById('reopenToc')?.addEventListener('click',()=>setToc(false))
+  document.getElementById('collapseGuide')?.addEventListener('click',()=>{setGuide(true);document.getElementById('reopenGuide')?.focus()})
+  document.getElementById('reopenGuide')?.addEventListener('click',()=>{setGuide(false);document.getElementById('collapseGuide')?.focus()})
+  document.getElementById('collapseToc')?.addEventListener('click',()=>{setToc(true);document.getElementById('reopenToc')?.focus()})
+  document.getElementById('reopenToc')?.addEventListener('click',()=>{setToc(false);document.getElementById('collapseToc')?.focus()})
 
-  const allHeads=[...document.querySelectorAll('.article-body h1[id],.article-body h2[id],.article-body h3[id]')]
+  const allHeads=[...document.querySelectorAll('.article-body h2[id],.article-body h3[id],.article-body h4[id]')]
   const guideLinks=[...document.querySelectorAll('#guidePanel .guide-item[href],#guidePanel .guide-subitem[href],#guideDrawer .guide-item[href],#guideDrawer .guide-subitem[href]')]
   const tocLists=[document.getElementById('dynamicToc'),document.getElementById('dynamicTocDrawer')]
   const collapsedDisclosureIcon=document.getElementById('guideDisclosureCollapsed')
@@ -41,7 +41,7 @@ export function initTopic(){
     return chapter
   }
   const navHeadFor=(current,heads,positions)=>{
-    const navigationHeads=heads.filter(head=>head.matches('h1[id],h2[id]'))
+    const navigationHeads=heads.filter(head=>head.matches('h2[id],h3[id]'))
     const readingStart=window.scrollY+125
     if(!current||!navigationHeads.length||readingStart<positions.get(navigationHeads[0]))return null
     let selected=navigationHeads[0]
@@ -57,9 +57,9 @@ export function initTopic(){
     for(let index=start+1;index<heads.length;index+=1){
       const head=heads[index]
       if(head.matches('.chapter-title[id]'))break
-      if(head.matches('h2[id],h3[id]'))items.push(head)
+      if(head.matches('h3[id],h4[id]'))items.push(head)
     }
-    const markup=items.map(head=>`<li><a class="${head.tagName==='H3'?'level-3':''}" href="#${encodeURIComponent(head.id)}">${escapeHTML(textOf(head))}</a></li>`).join('')||`<li><a href="#${encodeURIComponent(chapter.id)}">${escapeHTML(textOf(chapter))}</a></li>`
+    const markup=items.map(head=>`<li><a class="${head.tagName==='H4'?'level-3':''}" href="#${encodeURIComponent(head.id)}">${escapeHTML(textOf(head))}</a></li>`).join('')||`<li><a href="#${encodeURIComponent(chapter.id)}">${escapeHTML(textOf(chapter))}</a></li>`
     tocLists.forEach(list=>{if(list)list.innerHTML=markup})
   }
   const keepVisible=link=>{

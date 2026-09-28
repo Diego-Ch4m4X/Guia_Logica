@@ -59,15 +59,15 @@ function commonSocial({ title, description, canonical, type }) {
   ];
 }
 
-export function canonicalForHome() {
+function canonicalForHome() {
   return SEO.guideUrl;
 }
 
-export function canonicalForTopic(topic) {
+function canonicalForTopic(topic) {
   return `${SEO.guideUrl}topicos/${topic.id.toLowerCase()}/`;
 }
 
-export function buildHomeJsonLd({ title, description }) {
+function buildHomeJsonLd({ title, description }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -86,7 +86,7 @@ export function buildHomeJsonLd({ title, description }) {
   };
 }
 
-export function buildTopicJsonLd(topic) {
+function buildTopicJsonLd(topic) {
   const canonical = canonicalForTopic(topic);
   const webpageId = `${canonical}#webpage`;
   const articleId = `${canonical}#article`;

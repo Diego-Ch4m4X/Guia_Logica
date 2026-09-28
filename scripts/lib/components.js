@@ -2,6 +2,14 @@ import { escapeAttribute, escapeHtml } from './html.js';
 import { portableBaseSlug } from './slug.js';
 import { renderInline, splitTableRow } from './markdown.js';
 
+export function offsetTopicHeadings(html) {
+  return html.replace(/<h([1-6])(\b[^>]*)>([\s\S]*?)<\/h\1>/gi, (heading, level, attributes, content) => {
+    const next = Number(level) + 1;
+    if (next > 6) throw new Error('Cannot offset a topic h6 heading');
+    return `<h${next}${attributes}>${content}</h${next}>`;
+  });
+}
+
 const LAB_ICONS = {
   objective:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1.2"></circle></svg></span>',
   prerequisites:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>',
@@ -172,7 +180,7 @@ function wrapExercises(html, topicId='T25') {
   return html.slice(0,whole.start) + root + `<div class="exercise-suite">${pieces}${suiteFooter}</div>` + html.slice(whole.end);
 }
 
-export function enhanceTopicHtml(html, topicId='T25') {
+function enhanceTopicHtml(html, topicId='T25') {
   const groups = [
     { key:'transferencia', endId:'19-mesmo-adt-mecanismos-diferentes', panels:[
       {id:'15-python--abstração-e-implementação-concreta',key:'python',label:'Python'},
@@ -197,7 +205,7 @@ export function enhanceTopicHtml(html, topicId='T25') {
   return html;
 }
 
-export function publicationSlices(body) {
+function publicationSlices(body) {
   const normalized = String(body).replace(/\r\n?/g,'\n');
   const glossaryAt = normalized.search(/^# 52\. Glossário\s*$/m);
   const appendixAt = normalized.search(/^# APÊNDICES\b.*$/m);

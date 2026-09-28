@@ -1,11 +1,10 @@
 const navToggle=document.getElementById('homeNavToggle');
 const navPanel=document.getElementById('homeNavPanel');
 
-function setNavOpen(open,{focus=false}={}){
+function setNavOpen(open){
   if(!navToggle||!navPanel)return;
   navToggle.setAttribute('aria-expanded',open?'true':'false');
   navPanel.hidden=!open;
-  if(open&&focus)navPanel.querySelector('a')?.focus();
 }
 
 if(navToggle&&navPanel){
@@ -20,7 +19,7 @@ function initHomeTabs(){
   if(!group)return;
   const tabs=[...group.querySelectorAll('[role="tab"]')];
   const panels=tabs.map(tab=>document.getElementById(tab.getAttribute('aria-controls')));
-  const activate=(tab,{focus=false,updateHash=false}={})=>{
+  const activate=(tab,{focus=false}={})=>{
     tabs.forEach((item,index)=>{
       const active=item===tab;
       item.setAttribute('aria-selected',active?'true':'false');
@@ -28,7 +27,6 @@ function initHomeTabs(){
       if(panels[index])panels[index].hidden=!active;
     });
     if(focus)tab.focus();
-    if(updateHash)history.replaceState(null,'',`#${tab.id}`);
   };
   tabs.forEach((tab,index)=>{
     tab.addEventListener('click',()=>activate(tab));

@@ -10,7 +10,7 @@ function chapterNumber(text, fallback) {
 export function buildGuide(headings) {
   const parts = ['<nav aria-label="Capítulos do tópico aberto"><ol class="guide-tree">'];
   const firstChapter = headings.findIndex(h => h.chapter);
-  const intro = headings.slice(0, firstChapter < 0 ? 0 : firstChapter).filter(h => h.level === 2);
+  const intro = headings.slice(0, firstChapter < 0 ? 0 : firstChapter).filter(h => h.level === 3);
   if (intro.length) {
     parts.push('<li class="guide-group">Comece aqui</li><li><ol class="guide-subtree">');
     for (const h of intro) parts.push(`<li><a class="guide-subitem" href="#${escapeAttribute(h.id)}">${escapeHtml(h.text)}</a></li>`);
@@ -28,7 +28,7 @@ export function buildGuide(headings) {
     chapterIndex += 1;
     const children = [];
     for (let j=i+1; j<headings.length && !headings[j].chapter; j+=1) {
-      if (headings[j].level === 2) children.push(headings[j]);
+      if (headings[j].level === 3) children.push(headings[j]);
     }
     const num = chapterNumber(h.text, chapterIndex);
     if (children.length) {
