@@ -98,8 +98,58 @@ function isTableDelimiter(line) {
   return cells.length > 0 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
 }
 
-function splitTableRow(line) {
-  return line.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim());
+export function splitTableRow(line) {
+  const source = String(line).trim();
+  const cells = [];
+  let current = '';
+  let codeTicks = 0;
+  let endedWithDelimiter = false;
+
+  for (let i = 0; i < source.length;) {
+    const ch = source[i];
+
+    // GFM permits escaped pipes inside table cells. The escape belongs to
+    // Markdown syntax, so the rendered cell receives the literal pipe.
+    if (ch === '\\' && source[i + 1] === '|') {
+      current += '|';
+      endedWithDelimiter = false;
+      i += 2;
+      continue;
+    }
+
+    // Pipes inside code spans are cell content, not column separators.
+    if (ch === '`') {
+      let run = 1;
+      while (source[i + run] === '`') run += 1;
+      current += '`'.repeat(run);
+      if (codeTicks === 0) {
+        const marker = '`'.repeat(run);
+        if (source.indexOf(marker, i + run) !== -1) codeTicks = run;
+      } else if (codeTicks === run) {
+        codeTicks = 0;
+      }
+      endedWithDelimiter = false;
+      i += run;
+      continue;
+    }
+
+    if (ch === '|' && codeTicks === 0) {
+      cells.push(current.trim());
+      current = '';
+      endedWithDelimiter = true;
+      i += 1;
+      continue;
+    }
+
+    current += ch;
+    endedWithDelimiter = false;
+    i += 1;
+  }
+
+  cells.push(current.trim());
+  if (source.startsWith('|')) cells.shift();
+  if (endedWithDelimiter) cells.pop();
+  return cells;
 }
 
 function isBlockStart(lines, i) {
