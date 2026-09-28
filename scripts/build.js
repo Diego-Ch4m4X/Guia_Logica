@@ -31,7 +31,8 @@ async function copyDir(src, dest) {
     const from = path.join(src, entry.name);
     const to = path.join(dest, entry.name);
     if (entry.isDirectory()) await copyDir(from, to);
-    else if (path.dirname(from) === path.join(assetDir, 'js') && entry.name.endsWith('.js')) {
+    else if ((path.relative(assetDir, from).startsWith(`js${path.sep}`) && entry.name.endsWith('.js'))
+      || (path.relative(assetDir, from).startsWith(`css${path.sep}`) && entry.name.endsWith('.css'))) {
       const source = await read(from);
       await write(to, source.replaceAll('__ASSET_VERSION__', ASSET_VERSION));
     } else await fs.copyFile(from, to);
