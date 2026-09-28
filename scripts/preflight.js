@@ -2,15 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { contentDir } from './lib/paths.js';
 import { parseDocument, topicIdFromFilename } from './lib/metadata.js';
+import { validateTopicMetadata } from './lib/metadata-schema.js';
 
-const REQUIRED = ['title','slug','description','category','status','version','contract','taxonomy','languages','difficulty','tags','created','last_reviewed'];
 const ALLOWED_HTML = new Set(['a','details','summary','strong']);
-
-function validIsoDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
-}
 
 function findRawTagsOutsideFences(body) {
   const tags = [];
@@ -82,14 +76,7 @@ async function main() {
     titles.push(metadata.title);
     descriptions.push(metadata.description);
 
-    for (const key of REQUIRED) if (!(key in metadata)) errors.push(`${name}: missing metadata ${key}`);
-    if (metadata.version !== file.version) errors.push(`${name}: filename/frontmatter version mismatch`);
-    for (const key of ['title','description','category']) {
-      if (typeof metadata[key] !== 'string' || !metadata[key].trim()) errors.push(`${name}: invalid metadata ${key}`);
-    }
-    if (typeof metadata.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(metadata.slug)) errors.push(`${name}: invalid slug`);
-    if (!Array.isArray(metadata.tags) || !metadata.tags.length || metadata.tags.some(tag => typeof tag !== 'string' || !tag.trim())) errors.push(`${name}: invalid tags`);
-    for (const key of ['created','last_reviewed']) if (!validIsoDate(metadata[key])) errors.push(`${name}: invalid metadata ${key}`);
+    errors.push(...validateTopicMetadata(metadata, { filename:name, fileVersion:file.version }));
     if (source.normalize('NFC') !== source) { nfcErrors += 1; errors.push(`${name}: not NFC`); }
     const raw = findRawTagsOutsideFences(body);
     unsupported += raw.length;

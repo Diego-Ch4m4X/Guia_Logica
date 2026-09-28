@@ -7,6 +7,7 @@ function splitFrontMatter(source) {
 
 function stripQuotes(value) {
   const s = value.trim();
+  if (s === '[]') return [];
   if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
     return s.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'");
   }
@@ -85,7 +86,7 @@ function parseYamlSubset(text) {
 }
 
 export function parseDocument(source) {
-  const { frontMatter, body } = splitFrontMatter(source);
+  const { frontMatter, body } = splitFrontMatter(source.replace(/\r\n?/g, '\n'));
   return { metadata: parseYamlSubset(frontMatter), body };
 }
 
