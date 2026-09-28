@@ -1,5 +1,33 @@
 const root=document.documentElement
-const labels={light:'Tema claro',dark:'Tema escuro',system:'Tema do sistema'}
+const labels={light:'Tema claro',dark:'Tema escuro'}
+const continuousAnimations='animate[repeatcount="indefinite"],animateTransform[repeatcount="indefinite"]'
+const originalBegins=new WeakMap()
+
+export function syncContinuousMotion(animations,reduced){
+  for(const animation of animations){
+    if(reduced){
+      if(!originalBegins.has(animation))originalBegins.set(animation,animation.getAttribute('begin'))
+      animation.setAttribute('begin','indefinite')
+      animation.endElement?.()
+    }else if(originalBegins.has(animation)){
+      const begin=originalBegins.get(animation)
+      if(begin===null)animation.removeAttribute('begin')
+      else animation.setAttribute('begin',begin)
+      animation.beginElement?.()
+      originalBegins.delete(animation)
+    }
+  }
+}
+
+function initContinuousMotion(){
+  const preference=matchMedia('(prefers-reduced-motion: reduce)')
+  const sync=()=>syncContinuousMotion(document.querySelectorAll(continuousAnimations),preference.matches)
+  sync()
+  preference.addEventListener?.('change',sync)
+  new MutationObserver(records=>{
+    if(records.some(record=>record.addedNodes.length))sync()
+  }).observe(document.documentElement,{childList:true,subtree:true})
+}
 
 export function announce(message){
   const element=document.getElementById('announcer')
@@ -9,6 +37,7 @@ export function announce(message){
 }
 
 export function initTheme(){
+  initContinuousMotion()
   const button=document.getElementById('themeToggle')
   const iconHost=document.getElementById('themeIcon')
   if(!button||!iconHost)return

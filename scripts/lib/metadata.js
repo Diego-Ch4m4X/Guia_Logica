@@ -1,4 +1,4 @@
-export function splitFrontMatter(source) {
+function splitFrontMatter(source) {
   if (!source.startsWith('---\n')) throw new Error('Front Matter opening delimiter missing');
   const end = source.indexOf('\n---\n', 4);
   if (end < 0) throw new Error('Front Matter closing delimiter missing');
@@ -77,7 +77,7 @@ function parseBlock(lines, start, indent) {
   return { value, next: i };
 }
 
-export function parseYamlSubset(text) {
+function parseYamlSubset(text) {
   const lines = text.replace(/\r\n?/g, '\n').split('\n');
   const first = nextNonBlank(lines, 0);
   if (first < 0) return {};

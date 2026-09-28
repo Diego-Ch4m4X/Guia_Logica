@@ -210,32 +210,6 @@ function renderList(lines, start, context) {
   return { html: `<${tag}>${items.join('')}</${tag}>`, next: i };
 }
 
-export function analyzeHeadings(body) {
-  const reserved = new Set([...body.matchAll(/<a\s+id=["']([^"']+)["']\s*>\s*<\/a>/gi)].map(m => m[1]));
-  const slugger = createSlugger(reserved);
-  const headings = [];
-  const lines = body.replace(/\r\n?/g, '\n').split('\n');
-  let inFence = false;
-  let fenceChar = '';
-  let fenceLen = 0;
-  for (let i = 0; i < lines.length; i += 1) {
-    const fm = lines[i].match(/^\s{0,3}(`{3,}|~{3,})/);
-    if (fm) {
-      if (!inFence) { inFence = true; fenceChar = fm[1][0]; fenceLen = fm[1].length; }
-      else if (fm[1][0] === fenceChar && fm[1].length >= fenceLen) inFence = false;
-      continue;
-    }
-    if (inFence) continue;
-    const hm = lines[i].match(/^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$/);
-    if (!hm) continue;
-    const level = hm[1].length;
-    const plain = headingPlainText(hm[2]).replace(/<[^>]+>/g, '').trim();
-    const id = slugger(plain);
-    headings.push({ level, text: plain, id, line: i + 1 });
-  }
-  return headings;
-}
-
 export function renderMarkdown(body, options = {}) {
   const lines = body.replace(/\r\n?/g, '\n').split('\n');
   const reserved = new Set([...body.matchAll(/<a\s+id=["']([^"']+)["']\s*>\s*<\/a>/gi)].map(m => m[1]));

@@ -10,6 +10,7 @@ import {
   enhanceTopicHtmlGeneric,
   renderGlossaryGeneric,
   renderReferencesGeneric,
+  offsetTopicHeadings,
 } from './lib/components.js';
 import { buildGuide, buildToc, buildDrawer } from './lib/navigation.js';
 import { applyTemplate, extractSlot, escapeHtml } from './lib/html.js';
@@ -54,9 +55,9 @@ function articleHead(topic) {
 function topicOverview(topic, body) {
   const labs = (body.match(/^#{1,6}\s+.*(?:LAB|Laboratório)\s+\d+/gmi) || []).length;
   if (topic.number === 25) {
-    return `<div class="quick-answer"><div class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</div><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e pela <a href="#visao-panoramica">Visão panorâmica</a>. Depois avance de ADT e contrato para representação, invariantes, custos e transferência entre linguagens.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div><div class="info-grid"><section class="info-card"><h2>Filosofia operacional</h2><ul><li>Compreender o problema</li><li>Modelar pelo contrato</li><li>Separar interface e representação</li><li>Validar invariantes e custos</li><li>Transferir o modelo entre linguagens</li></ul></section><section class="info-card"><h2>Escopo</h2><ul><li>ADT, contratos e invariantes</li><li>Fila FIFO como estudo canônico</li><li>Python, JavaScript, Java e GNU Bash</li><li>Modelagem, decisão e trade-offs</li></ul></section></div>`;
+    return `<div class="quick-answer"><h2 class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</h2><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e pela <a href="#visao-panoramica">Visão panorâmica</a>. Depois avance de ADT e contrato para representação, invariantes, custos e transferência entre linguagens.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div><div class="info-grid"><section class="info-card"><h2>Filosofia operacional</h2><ul><li>Compreender o problema</li><li>Modelar pelo contrato</li><li>Separar interface e representação</li><li>Validar invariantes e custos</li><li>Transferir o modelo entre linguagens</li></ul></section><section class="info-card"><h2>Escopo</h2><ul><li>ADT, contratos e invariantes</li><li>Fila FIFO como estudo canônico</li><li>Python, JavaScript, Java e GNU Bash</li><li>Modelagem, decisão e trade-offs</li></ul></section></div>`;
   }
-  return `<div class="quick-answer"><div class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</div><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e avance pela visão panorâmica, conceitos, exemplos e atividades.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div>`;
+  return `<div class="quick-answer"><h2 class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</h2><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e avance pela visão panorâmica, conceitos, exemplos e atividades.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div>`;
 }
 
 function related(topic, topics) {
@@ -130,7 +131,7 @@ function topicContent(topic) {
   html += renderGlossaryGeneric(slices.glossarySource, topic.id);
   if (slices.postGlossary) html += renderMarkdown(slices.postGlossary).html;
   html += renderReferencesGeneric(slices.referencesSource, topic.sourceBody, topic.id);
-  return { html, sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
+  return { html:offsetTopicHeadings(html), sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
 }
 
 async function renderTopic(topic, topics, base, topicTpl) {
