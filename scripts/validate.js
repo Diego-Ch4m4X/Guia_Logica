@@ -7,6 +7,16 @@ async function exists(p) { try { await fs.access(p); return true; } catch { retu
 function idsFrom(html) { return [...html.matchAll(/\sid=["']([^"']+)["']/g)].map(m => m[1]); }
 function duplicateIds(html) { const ids = idsFrom(html); return ids.length - new Set(ids).size; }
 function refsFrom(html) { return [...html.matchAll(/\s(?:href|src)=["']([^"']+)["']/g)].map(m => m[1]); }
+function brokenAriaRefs(rel, html) {
+  const ids = new Set(idsFrom(html));
+  const broken = [];
+  for (const match of html.matchAll(/\s(aria-controls|aria-labelledby|aria-describedby|aria-owns|aria-activedescendant)=["']([^"']*)["']/gi)) {
+    for (const id of match[2].trim().split(/\s+/).filter(Boolean)) {
+      if (!ids.has(id)) broken.push(`${rel}: ${match[1]} references missing #${id}`);
+    }
+  }
+  return broken;
+}
 function duplicateHtmlAttributes(html) {
   const duplicates = [];
   for (const match of html.matchAll(/<[A-Za-z][^>]*>/g)) {
@@ -55,6 +65,32 @@ async function brokenLocalRefs(rel, html) {
     if (target.fragment && target.file.endsWith('.html')) {
       const targetHtml = target.file === from ? html : await fs.readFile(target.file, 'utf8');
       if (!new Set(idsFrom(targetHtml)).has(target.fragment)) broken.push(`${rel}: broken fragment ${raw}`);
+    }
+  }
+  return broken;
+}
+
+async function publishedCssFiles(dir = path.join(distDir, 'assets/css')) {
+  const files = [];
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const absolute = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...await publishedCssFiles(absolute));
+    else if (entry.isFile() && entry.name.endsWith('.css')) files.push(absolute);
+  }
+  return files;
+}
+
+async function brokenCssAssets() {
+  const broken = [];
+  for (const file of await publishedCssFiles()) {
+    const css = await fs.readFile(file, 'utf8');
+    for (const match of css.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
+      const raw = match[2].trim();
+      if (!raw || /^(?:data:|https?:|#)/i.test(raw)) continue;
+      const target = await targetFor(file, raw);
+      if (target && !await exists(target.file)) {
+        broken.push(`${path.relative(distDir, file)}: missing ${raw}`);
+      }
     }
   }
   return broken;
@@ -124,7 +160,9 @@ async function main() {
     }
 
     errors.push(...await brokenLocalRefs(rel, html));
+    errors.push(...brokenAriaRefs(rel, html));
   }
+  errors.push(...await brokenCssAssets());
 
   const htmlCache = new Map();
   const idCache = new Map();
@@ -161,6 +199,8 @@ async function main() {
   console.log('topics: 35/35');
   console.log('generated topic pages: 35/35');
   console.log('broken local links/fragments: 0');
+  console.log('broken ARIA references: 0');
+  console.log('broken asset references: 0');
   console.log('duplicate ids: 0');
   console.log('duplicate HTML attributes: 0');
   console.log('heading hierarchy jumps: 0');

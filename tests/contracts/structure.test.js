@@ -68,6 +68,24 @@ function count(html, re) {
   return (html.match(re) || []).length;
 }
 
+test('Home preserves approved golden structure and local navigation', async () => {
+  const actual = await readFile(path.join(ROOT, 'dist/index.html'), 'utf8');
+  const golden = await readFile(path.join(ROOT, 'tests/fixtures/home/golden.html'), 'utf8');
+  assert.equal(count(actual, /<h1\b/gi), 1);
+  assert.equal(count(actual, /class="home-topic-card"/g), 35);
+  assert.equal(count(actual, /role="tabpanel"/g), 3);
+  const values = (html, pattern) => [...html.matchAll(pattern)].map(match => match[1]);
+  const actualIds = new Set(values(actual, /\bid="([^"]+)"/g));
+  for (const id of values(golden, /\bid="([^"]+)"/g)) {
+    assert.ok(actualIds.has(id), `Home historical ID disappeared: ${id}`);
+  }
+  const localLinks = new Set(values(actual, /href="(#[^"]+)"/g));
+  for (const href of values(golden, /href="(#[^"]+)"/g)) {
+    assert.ok(localLinks.has(href), `Home local anchor disappeared: ${href}`);
+  }
+  assert.equal(count(actual, /class="home-section"/g), count(golden, /class="home-section"/g));
+});
+
 test('canonical Markdown has no heading-level jumps', async () => {
   const dir = path.join(ROOT, 'content/topics');
   const names = (await readdir(dir)).filter(name => name.endsWith('.md')).sort();

@@ -2,7 +2,11 @@ name: Build and deploy GitHub Pages
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -31,7 +35,13 @@ jobs:
           node-version-file: .node-version
           check-latest: false
 
-      - name: Verify pinned runtime
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify pinned runtimes
         shell: bash
         run: |
           set -euo pipefail
@@ -40,24 +50,31 @@ jobs:
           test "$actual" = "$expected"
           node --version
           npm --version
+          java -version
 
       - name: Install dependencies from lockfile
         run: npm ci --ignore-scripts
 
-      - name: Preflight canonical Markdown
-        run: npm run preflight
-
-      - name: Build Home and T01-T35
+      - name: Build Home and T01-T35 (includes preflight)
         run: npm run build
 
       - name: Validate generated site
         run: npm run validate
+
+      - name: Validate HTML conformance
+        run: npm run validate:html
+
+      - name: Validate browser JavaScript syntax
+        run: npm run validate:js
 
       - name: Run contract tests
         run: npm test
 
       - name: Validate Pages artifact input
         run: npm run validate:pages
+
+      - name: Check external links
+        run: npm run check:external-links
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -110,15 +127,21 @@ jobs:
             test -s "$out"
           }
 
-          for route in "" "topicos/t01/" "topicos/t24/" "topicos/t25/" "topicos/t35/"; do
+          routes=("")
+          for n in $(seq -w 1 35); do routes+=("topicos/t${n}/"); done
+          route_count=0
+          for route in "${routes[@]}"; do
             name="${route//\//_}"
             test -n "$name" || name="home"
             fetch "$route" "$tmp/$name.html"
             grep -qi '<!doctype html' "$tmp/$name.html"
-            grep -Fq 'rel="canonical"' "$tmp/$name.html"
+            expected="https://diego-ch4m4x.github.io/Guia_Logica/${route}"
+            grep -Fq "rel=\"canonical\" href=\"${expected}\"" "$tmp/$name.html"
             grep -Fq 'application/ld+json' "$tmp/$name.html"
-            grep -Fq 'property="og:url"' "$tmp/$name.html"
+            grep -Fq "property=\"og:url\" content=\"${expected}\"" "$tmp/$name.html"
+            route_count=$((route_count + 1))
           done
+          test "$route_count" = "36"
 
           fetch "data/package.json" "$tmp/package.json"
           published_version="$(sed -n 's/^[[:space:]]*"version": "\([^"]*\)".*/\1/p' "$tmp/package.json" | head -n 1)"
@@ -137,5 +160,6 @@ jobs:
           grep -Fq '<loc>https://diego-ch4m4x.github.io/Guia_Logica/</loc>' "$tmp/sitemap.xml"
           grep -Fq '<loc>https://diego-ch4m4x.github.io/Guia_Logica/topicos/t35/</loc>' "$tmp/sitemap.xml"
 
+          echo "production routes: 36/36"
           echo "PRODUCTION_SMOKE: PASS"
           echo "base_url=$base"

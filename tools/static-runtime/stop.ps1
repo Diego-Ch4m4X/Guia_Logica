@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$packageManifest = Join-Path $projectRoot 'data\package.json'
+$packageManifest = Join-Path $projectRoot 'dist\data\package.json'
+if (-not (Test-Path -LiteralPath $packageManifest)) { $packageManifest = Join-Path $projectRoot 'data\package.json' }
 $packageVersion = if (Test-Path -LiteralPath $packageManifest) { [string]((Get-Content -LiteralPath $packageManifest -Raw | ConvertFrom-Json).version) } else { 'desconhecida' }
 $runtime = Join-Path $projectRoot '.runtime'
 $stateFile = Join-Path $runtime 'server.json'

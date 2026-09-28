@@ -1,9 +1,21 @@
+param(
+  [switch]$NoBrowser
+)
+
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$distManifest = Join-Path $projectRoot 'dist\data\package.json'
 $packageManifest = Join-Path $projectRoot 'data\package.json'
-if (-not (Test-Path -LiteralPath $packageManifest)) { throw 'Manifesto data\package.json ausente.' }
+if (Test-Path -LiteralPath $distManifest) {
+  $siteRoot = Join-Path $projectRoot 'dist'
+  $packageManifest = $distManifest
+} elseif (Test-Path -LiteralPath $packageManifest) {
+  $siteRoot = $projectRoot
+} else {
+  throw 'Manifesto data\package.json ausente em dist/ e na raiz.'
+}
 $packageVersion = [string]((Get-Content -LiteralPath $packageManifest -Raw | ConvertFrom-Json).version)
-if ($packageVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Versao invalida em data\package.json.' }
+if ([string]::IsNullOrWhiteSpace($packageVersion)) { throw 'Versao ausente em data\package.json.' }
 Set-Location $projectRoot
 
 $runtime = Join-Path $projectRoot '.runtime'
@@ -45,81 +57,56 @@ function Stop-OwnedProcess([int]$ProcessId) {
   }
 }
 
+function Read-PreviewResponse([string]$Url) {
+  $request = [System.Net.HttpWebRequest][System.Net.WebRequest]::Create($Url)
+  $request.Timeout = 10000
+  $request.ReadWriteTimeout = 10000
+  $request.KeepAlive = $false
+  $response = [System.Net.HttpWebResponse]$request.GetResponse()
+  try {
+    $stream = $response.GetResponseStream()
+    $buffer = New-Object byte[] 512
+    $count = $stream.Read($buffer, 0, $buffer.Length)
+    return [pscustomobject]@{
+      status = [int]$response.StatusCode
+      bytes = $count
+      prefix = [System.Text.Encoding]::UTF8.GetString($buffer, 0, $count)
+      cache = [string]$response.Headers['Cache-Control']
+      package = [string]$response.Headers['X-Filomatia-Package']
+      content_type_options = [string]$response.Headers['X-Content-Type-Options']
+    }
+  } finally { $response.Dispose() }
+}
+
 function Test-ExpectedPreview([int]$Port) {
   $script:LastVerificationFailures = @()
   try {
-    $topicUrl = "http://127.0.0.1:$Port/topicos/t25/"
-    $response = Invoke-WebRequest -UseBasicParsing -Uri $topicUrl -TimeoutSec 2
-    $html = [string]$response.Content
-    $cacheHeader = [string]$response.Headers['Cache-Control']
-    $packageHeader = [string]$response.Headers['X-Filomatia-Package']
-
-    $homeResponse = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$Port/" -TimeoutSec 2
-    $homeHtml = [string]$homeResponse.Content
-
-    $topicScriptResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/js/topic.js?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $topicScript = [string]$topicScriptResponse.Content
-
-    $appScriptResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/js/app.js?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $appScript = [string]$appScriptResponse.Content
-
-    $mermaidLoaderResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/js/mermaid-loader.js?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $mermaidLoader = [string]$mermaidLoaderResponse.Content
-
-    $codeCssResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/css/code.css?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $codeCss = [string]$codeCssResponse.Content
-
-    $topicCssResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/css/topic.css?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $topicCss = [string]$topicCssResponse.Content
-
-    $homeCssResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/css/home.css?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $homeCss = [string]$homeCssResponse.Content
-
-    $faviconResponse = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:{0}/assets/img/favicon.svg?v={1}" -f $Port, $packageVersion) -TimeoutSec 2
-    $faviconSvg = [string]$faviconResponse.Content
-
-    $iconCount = ([regex]::Matches($html, 'class="lab-panel-icon"')).Count
-    $flowCount = ([regex]::Matches($html, 'activity-flow')).Count
-    $escapedPackageVersion = [regex]::Escape($packageVersion)
-
-    $checks = [ordered]@{
-      'cabecalho X-Filomatia-Package' = ($packageHeader -eq $packageVersion)
-      '88 SVGs dos LABs' = ($iconCount -eq 88)
-      'fluxo antigo ausente' = ($flowCount -eq 0)
-      'topic.css corresponde ao pacote' = ($html -match ("topic\.css\?v={0}" -f $escapedPackageVersion))
-      'code.css corresponde ao pacote' = ($html -match ("code\.css\?v={0}" -f $escapedPackageVersion))
-      'app.js corresponde ao pacote' = ($html -match ("app\.js\?v={0}" -f $escapedPackageVersion))
-      'Mermaid markup presente' = ($html -match 'class="mermaid-figure"')
-      'app inicializa Mermaid' = ($appScript -match 'initMermaid')
-      'app inicializa blocos de codigo' = ($appScript -match 'initCodeBlocks')
-      'Mermaid loader renderiza SVG' = ($mermaidLoader -match 'host\.innerHTML=rendered\.svg')
-      'degrade dos blocos de codigo presente' = ($codeCss -match 'show-fade')
-      'hierarquia tipografica das abas T25' = ($topicCss -match '\.tab-panel>h2\.chapter-title')
-      'scrollspy usa documentTop' = ($topicScript -match 'documentTop')
-      'scrollspy nao usa offsetTop' = ($topicScript -notmatch '\.offsetTop')
-      'home.css corresponde ao pacote' = ($homeHtml -match ("home\.css\?v={0}" -f $escapedPackageVersion))
-      'home.js corresponde ao pacote' = ($homeHtml -match ("home\.js\?v={0}" -f $escapedPackageVersion))
-      'tabs da Home presentes' = ($homeHtml -match 'data-home-tabs')
-      'project-cover do Hero presente' = ($homeCss -match 'project-cover-hero\.webp')
-      'disclosure Navegacao presente' = ($homeHtml -match 'homeNavToggle')
-      'favicon do logo presente' = ($faviconSvg -match 'filomatia-favicon')
-      'GitHub no footer presente' = ($homeHtml -match 'diego-ch4m4x\.github\.io')
-      'LinkedIn no footer presente' = ($homeHtml -match 'linkedin\.com/in/diegodsl')
-      'legenda das quatro linguagens correta' = ($homeHtml -match 'Quatro perspectivas sobre os mesmos fundamentos\.')
-      'secao interna Projeto e publicacao ausente' = ($homeHtml -notmatch '09-projeto-e-publicação')
-      'secao interna Estado da colecao ausente' = ($homeHtml -notmatch '10-estado-da-coleção')
-      'cache HTTP desativado' = ($cacheHeader -match 'no-store')
+    $base = "http://127.0.0.1:$Port/"
+    $routes = @('') + @(1..35 | ForEach-Object { 'topicos/t{0:D2}/' -f $_ })
+    foreach ($route in $routes) {
+      $response = Read-PreviewResponse ($base + $route)
+      if ($response.status -ne 200 -or $response.bytes -eq 0 -or $response.prefix -notmatch '(?i)<!doctype html') {
+        $script:LastVerificationFailures += "Rota invalida: $route"
+      }
+      if ($response.cache -notmatch 'no-store' -or $response.package -ne $packageVersion -or $response.content_type_options -ne 'nosniff') {
+        $script:LastVerificationFailures += "Cabecalhos invalidos: $route"
+      }
     }
-
-    $script:LastVerificationFailures = @(
-      $checks.GetEnumerator() |
-        Where-Object { -not $_.Value } |
-        ForEach-Object { [string]$_.Key }
+    $assets = @(
+      'data/package.json', 'data/topics.json', 'data/search-index.json', 'sitemap.xml',
+      "assets/css/base.css?v=$packageVersion", "assets/js/app.js?v=$packageVersion",
+      'assets/vendor/mermaid-11.17.2.min.js', 'assets/vendor/highlight-11.12.0.min.js'
     )
-
+    foreach ($asset in $assets) {
+      $response = Read-PreviewResponse ($base + $asset)
+      if ($response.status -ne 200 -or $response.bytes -eq 0) {
+        $script:LastVerificationFailures += "Asset invalido: $asset"
+      }
+    }
+    if ($script:LastVerificationFailures.Count -eq 0) { Write-Step 'PASS' 'Rotas: 36/36; dados e assets essenciais: PASS.' }
     return ($script:LastVerificationFailures.Count -eq 0)
   } catch {
-    $script:LastVerificationFailures = @('erro HTTP: ' + $_.Exception.Message)
+    $script:LastVerificationFailures += ('erro HTTP: ' + $_.Exception.Message)
     return $false
   }
 }
@@ -129,15 +116,17 @@ Write-Step 'INFO' ("Preview: v{0}" -f $packageVersion)
 
 $requiredFiles = @(
   'index.html',
-  'topicos\t25\index.html',
   'data\topics.json',
   'data\search-index.json',
   'data\package.json',
-  'assets',
-  'tools\static-runtime\serve.py',
-  'tools\static-runtime\serve.ps1'
+  'sitemap.xml',
+  'assets\css\base.css',
+  'assets\js\app.js',
+  'assets\vendor\mermaid-11.17.2.min.js',
+  'assets\vendor\highlight-11.12.0.min.js'
 )
-$missingFiles = @($requiredFiles | Where-Object { -not (Test-Path (Join-Path $projectRoot $_)) })
+$requiredFiles += @(1..35 | ForEach-Object { 'topicos\t{0:D2}\index.html' -f $_ })
+$missingFiles = @($requiredFiles | Where-Object { -not (Test-Path (Join-Path $siteRoot $_)) })
 if ($missingFiles.Count -gt 0) {
   throw ('Pacote incompleto. Ausente(s): ' + ($missingFiles -join ', '))
 }
@@ -149,23 +138,23 @@ if (Test-Path $stateFile) {
     $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
     $statePid = [int]$state.pid
     $statePort = [int]$state.port
-    if (($state.version -eq $packageVersion) -and ($state.root -eq $projectRoot) -and (Get-Process -Id $statePid -ErrorAction SilentlyContinue) -and (Test-ExpectedPreview $statePort)) {
+    if (($state.version -eq $packageVersion) -and ($state.project_root -eq $projectRoot) -and ($state.site_root -eq $siteRoot) -and (Get-Process -Id $statePid -ErrorAction SilentlyContinue) -and (Test-ExpectedPreview $statePort)) {
       $existingUrl = "http://localhost:$statePort/"
       Write-Step 'PASS' ("Preview ja estava ativo na porta {0}." -f $statePort)
-      Start-Process $existingUrl
+      if (-not $NoBrowser) { Start-Process $existingUrl }
       exit 0
     }
     Stop-OwnedProcess $statePid
   } catch {}
 }
 
-# Clean old previews from this project family only. Never kill an unrelated listener.
-Write-Step 'INFO' 'Limpando previews antigos desta familia de projeto...'
+# Clean only previews whose command line names this exact project root and server.
+Write-Step 'INFO' 'Limpando previews antigos deste projeto...'
 try {
   $familyProcesses = Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object {
     $_.ProcessId -ne $PID -and
     $_.CommandLine -and
-    ($_.CommandLine -match 'LOGICA_HOME_T25_PILOTO_v') -and
+    ($_.CommandLine -match [regex]::Escape($projectRoot)) -and
     ($_.CommandLine -match 'static-runtime[\\/](serve\.py|serve\.ps1)')
   }
   foreach ($fp in $familyProcesses) {
@@ -206,11 +195,11 @@ if ($pythonLauncher) {
     "`"$serverScript`"",
     '--port', "$port",
     '--bind', '127.0.0.1',
-    '--directory', "`"$projectRoot`"",
+    '--directory', "`"$siteRoot`"",
     '--package-version', $packageVersion
   ))
   Write-Step 'INFO' ("Motor HTTP: Python ({0})." -f $pythonLauncher)
-  $process = Start-Process -FilePath $pythonLauncher -ArgumentList $arguments -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
+  $process = Start-Process -FilePath $pythonLauncher -ArgumentList $arguments -WorkingDirectory $siteRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
 } else {
   $engine = 'powershell'
   $serverScript = Join-Path $PSScriptRoot 'serve.ps1'
@@ -220,10 +209,10 @@ if ($pythonLauncher) {
     '-ExecutionPolicy', 'Bypass',
     '-File', "`"$serverScript`"",
     '-Port', "$port",
-    '-Root', "`"$projectRoot`"",
+    '-Root', "`"$siteRoot`"",
     '-PackageVersion', $packageVersion
   )
-  $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
+  $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -WorkingDirectory $siteRoot -WindowStyle Hidden -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
 }
 
 Write-Step 'INFO' ("Servidor iniciado em segundo plano. PID {0}." -f $process.Id)
@@ -236,6 +225,9 @@ for ($attempt = 1; $attempt -le 16; $attempt++) {
   if (Test-ExpectedPreview $port) {
     $verified = $true
     break
+  }
+  if ($script:LastVerificationFailures.Count -gt 0) {
+    Write-Step 'WARN' ('Tentativa de autoverificacao: ' + ($script:LastVerificationFailures -join '; '))
   }
 }
 
@@ -253,7 +245,8 @@ if (-not $verified) {
 
 $state = [ordered]@{
   version = $packageVersion
-  root = $projectRoot
+  project_root = $projectRoot
+  site_root = $siteRoot
   pid = $process.Id
   port = $port
   engine = $engine
@@ -265,10 +258,10 @@ $process.Id | Set-Content -LiteralPath $pidFile -Encoding ASCII
 $port | Set-Content -LiteralPath $portFile -Encoding ASCII
 
 Write-Step 'PASS' 'Autoverificacao HTTP concluida.'
-Write-Step 'PASS' 'T25 preservado; nova Home validada; navegacao/tabs presentes; cache desativado.'
+Write-Step 'PASS' 'Home, T01-T35, dados e assets validados; cache desativado.'
 Write-Step 'PASS' ("Runtime registrado em .runtime\server.json ({0})." -f $engine)
 
 $homeUrl = "http://localhost:$port/"
 Write-Step 'PASS' ("Home: {0}" -f $homeUrl)
-Start-Process $homeUrl
+if (-not $NoBrowser) { Start-Process $homeUrl }
 exit 0
