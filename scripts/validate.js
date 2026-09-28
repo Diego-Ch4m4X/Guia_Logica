@@ -6,6 +6,28 @@ async function exists(p) { try { await fs.access(p); return true; } catch { retu
 function idsFrom(html) { return [...html.matchAll(/\sid=["']([^"']+)["']/g)].map(m => m[1]); }
 function duplicateIds(html) { const ids = idsFrom(html); return ids.length - new Set(ids).size; }
 function refsFrom(html) { return [...html.matchAll(/\s(?:href|src)=["']([^"']+)["']/g)].map(m => m[1]); }
+function duplicateHtmlAttributes(html) {
+  const duplicates = [];
+  for (const match of html.matchAll(/<[A-Za-z][^>]*>/g)) {
+    const seen = new Set();
+    for (const attr of match[0].matchAll(/\s([A-Za-z_:][-A-Za-z0-9_:.]*)\s*=/g)) {
+      const name = attr[1].toLowerCase();
+      if (seen.has(name)) duplicates.push({ name, tag:match[0].slice(0, 180) });
+      seen.add(name);
+    }
+  }
+  return duplicates;
+}
+
+function htmlHeadingJumps(html) {
+  const headings = [...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map(match => Number(match[1]));
+  const jumps = [];
+  for (let i = 1; i < headings.length; i += 1) {
+    if (headings[i] > headings[i - 1] + 1) jumps.push(`h${headings[i - 1]}->h${headings[i]}`);
+  }
+  return jumps;
+}
+
 
 async function targetFor(fromFile, raw) {
   if (/^(?:https?:|mailto:|tel:|data:|javascript:)/i.test(raw)) return null;
@@ -87,6 +109,18 @@ async function main() {
   for (const {rel, html} of pages) {
     const dup = duplicateIds(html);
     if (dup) errors.push(`${rel}: duplicate ids=${dup}`);
+
+    if (rel !== 'index.html') {
+      const duplicateAttributes = duplicateHtmlAttributes(html);
+      if (duplicateAttributes.length) {
+        errors.push(`${rel}: duplicate HTML attributes=${duplicateAttributes.length}`);
+      }
+      const headingJumps = htmlHeadingJumps(html);
+      if (headingJumps.length) {
+        errors.push(`${rel}: heading hierarchy jumps=${headingJumps.length} (${headingJumps.slice(0, 8).join(', ')})`);
+      }
+    }
+
     errors.push(...await brokenLocalRefs(rel, html));
   }
 
@@ -126,6 +160,8 @@ async function main() {
   console.log('generated topic pages: 35/35');
   console.log('broken local links/fragments: 0');
   console.log('duplicate ids: 0');
+  console.log('duplicate HTML attributes: 0');
+  console.log('heading hierarchy jumps: 0');
   console.log(`search-index targets: ${search.length}/${search.length}`);
   console.log('generated pages: Home + T01–T35 staging');
 }

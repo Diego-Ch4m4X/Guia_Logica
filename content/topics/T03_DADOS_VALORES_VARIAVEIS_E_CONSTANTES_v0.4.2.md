@@ -3337,7 +3337,7 @@ Aqui o troubleshooting aplica o método de diagnóstico aos mecanismos centrais 
 
 <a id="ts-t03-01"></a>
 
-### `TS-T03-01` — Python: annotation existe, mas o valor não
+## `TS-T03-01` — Python: annotation existe, mas o valor não
 
 **Sintoma**
 
@@ -3408,7 +3408,7 @@ Manter um caso que falhe deliberadamente quando a annotation permanecer sem valo
 
 <a id="ts-t03-02"></a>
 
-### `TS-T03-02` — JavaScript: leitura dentro da Temporal Dead Zone
+## `TS-T03-02` — JavaScript: leitura dentro da Temporal Dead Zone
 
 **Sintoma**
 
@@ -3460,7 +3460,7 @@ Preservar um teste negativo com leitura antecipada e um positivo após inicializ
 
 <a id="ts-t03-03"></a>
 
-### `TS-T03-03` — Java: “variable might not have been initialized”
+## `TS-T03-03` — Java: “variable might not have been initialized”
 
 **Sintoma**
 
@@ -3514,7 +3514,7 @@ Adicionar caso de compilação/controle que garanta assignment em todo caminho p
 
 <a id="ts-t03-04"></a>
 
-### `TS-T03-04` — Bash: string vazia foi confundida com variável unset
+## `TS-T03-04` — Bash: string vazia foi confundida com variável unset
 
 **Sintoma**
 
@@ -3569,7 +3569,7 @@ Manter os três estados no conjunto de testes do script.
 
 <a id="ts-t03-05"></a>
 
-### `TS-T03-05` — `const` / `final` não congelou o objeto
+## `TS-T03-05` — `const` / `final` não congelou o objeto
 
 **Sintoma**
 
@@ -3622,7 +3622,7 @@ Manter um teste explícito para reatribuição e outro para mutação, de acordo
 
 <a id="ts-t03-06"></a>
 
-### `TS-T03-06` — placeholder inicial produz estado impossível
+## `TS-T03-06` — placeholder inicial produz estado impossível
 
 **Sintoma**
 
@@ -4460,7 +4460,7 @@ Ruído: `retry_count: int | None = None` quando a contagem de tentativas já rea
 
 Como o tópico é `[D]`, você deve conseguir ir além de reconhecer sintaxe.
 
-### Matriz de prática verificável
+## Matriz de prática verificável
 
 | Capacidade | Onde praticar / verificar |
 |---|---|

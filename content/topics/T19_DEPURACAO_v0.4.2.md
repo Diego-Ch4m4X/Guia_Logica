@@ -688,7 +688,7 @@ PARA EXPLICAR O CASO REPRODUZIDO
 E VALIDAR A CORREÇÃO SEM REGRESSÃO CONHECIDA
 ```
 
-### Mapa do domínio — o que precisa ser dominado
+## Mapa do domínio — o que precisa ser dominado
 
 ```text
 DEPURAÇÃO [D]
@@ -741,7 +741,7 @@ DEPURAÇÃO [D]
 
 **Destinos principais:** [reprodução](#5-191--reprodução-do-problema-d), [hipóteses](#6-192--formulação-de-hipóteses-d), [estado](#7-193--inspeção-de-estado-d), [logging](#8-194--logging-d), [debugger](#9-195--debugger-d) e [isolamento](#15-196--isolamento-d).
 
-### Fluxo principal — investigar em vez de adivinhar
+## Fluxo principal — investigar em vez de adivinhar
 
 ```mermaid
 flowchart TD
@@ -766,7 +766,7 @@ flowchart TD
 
 O fluxo pode voltar etapas. A disciplina está em **preservar a pergunta e a evidência**, não em obedecer uma sequência rígida.
 
-### Consulta rápida — pergunta × mecanismo × evidência × risco
+## Consulta rápida — pergunta × mecanismo × evidência × risco
 
 | Pergunta prática | Primeiro mecanismo | Evidência útil | Erro frequente | Aprofundamento |
 |---|---|---|---|---|
@@ -783,7 +783,7 @@ O fluxo pode voltar etapas. A disciplina está em **preservar a pergunta e a evi
 | “Ao instrumentar o bug ele desaparece.” | reduzir instrumentação; preservar timings | comparação com/sem observação | concluir que foi corrigido | [5.8](#58-heisenbug-como-alerta-conceitual) |
 | “Qual parte do sistema é responsável?” | isolamento | caso mínimo que preserva o sintoma | remover também a condição causadora | [19.6](#15-196--isolamento-d) |
 
-### Pergunta → primeira ação útil
+## Pergunta → primeira ação útil
 
 ```text
 NÃO TENHO REPRODUÇÃO
@@ -817,7 +817,7 @@ CORRIGI
 → volte ao caso original + casos vizinhos + regressão no T20
 ```
 
-### Não confundir
+## Não confundir
 
 | Conceitos | Diferença operacional |
 |---|---|
@@ -833,7 +833,7 @@ CORRIGI
 | **debugging × observabilidade** | T19 usa evidência local e logging; observabilidade distribuída é domínio posterior |
 | **Bash xtrace × debugger interativo** | `set -x` mostra comandos após expansão/antes da execução; não oferece por si só frames/watches/stepping equivalentes a `pdb`/DevTools/`jdb` |
 
-### Microexemplo canônico — encontre a primeira divergência
+## Microexemplo canônico — encontre a primeira divergência
 
 Requisito:
 
@@ -885,7 +885,7 @@ verificar 99, 100 e 101
 
 O mesmo **método** transfere entre linguagens; a ferramenta concreta muda.
 
-### Problemas reais que este tópico precisa fechar
+## Problemas reais que este tópico precisa fechar
 
 | ID | Situação real | Capacidade dominante | Destino |
 |---|---|---|---|
@@ -902,7 +902,7 @@ O mesmo **método** transfere entre linguagens; a ferramenta concreta muda.
 
 O fechamento formal desses problemas aparece em [Problemas Reais e Gate de Cobertura Prática](#problemas-reais-t19).
 
-### Entrada rápida de troubleshooting
+## Entrada rápida de troubleshooting
 
 | Sintoma | Primeira pergunta | Primeira evidência |
 |---|---|---|
@@ -917,7 +917,7 @@ O fechamento formal desses problemas aparece em [Problemas Reais e Gate de Cober
 
 Casos completos e reproduzíveis: [Troubleshooting sistemático](#troubleshooting-sistematico).
 
-### Transferência entre linguagens — conceito comum, ferramentas diferentes
+## Transferência entre linguagens — conceito comum, ferramentas diferentes
 
 | Capacidade | Python | JavaScript / Node.js | Java | GNU Bash |
 |---|---|---|---|---|
@@ -933,7 +933,7 @@ Casos completos e reproduzíveis: [Troubleshooting sistemático](#troubleshootin
 
 **Regra de transferência:** transfira o **método investigativo**; não force equivalência entre interfaces que possuem semânticas diferentes.
 
-### Modo consulta × modo estudo
+## Modo consulta × modo estudo
 
 **Consulta rápida:**
 
@@ -950,7 +950,7 @@ Casos completos e reproduzíveis: [Troubleshooting sistemático](#troubleshootin
 
 **Estudo completo:** siga [modelo mental](#3-modelo-mental-depuração-como-redução-de-incerteza) → [método](#4-método-sistemático-de-depuração) → 19.1–19.6 → ferramentas por linguagem → [padrões por sintoma](#26-padrões-de-investigação-por-tipo-de-sintoma) → [problemas reais](#problemas-reais-t19) → [troubleshooting](#troubleshooting-sistematico) → LABs.
 
-### Fronteiras do mapa
+## Fronteiras do mapa
 
 ```text
 T12
@@ -969,7 +969,7 @@ PROFILING / OBSERVABILIDADE DISTRIBUÍDA / POST-MORTEM AVANÇADO
 → aprofundamentos posteriores
 ```
 
-### Gate 1 — mapa congelado para a iteração 0.4.2
+## Gate 1 — mapa congelado para a iteração 0.4.2
 
 ```text
 DOMÍNIO 19.1–19.6: representado
@@ -4348,7 +4348,7 @@ def classify_vendor(vendor: str) -> str:
     return "UNKNOWN"
 ```
 
-### Guardrail — normalização de identificadores
+## Guardrail — normalização de identificadores
 
 Não generalize automaticamente normalização de identificadores técnicos.
 
