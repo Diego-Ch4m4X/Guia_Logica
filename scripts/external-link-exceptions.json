@@ -1,0 +1,22 @@
+{
+  "reviewed": [
+    {
+      "url": "https://doi.org/10.1145/3664191",
+      "expected": [403],
+      "classification": "automation-restricted",
+      "reason": "DOI resolves to a valid ACM publication but automated requests may be blocked after redirect."
+    },
+    {
+      "url": "https://www.iso.org/standard/71616.html",
+      "expected": [403],
+      "classification": "automation-restricted",
+      "reason": "Official ISO page independently verified as active; CI requests may be refused."
+    },
+    {
+      "url": "https://www.linkedin.com/in/diegodsl/",
+      "expected": [999],
+      "classification": "automation-restricted",
+      "reason": "LinkedIn profile requests are intentionally blocked for automated clients."
+    }
+  ]
+}

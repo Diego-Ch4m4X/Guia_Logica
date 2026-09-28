@@ -10,7 +10,13 @@
     "build": "node scripts/build.js",
     "validate": "node scripts/validate.js",
     "test": "node --test tests/contracts/*.test.js",
-    "validate:pages": "node scripts/validate-pages-artifact.js"
+    "validate:pages": "node scripts/validate-pages-artifact.js",
+    "validate:html": "vnu --errors-only --skip-non-html dist",
+    "validate:js": "node scripts/check-js-syntax.js",
+    "check:external-links": "node scripts/check-external-links.js"
   },
-  "version": "1.2.0"
+  "version": "1.2.0",
+  "devDependencies": {
+    "vnu-jar": "26.8.30"
+  }
 }
