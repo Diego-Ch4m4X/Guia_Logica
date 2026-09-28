@@ -8,6 +8,18 @@ import { offsetTopicHeadings } from '../../scripts/lib/components.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFile(path.join(root, file), 'utf8');
 
+test('mobile drawers use conforming dialog containers', async () => {
+  const template = await read('src/templates/topic.html');
+  for (const id of ['guideDrawer', 'tocDrawer']) {
+    const tag = template.match(new RegExp(`<div\\b[^>]*\\bid="${id}"[^>]*>`))?.[0];
+    assert.ok(tag, `${id}: div container missing`);
+    for (const attribute of ['role="dialog"', 'aria-modal="true"', 'aria-hidden="true"', 'inert=""']) {
+      assert.ok(tag.includes(attribute), `${id}: ${attribute} missing`);
+    }
+  }
+  assert.doesNotMatch(template, /<aside\b[^>]*\brole="dialog"/i);
+});
+
 test('topic heading offset keeps text, IDs and paired tags', () => {
   assert.equal(offsetTopicHeadings('<h1 class="chapter-title" id="a">Capítulo</h1><h4 id="b"><code>x</code></h4>'),
     '<h2 class="chapter-title" id="a">Capítulo</h2><h5 id="b"><code>x</code></h5>');
