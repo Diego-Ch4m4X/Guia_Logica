@@ -81,6 +81,23 @@ test('legacy T25 checklist storage key remains stable', async () => {
   assert.match(await read('src/assets/js/checklists.js'), /logic\.t25\.checks\.v1/);
 });
 
+test('direct topic H5 headings retain the former H4 visual metrics', async () => {
+  const topicCss = await read('src/assets/css/topic.css');
+  const baseCss = await read('src/assets/css/base.css');
+  const declaration = source => Object.fromEntries(
+    source.split(';').map(item => item.split(':').map(part => part.trim())).filter(parts => parts.length === 2)
+  );
+  const oldH4 = declaration(baseCss.match(/(?:^|})h4\{([^}]*)\}/)?.[1] || '');
+  const directH5 = declaration(topicCss.match(/\.topic-article \.article-body > h5\{([^}]*)\}/)?.[1] || '');
+  assert.equal(directH5['font-size'], oldH4['font-size']);
+  assert.equal(directH5['margin-top'], oldH4['margin-top']);
+  assert.equal(directH5['margin-bottom'], '1.33em');
+  assert.equal(directH5['font-weight'], undefined);
+  assert.equal(directH5['line-height'], undefined);
+  assert.equal(directH5.color, undefined);
+  assert.equal(directH5['letter-spacing'], undefined);
+});
+
 test('dead build helpers and internal-only exports stay removed', async () => {
   const pairs = [
     ['scripts/lib/components.js', ['enhanceTopicHtml', 'publicationSlices']],

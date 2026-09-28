@@ -52,6 +52,11 @@
   line-height:1.28;
   letter-spacing:-.008em;
 }
+.topic-article .article-body > h5{
+  font-size:1.05rem;
+  margin-top:1.5rem;
+  margin-bottom:1.33em;
+}
 .topic-article .article-body > :is(h2,h3,h4,h5){
   overflow-wrap:anywhere;
 }
