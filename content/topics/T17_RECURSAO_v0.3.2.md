@@ -2794,7 +2794,7 @@ def countdown(n: int) -> None:
 
 # 38. Laboratórios
 
-### Critério mínimo de conclusão dos LABs
+## Critério mínimo de conclusão dos LABs
 
 Um LAB é considerado concluído quando o estudante registra, de forma reproduzível:
 
@@ -3008,7 +3008,7 @@ Objetivo:
 34. Como depurar recursão infinita?
 35. Quando escolher iteração mesmo que recursão seja possível?
 
-### Exercícios de diagnóstico e decisão
+## Exercícios de diagnóstico e decisão
 
 36. Dada uma função com caso-base correto, mas chamada recursiva que mantém o mesmo estado, identifique o defeito e proponha a menor correção que garanta progresso.
 37. Rastreie uma função recursiva de soma até o caso-base e indique, para cada nível, **profundidade máxima**, operação pendente e ordem de retorno.

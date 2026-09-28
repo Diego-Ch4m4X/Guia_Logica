@@ -42,7 +42,7 @@ function sectionSlice(html, startId, endId) {
 
 function firstHeadingToPanel(segment) {
   if (/^<h1/.test(segment)) {
-    return segment.replace(/^<h1([^>]*)>/, '<h2 class="chapter-title"$1>').replace(/<\/h1>/, '</h2>');
+    return segment.replace(/^<h1([^>]*)>/, '<h2$1>').replace(/<\/h1>/, '</h2>');
   }
   return segment;
 }
@@ -405,6 +405,7 @@ function wrapLabsGeneric(html, topicId) {
 }
 
 export function enhanceTopicHtmlGeneric(html, topicId) {
+  if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
   let out = wrapLabsGeneric(html, topicId);
   const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
   out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
@@ -423,11 +424,15 @@ function topLevelSection(source, headingPattern) {
   return { start, end, text: source.slice(start, end), heading: m[0] };
 }
 
-export function publicationSlicesGeneric(body) {
+export function publicationSlicesGeneric(body, topicId = '') {
+  if (topicId === 'T25') {
+    const legacy = publicationSlices(body);
+    return { ...legacy, referencesSource: '' };
+  }
   const normalized = String(body).replace(/\r\n?/g, '\n');
   const glossary = topLevelSection(normalized, '\\d+\\. Glossário');
   const references = topLevelSection(normalized, '\\d+\\. Referências');
-  if (!glossary || !references) return { core: normalized, glossarySource: '', referencesSource: '' };
+  if (!glossary || !references) return { core: normalized, glossarySource: '', referencesSource: '', postGlossary: '' };
   let core = normalized.slice(0, glossary.start);
   const refNum = references.heading.match(/^# (\d+)\./)?.[1];
   if (refNum) {
@@ -444,10 +449,11 @@ export function publicationSlicesGeneric(body) {
     if (refNum && n === Number(refNum) && /\]\(#referências\)/.test(line)) return true;
     return false;
   }).join('\n');
-  return { core, glossarySource: glossary.text, referencesSource: references.text };
+  return { core, glossarySource: glossary.text, referencesSource: references.text, postGlossary: '' };
 }
 
 export function renderGlossaryGeneric(glossarySource, topicId) {
+  if (topicId === 'T25') return renderGlossary(glossarySource, topicId);
   const number = glossarySource.match(/^# (\d+)\. Glossário\s*$/m)?.[1] || '';
   const rows = glossarySource.split('\n').filter(line => /^\|/.test(line)).slice(2);
   const entries = rows.map(splitTableRow).filter(x => x.length >= 2);
@@ -477,6 +483,7 @@ export function renderGlossaryGeneric(glossarySource, topicId) {
 }
 
 export function renderReferencesGeneric(referenceSource, fullBody, topicId = '') {
+  if (topicId === 'T25') return renderReferences(fullBody);
   const number = referenceSource.match(/^# (\d+)\. Referências\s*$/m)?.[1] || '';
   const sectionRe = new RegExp(`^## ${number}\\.(\\d+)\\s+(.+?)\\s*$([\\s\\S]*?)(?=^## ${number}\\.|\\Z)`, 'gm');
   const sections = [];

@@ -555,7 +555,7 @@ fica para T23.
 
 Esta seção funciona como **caderno rápido de consulta**, **modelo mental** e **contrato de cobertura** do T18. O objetivo é permitir recuperar em poucos segundos **que tipo de falha ocorreu, como a linguagem a sinaliza, quem deve tratá-la e qual resposta preserva o contrato**.
 
-### Mapa do domínio
+## Mapa do domínio
 
 ```text
 ERROS, EXCEÇÕES E TRATAMENTO DE FALHAS
@@ -612,7 +612,7 @@ ERROS, EXCEÇÕES E TRATAMENTO DE FALHAS
     └── Bash → exit/return status / condicionais / `trap`; diagnóstico opcional em stderr
 ```
 
-### Fluxo essencial — da falha à decisão
+## Fluxo essencial — da falha à decisão
 
 ```mermaid
 flowchart TD
@@ -658,7 +658,7 @@ COMUNICAR COM SEGURANÇA
 VALIDAR O CONTRATO
 ```
 
-### Consulta rápida — categoria, mecanismo e primeira ação
+## Consulta rápida — categoria, mecanismo e primeira ação
 
 | Situação | Categoria inicial | Mecanismo típico | Primeira ação útil |
 |---|---|---|---|
@@ -673,7 +673,7 @@ VALIDAR O CONTRATO
 | mensagem externa revela stack/versão/segredo | segurança | erro não sanitizado | separar mensagem externa de diagnóstico interno |
 | lote NetDev tem sucessos e falhas parciais | resultado composto | exception/status por item + resumo | preservar resultado por alvo; não declarar sucesso global falso |
 
-### Pergunta prática → mecanismo / seção
+## Pergunta prática → mecanismo / seção
 
 | Pergunta | Onde olhar primeiro |
 |---|---|
@@ -690,7 +690,7 @@ VALIDAR O CONTRATO
 | “Como investigar um handler que não funciona?” | `TS-T18-*` |
 | “Como aplicar isso em automação de rede?” | § 45 + `PR-T18-10` |
 
-### Não confundir
+## Não confundir
 
 ```text
 ERRO LÓGICO
@@ -740,7 +740,7 @@ EXIT STATUS NÃO ZERO
 
 Status de processo é um contrato próprio. `set -e` e `trap ERR` não transformam o shell em Python/Java/JavaScript.
 
-### Microexemplos canônicos
+## Microexemplos canônicos
 
 **1. Erro lógico sem exception:**
 
@@ -767,7 +767,7 @@ if ! cp -- "$source" "$destination"; then
 fi
 ```
 
-### Problemas reais representativos
+## Problemas reais representativos
 
 Os problemas abaixo têm rastreabilidade formal no índice `PR-T18-*`:
 
@@ -782,7 +782,7 @@ Os problemas abaixo têm rastreabilidade formal no índice `PR-T18-*`:
 - `PR-T18-09` — transferir o mesmo contrato de falha entre Python, JavaScript, Java e Bash;
 - `PR-T18-10` — executar lote NetDev com falhas parciais, resultado por alvo e sem vazamento de credenciais.
 
-### Entrada rápida de troubleshooting
+## Entrada rápida de troubleshooting
 
 | Sintoma | Primeira hipótese útil | Primeira verificação |
 |---|---|---|
@@ -795,7 +795,7 @@ Os problemas abaixo têm rastreabilidade formal no índice `PR-T18-*`:
 | retry aumenta carga e demora | falha permanente ou sem limite | contar tentativas, intervalo e classe de falha |
 | lote mostra “sucesso” com dispositivos falhos | agregação perdeu estados individuais | auditar resultado por alvo e status final |
 
-### Transferência entre Python, JavaScript, Java e Bash
+## Transferência entre Python, JavaScript, Java e Bash
 
 | Dimensão | Python | JavaScript | Java | Bash |
 |---|---|---|---|---|
@@ -808,7 +808,7 @@ Os problemas abaixo têm rastreabilidade formal no índice `PR-T18-*`:
 | risco de captura ampla | esconder bugs e sinais de controle | valor lançado pode nem ser `Error` | capturar `Throwable`/`Exception` sem política adequada | ignorar status / `|| true` |
 | principal pergunta | “quem sabe recuperar?” | “qual abrupt completion/valor foi lançado?” | “checked ou unchecked; quem declara/trata?” | “qual status e em que contexto ele é consumido?” |
 
-### Rota de consulta × rota de estudo
+## Rota de consulta × rota de estudo
 
 **Consulta rápida:**
 
@@ -1517,7 +1517,7 @@ Isso é parte essencial do tratamento:
 
 Exemplos didáticos:
 
-### Python
+## Python
 
 ```python
 items = ["a", "b"]
@@ -1526,7 +1526,7 @@ print(items[5])
 
 → `IndexError`.
 
-### JavaScript
+## JavaScript
 
 ```javascript
 const items = ["a", "b"];
@@ -1546,7 +1546,7 @@ console.log(item.name);
 
 → `TypeError`.
 
-### Java
+## Java
 
 ```java
 var items = new int[] {10, 20};
@@ -1555,7 +1555,7 @@ System.out.println(items[5]);
 
 → exceção de índice em runtime.
 
-### Bash
+## Bash
 
 Bash não possui o mesmo modelo de acesso a objetos/arrays das outras três linguagens.
 
@@ -2990,7 +2990,7 @@ Outro antipadrão é tentar “pré-checar tudo” e acreditar que isso elimina 
 
 Um **swallowed error** ocorre quando a falha é interceptada e desaparece sem política coerente.
 
-### Python
+## Python
 
 ```python
 try:
@@ -2999,7 +2999,7 @@ except Exception:
     pass
 ```
 
-### JavaScript
+## JavaScript
 
 ```javascript
 try {
@@ -3009,7 +3009,7 @@ try {
 }
 ```
 
-### Java
+## Java
 
 ```java
 try {
@@ -3019,7 +3019,7 @@ try {
 }
 ```
 
-### Bash
+## Bash
 
 ```bash
 synchronize || true
@@ -3076,7 +3076,7 @@ A regra melhor é:
 
 > **respeite o contrato e o idiomatismo da linguagem/API; não force exceções onde um resultado normal expressa melhor a condição.**
 
-### Exceção, sentinel, valor opcional e status são escolhas de contrato
+## Exceção, sentinel, valor opcional e status são escolhas de contrato
 
 A literatura consultada na File Library converge em um ponto útil: **detectar uma condição inválida não determina sozinho como ela deve ser comunicada ao chamador**.
 

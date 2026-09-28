@@ -34,6 +34,34 @@ function findRawTagsOutsideFences(body) {
   return tags;
 }
 
+function findHeadingJumps(body) {
+  const jumps = [];
+  const lines = body.replace(/\r\n?/g, '\n').split('\n');
+  let inFence = false;
+  let fenceChar = '';
+  let fenceLen = 0;
+  let previous = null;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const fm = lines[i].match(/^\s{0,3}(`{3,}|~{3,})/);
+    if (fm) {
+      if (!inFence) { inFence = true; fenceChar = fm[1][0]; fenceLen = fm[1].length; }
+      else if (fm[1][0] === fenceChar && fm[1].length >= fenceLen) inFence = false;
+      continue;
+    }
+    if (inFence) continue;
+
+    const hm = lines[i].match(/^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if (!hm) continue;
+    const current = { level:hm[1].length, line:i + 1, text:hm[2].trim() };
+    if (previous && current.level > previous.level + 1) {
+      jumps.push({ previous, current });
+    }
+    previous = current;
+  }
+  return jumps;
+}
+
 async function main() {
   const names = (await fs.readdir(contentDir)).filter(n => n.endsWith('.md')).sort();
   const ids = [];
@@ -43,6 +71,7 @@ async function main() {
   const errors = [];
   let unsupported = 0;
   let nfcErrors = 0;
+  let headingErrors = 0;
 
   for (const name of names) {
     const source = await fs.readFile(path.join(contentDir, name), 'utf8');
@@ -65,6 +94,12 @@ async function main() {
     const raw = findRawTagsOutsideFences(body);
     unsupported += raw.length;
     for (const item of raw) errors.push(`${name}:${item.line}: unsupported raw HTML ${item.raw}`);
+
+    const headingJumps = findHeadingJumps(body);
+    headingErrors += headingJumps.length;
+    for (const item of headingJumps) {
+      errors.push(`${name}:${item.current.line}: heading jumps h${item.previous.level} -> h${item.current.level} after line ${item.previous.line}`);
+    }
   }
 
   const expected = Array.from({ length: 35 }, (_, i) => `T${String(i + 1).padStart(2, '0')}`);
@@ -88,6 +123,7 @@ async function main() {
   console.log('metadata errors: 0');
   console.log(`unsupported constructs: ${unsupported}`);
   console.log(`unicode normalization errors: ${nfcErrors}`);
+  console.log(`heading hierarchy errors: ${headingErrors}`);
 }
 
 main().catch(error => { console.error(`PREFLIGHT: FAIL\n${error.stack || error}`); process.exitCode = 1; });

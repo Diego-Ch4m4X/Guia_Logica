@@ -5,10 +5,6 @@ import { projectRoot, contentDir, templateDir, assetDir, distDir, dataDir } from
 import { parseDocument, topicIdFromFilename } from './lib/metadata.js';
 import { renderMarkdown } from './lib/markdown.js';
 import {
-  publicationSlices,
-  enhanceTopicHtml,
-  renderGlossary,
-  renderReferences,
   headingsFromHtml,
   publicationSlicesGeneric,
   enhanceTopicHtmlGeneric,
@@ -123,28 +119,22 @@ function searchEntriesForTopic(topic, html, sourceHeadingText) {
   return entries;
 }
 
-function genericTopicContent(topic) {
-  const slices = publicationSlicesGeneric(topic.sourceBody);
-  const core = renderMarkdown(slices.core, { topicId:topic.id, canonicalAliases:topic.number !== 24, normalizeHeadingJumps:topic.number !== 24 });
+function topicContent(topic) {
+  const slices = publicationSlicesGeneric(topic.sourceBody, topic.id);
+  const core = renderMarkdown(slices.core, {
+    topicId:topic.id,
+    canonicalAliases:topic.number !== 24 && topic.number !== 25,
+    normalizeHeadingJumps:topic.number !== 24,
+  });
   let html = enhanceTopicHtmlGeneric(core.html, topic.id);
   html += renderGlossaryGeneric(slices.glossarySource, topic.id);
+  if (slices.postGlossary) html += renderMarkdown(slices.postGlossary).html;
   html += renderReferencesGeneric(slices.referencesSource, topic.sourceBody, topic.id);
   return { html, sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
 }
 
-function goldenT25Content(topic) {
-  const slices = publicationSlices(topic.sourceBody);
-  const core = renderMarkdown(slices.core);
-  const post = renderMarkdown(slices.postGlossary);
-  let html = enhanceTopicHtml(core.html, topic.id);
-  html += renderGlossary(slices.glossarySource, topic.id);
-  html += post.html;
-  html += renderReferences(topic.sourceBody);
-  return { html, sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
-}
-
 async function renderTopic(topic, topics, base, topicTpl) {
-  const built = topic.number === 25 ? goldenT25Content(topic) : genericTopicContent(topic);
+  const built = topicContent(topic);
   const renderedHeadings = headingsFromHtml(built.html);
   const guideHeadings = renderedHeadings.map(h => ({ ...h, text:built.sourceHeadingText.get(h.id) || h.text }));
   const guide = buildGuide(guideHeadings);

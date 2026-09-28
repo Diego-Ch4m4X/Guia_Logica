@@ -359,7 +359,7 @@ T21 — aplicar isso também em I/O e persistência básica
 T24 — separar testes empíricos de argumentos de correção algorítmica
 ```
 
-### 1.1 O que T20 ensina
+## 1.1 O que T20 ensina
 
 T20 ensina a responder:
 
@@ -371,7 +371,7 @@ T20 ensina a responder:
 - como repetir testes sem depender de inspeção manual?;
 - como preservar uma correção contra regressões futuras?
 
-### 1.2 O que T20 deliberadamente não tenta esgotar
+## 1.2 O que T20 deliberadamente não tenta esgotar
 
 Este tópico **não transforma fundamentos em curso completo de QA**. Ficam para camadas posteriores, quando fizer sentido:
 
@@ -715,7 +715,7 @@ OBSERVAÇÃO
 COMPARAÇÃO COM EXPECTATIVA
 ```
 
-### 3.1 Arrange — Act — Assert como organização
+## 3.1 Arrange — Act — Assert como organização
 
 Uma convenção comum é organizar um teste em três fases:
 
@@ -740,7 +740,7 @@ act:     fee = calculate_fee(total)
 assert:  fee == 1500
 ```
 
-### 3.2 O teste precisa conseguir falhar
+## 3.2 O teste precisa conseguir falhar
 
 Este “teste” não verifica nada:
 
@@ -768,7 +768,7 @@ já transforma divergência em falha observável — com a ressalva importante d
 
 Testes são evidência empírica sobre execuções concretas.
 
-### 4.1 O que uma passagem demonstra
+## 4.1 O que uma passagem demonstra
 
 Se um teste foi bem construído e passou, podemos afirmar algo como:
 
@@ -776,7 +776,7 @@ Se um teste foi bem construído e passou, podemos afirmar algo como:
 
 Isso é útil e operacionalmente forte.
 
-### 4.2 O que uma passagem não demonstra
+## 4.2 O que uma passagem não demonstra
 
 Uma passagem isolada não demonstra automaticamente que:
 
@@ -790,7 +790,7 @@ Uma passagem isolada não demonstra automaticamente que:
 
 Bjarne Stroustrup separa explicitamente testing de uma prova geral de correção: testes executam casos selecionados e comparam os resultados ao esperado, mas não oferecem uma resposta universal para “encontramos todos os erros?”. Essa fronteira será retomada em T24.
 
-### 4.3 Um teste pode estar errado
+## 4.3 Um teste pode estar errado
 
 Existem pelo menos três fontes de defeito:
 
@@ -812,7 +812,7 @@ Por isso, uma falha deve ser investigada; não corrigida automaticamente alteran
 
 Resultado esperado é a descrição verificável do comportamento correto **antes** de olhar para a execução do caso.
 
-### 5.1 De onde vem o esperado
+## 5.1 De onde vem o esperado
 
 A expectativa pode vir de:
 
@@ -843,7 +843,7 @@ EXECUÇÃO
 EXPECTATIVA INVENTADA PARA CABER NO RESULTADO
 ```
 
-### 5.2 Resultado esperado não é apenas valor de retorno
+## 5.2 Resultado esperado não é apenas valor de retorno
 
 Uma expectativa pode ser:
 
@@ -860,7 +860,7 @@ Uma expectativa pode ser:
 
 Efeitos de I/O serão aprofundados em T21; aqui interessa apenas entender que “resultado” é mais amplo que `return`.
 
-### 5.3 O problema do oracle circular
+## 5.3 O problema do oracle circular
 
 Um erro comum é calcular o esperado usando a mesma lógica que está sendo testada:
 
@@ -880,7 +880,7 @@ actual = calculate_fee(5_000)
 assert actual == expected
 ```
 
-### 5.4 Esperado deve ser específico na medida certa
+## 5.4 Esperado deve ser específico na medida certa
 
 Teste frágil:
 
@@ -897,7 +897,7 @@ quando o contrato exige apenas:
 
 Não congele detalhes não contratados sem necessidade. O teste deve proteger **comportamento relevante**, não toda coincidência acidental da implementação.
 
-### 5.5 Quando o oracle independente não é óbvio
+## 5.5 Quando o oracle independente não é óbvio
 
 Nem todo comportamento possui uma resposta simples que possa ser calculada manualmente. Ainda assim, não derive o esperado chamando novamente a própria implementação sob teste. Dependendo do contrato, fontes independentes de evidência podem incluir:
 
@@ -919,7 +919,7 @@ Um oracle não precisa ser isolado de toda dependência externa; precisa ser **i
 
 Para comparar as quatro linguagens sem mudar o problema, este tópico usa um contrato sintético simples.
 
-### 6.1 Regra de frete
+## 6.1 Regra de frete
 
 ```text
 Entrada:
@@ -944,11 +944,11 @@ calculate_shipping_fee(order_total_cents)
 
 Esse contrato é **didático**. Não representa preço ou política de empresa real.
 
-### 6.2 Por que centavos inteiros
+## 6.2 Por que centavos inteiros
 
 Usar inteiro neste exemplo evita misturar T20 com detalhes de representação de ponto flutuante. O assunto testado é **seleção de casos e verificação**, não arredondamento monetário.
 
-### 6.3 Guardrail — comparação aproximada
+## 6.3 Guardrail — comparação aproximada
 
 Não generalize a igualdade exata deste exemplo para toda computação numérica. Valores de ponto flutuante podem representar aproximações; quando o contrato admite tolerância, o teste deve explicitar essa tolerância em vez de exigir igualdade bit a bit por hábito. Em Python, por exemplo, `math.isclose()` materializa esse tipo de comparação. O critério correto continua vindo do **contrato**, não de uma tolerância arbitrária.
 
@@ -982,7 +982,7 @@ REGISTRO DA EXECUÇÃO
 
 Antes da execução, o observado ainda não existe; depois da execução, ele completa a evidência do caso. T20 mantém os dois no mesmo nó curricular porque o objetivo é comparar **esperado × observado**, mas não os trata como se fossem produzidos no mesmo momento.
 
-### 7.1 Registro mínimo
+## 7.1 Registro mínimo
 
 | Caso | Entrada | Esperado | Observado | Resultado |
 |---|---:|---:|---:|---|
@@ -991,7 +991,7 @@ Antes da execução, o observado ainda não existe; depois da execução, ele co
 
 A segunda linha não diz por que falhou. Ela só registra a divergência.
 
-### 7.2 Caso de teste também precisa de contexto quando necessário
+## 7.2 Caso de teste também precisa de contexto quando necessário
 
 Para comportamentos com estado, um caso pode precisar registrar:
 
@@ -1005,7 +1005,7 @@ Para comportamentos com estado, um caso pode precisar registrar:
 
 Mas não transforme todo teste trivial em burocracia documental. O detalhamento deve ser suficiente para tornar o caso compreensível e reproduzível.
 
-### 7.3 Esperado e observado não devem ser misturados
+## 7.3 Esperado e observado não devem ser misturados
 
 Ruim:
 
@@ -1044,7 +1044,7 @@ A regra de frete permite construir uma matriz que revela mais que um “exemplo 
 
 > **Nota:** nesta matriz, “positivo” descreve um caminho de comportamento/sucesso esperado; não o sinal matemático da entrada. A entrada `-1` é **inválida** pelo contrato e exercita um caminho de rejeição esperado.
 
-### 8.1 Por que `9999`, `10000` e `10001` são importantes
+## 8.1 Por que `9999`, `10000` e `10001` são importantes
 
 A regra muda exatamente em `10000`.
 
@@ -1078,7 +1078,7 @@ um caso normal como `25000` não encontra o defeito. O caso da fronteira encontr
 
 As classes do GUIA são perspectivas úteis para escolher entradas. Elas **não formam categorias mutuamente exclusivas**.
 
-### 9.1 Normal
+## 9.1 Normal
 
 Caso representativo do uso ordinário e válido.
 
@@ -1088,7 +1088,7 @@ Exemplo:
 5000 → 1500
 ```
 
-### 9.2 Positivo
+## 9.2 Positivo
 
 Caso em que a condição/ação esperada ocorre com sucesso.
 
@@ -1102,7 +1102,7 @@ shipping_fee(5000) → 1500
 
 “Positivo” não quer dizer necessariamente “número positivo”. É **semântico**.
 
-### 9.3 Negativo
+## 9.3 Negativo
 
 Caso que verifica ausência, rejeição ou resultado falso esperado.
 
@@ -1113,7 +1113,7 @@ contains_route(routes, missing_route) → false
 
 Uma entrada negativa pode ser totalmente válida.
 
-### 9.4 Limite
+## 9.4 Limite
 
 Caso no ponto de transição ou imediatamente próximo de um limite relevante.
 
@@ -1136,7 +1136,7 @@ máximo + 1
 
 Nem todos fazem sentido em todo domínio.
 
-### 9.5 Inválido
+## 9.5 Inválido
 
 Caso que viola uma pré-condição ou formato aceito.
 
@@ -1146,7 +1146,7 @@ Caso que viola uma pré-condição ou formato aceito.
 
 O objetivo é verificar a **resposta definida para entrada inválida**, não tratar qualquer comportamento acidental como aceitável.
 
-### 9.6 As classes podem se sobrepor
+## 9.6 As classes podem se sobrepor
 
 `0` pode ser simultaneamente:
 
@@ -1158,7 +1158,7 @@ limite inferior
 
 Por isso, não use as classes como caixas rígidas; use-as como perguntas de cobertura mental.
 
-### 9.7 “Classes de teste” neste T20 não significa “classes de equivalência”
+## 9.7 “Classes de teste” neste T20 não significa “classes de equivalência”
 
 Neste tópico, **classes de teste** é o nome curricular das perspectivas `normal`, `positivo`, `negativo`, `limite` e `inválido`. Não significa classe de código de framework, tipo de teste como unitário/integração, nem automaticamente uma **classe de equivalência** formal.
 
@@ -1172,7 +1172,7 @@ Neste tópico, **classes de teste** é o nome curricular das perspectivas `norma
 
 Essa distinção evita muitos testes confusos.
 
-### 10.1 Negativo válido
+## 10.1 Negativo válido
 
 Contrato:
 
@@ -1183,7 +1183,7 @@ is_allowed_vlan(250) → false
 
 Se a política sintética permite apenas `100..200`, `250` pode ser um identificador numericamente bem formado, mas **não permitido pela política**.
 
-### 10.2 Inválido
+## 10.2 Inválido
 
 Se a função exige inteiro e recebe uma estrutura incompatível, temos violação do contrato de entrada.
 
@@ -1197,7 +1197,7 @@ INVÁLIDO
 = entrada viola o contrato aceito
 ```
 
-### 10.3 Não fabrique equivalência entre linguagens
+## 10.3 Não fabrique equivalência entre linguagens
 
 Python, JavaScript, Java e Bash diferem em:
 
@@ -1210,7 +1210,7 @@ Python, JavaScript, Java e Bash diferem em:
 
 O teste deve seguir o contrato **da implementação real**, não forçar a mesma sintaxe de falha nas quatro linguagens.
 
-### 10.4 Nota terminológica sobre “teste negativo”
+## 10.4 Nota terminológica sobre “teste negativo”
 
 Neste T20, **teste negativo** significa um caso que espera ausência, rejeição ou condição falsa segundo o contrato, podendo usar uma entrada perfeitamente válida. Outras literaturas e equipes podem empregar *negative testing* de forma mais ampla, inclusive para entradas inválidas ou condições de erro.
 
@@ -1224,7 +1224,7 @@ Ao consultar outras fontes, preserve a distinção conceitual e confira a defini
 
 Farrell destaca que escolher dados de teste exige cuidado: um conjunto que contém apenas casos semelhantes pode esconder defeitos. Stroustrup reforça a seleção sistemática de entradas corretas e incorretas e sugere explorar zero, negativos, valores muito pequenos, muito grandes e entradas deliberadamente estranhas quando o domínio permitir.
 
-### 11.1 Perguntas práticas
+## 11.1 Perguntas práticas
 
 Para uma regra qualquer, pergunte:
 
@@ -1241,7 +1241,7 @@ qual caso vazio faz sentido?
 há estado anterior relevante?
 ```
 
-### 11.2 Não multiplique casos sem propósito
+## 11.2 Não multiplique casos sem propósito
 
 Testar `5001`, `5002`, `5003`, `5004` pode adicionar pouco se todos percorrem exatamente a mesma regra.
 
@@ -1257,7 +1257,7 @@ Isso prepara a ideia posterior de particionamento/equivalência, sem transformar
 
 Um teste não precisa esperar sucesso. Muitas vezes o comportamento correto é **falhar da maneira especificada**.
 
-### 12.1 Exemplo conceitual
+## 12.1 Exemplo conceitual
 
 Entrada:
 
@@ -1278,7 +1278,7 @@ A forma concreta pode ser:
 - exceção em Java;
 - status não zero em Bash.
 
-### 12.2 O tipo de falha também faz parte do contrato
+## 12.2 O tipo de falha também faz parte do contrato
 
 Teste fraco:
 
@@ -1321,7 +1321,7 @@ se condição é falsa:
     falhar explicitamente
 ```
 
-### 13.1 Assertion de teste
+## 13.1 Assertion de teste
 
 Em um teste, a assertion liga:
 
@@ -1337,7 +1337,7 @@ Exemplo conceitual:
 assert_equal(actual_fee, 1500)
 ```
 
-### 13.2 Assertion interna ao programa
+## 13.2 Assertion interna ao programa
 
 Uma assertion também pode expressar uma condição que o programador acredita que deveria ser sempre verdadeira em determinado ponto:
 
@@ -1347,7 +1347,7 @@ assert balance_cents >= 0
 
 Esse uso está relacionado a invariantes e depuração. A semântica concreta depende da linguagem.
 
-### 13.3 Assertion não é validação de entrada não confiável
+## 13.3 Assertion não é validação de entrada não confiável
 
 Considere um endpoint que recebe um valor enviado por cliente externo.
 
@@ -1377,7 +1377,7 @@ explicita hipótese/invariante ou expectativa de teste
 
 Python possui uma instrução `assert` na própria linguagem e também frameworks/APIs de teste.
 
-### 14.1 `assert` da linguagem
+## 14.1 `assert` da linguagem
 
 ```python
 order_total_cents = 5_000
@@ -1394,7 +1394,7 @@ Portanto:
 
 > **não use `assert` como validação obrigatória de produção, autorização, checagem de segurança ou regra que precisa executar sempre.**
 
-### 14.2 Assertion de framework
+## 14.2 Assertion de framework
 
 O `unittest` oferece métodos próprios, por exemplo:
 
@@ -1406,7 +1406,7 @@ self.assertRaises(ValueError, function, argument)
 
 Esses métodos são chamadas normais do framework; não são a instrução `assert` removível por `-O`.
 
-### 14.3 Exemplo completo
+## 14.3 Exemplo completo
 
 ```python
 import unittest
@@ -1467,7 +1467,7 @@ node:assert/strict
 node:test
 ```
 
-### 15.1 Assertion no Node.js
+## 15.1 Assertion no Node.js
 
 ```javascript
 import assert from 'node:assert/strict';
@@ -1480,7 +1480,7 @@ assert.strictEqual(actual, expected);
 
 Se a comparação falhar, o módulo gera `AssertionError`.
 
-### 15.2 Exemplo com test runner nativo
+## 15.2 Exemplo com test runner nativo
 
 ```javascript
 import assert from 'node:assert/strict';
@@ -1510,7 +1510,7 @@ test('negative total is rejected', () => {
 });
 ```
 
-### 15.3 Não generalize Node para todo JavaScript
+## 15.3 Não generalize Node para todo JavaScript
 
 Este código:
 
@@ -1541,7 +1541,7 @@ browser/projeto → ferramenta e ambiente escolhidos
 
 Java possui a instrução `assert`, mas ela pode estar habilitada ou desabilitada.
 
-### 16.1 Forma básica
+## 16.1 Forma básica
 
 ```java
 int feeCents = 1500;
@@ -1556,7 +1556,7 @@ assert feeCents == 1500 : "unexpected fee";
 
 Segundo a Java Language Specification, se a assertion estiver desabilitada, sua execução **não tem efeito**. Quando habilitada e a expressão for falsa, ocorre `AssertionError`.
 
-### 16.2 Assertions normalmente são habilitadas explicitamente
+## 16.2 Assertions normalmente são habilitadas explicitamente
 
 Exemplo de execução:
 
@@ -1566,7 +1566,7 @@ java -ea MyProgram
 
 O launcher Java documenta `-ea` / `-enableassertions` para habilitá-las.
 
-### 16.3 Não dependa de `assert` para contrato público
+## 16.3 Não dependa de `assert` para contrato público
 
 A própria JLS alerta que assertions não devem ser usadas para validar argumentos de métodos públicos quando essa validação precisa existir independentemente de assertions estarem habilitadas.
 
@@ -1585,7 +1585,7 @@ assert removed;
 
 se essa realmente for uma invariável interna apropriada.
 
-### 16.4 Harness mínimo sem framework externo
+## 16.4 Harness mínimo sem framework externo
 
 Como frameworks específicos pertencem a aprofundamento posterior, é útil compreender um harness mínimo:
 
@@ -1637,7 +1637,7 @@ Bash exige uma distinção de vocabulário importante:
 
 Ele avalia uma expressão condicional e retorna status.
 
-### 17.1 Verdade em termos de status
+## 17.1 Verdade em termos de status
 
 No modelo do shell:
 
@@ -1656,7 +1656,7 @@ if [[ 10 -gt 5 ]]; then
 fi
 ```
 
-### 17.2 Helper de assertion didático
+## 17.2 Helper de assertion didático
 
 ```bash
 assert_equals() {
@@ -1681,7 +1681,7 @@ fee_cents=1500
 assert_equals 1500 "$fee_cents" 'shipping fee'
 ```
 
-### 17.3 Não use `set -e` como substituto de test runner
+## 17.3 Não use `set -e` como substituto de test runner
 
 `errexit` possui regras contextuais próprias. Para um harness didático, é melhor registrar falhas explicitamente do que presumir:
 
@@ -1711,7 +1711,7 @@ O teste precisa saber:
 | Verdade de comando | N/A | N/A | N/A | status `0` é sucesso |
 | Cuidado central | não usar `assert` como validação obrigatória | Node API ≠ ECMAScript | `assert` não deve carregar efeito essencial | `test` builtin ≠ software test framework |
 
-### 18.1 O conceito compartilhado
+## 18.1 O conceito compartilhado
 
 Apesar das diferenças:
 
@@ -1736,7 +1736,7 @@ A sintaxe muda. A disciplina mental não.
 
 Automatizar um teste significa, **neste T20**, tornar sua execução e sua avaliação repetíveis por máquina. Essa é uma definição operacional para o núcleo curricular; em engenharia de testes existem graus e arranjos de automação mais amplos, inclusive fluxos parcialmente automatizados.
 
-### 19.1 Propriedades fundamentais nesta etapa
+## 19.1 Propriedades fundamentais nesta etapa
 
 O GUIA exige:
 
@@ -1747,7 +1747,7 @@ ISOLAMENTO
 
 Frameworks específicos serão aprofundados depois.
 
-### 19.2 Execução repetível
+## 19.2 Execução repetível
 
 Um teste automatizado útil deve poder ser executado novamente:
 
@@ -1761,7 +1761,7 @@ em outro ciclo de mudança
 
 sem reconstruir manualmente a expectativa a cada vez.
 
-### 19.3 Comparação automática
+## 19.3 Comparação automática
 
 Ruim:
 
@@ -1780,7 +1780,7 @@ assertions avaliam
 runner reporta PASS/FAIL
 ```
 
-### 19.4 Automação não elimina julgamento humano
+## 19.4 Automação não elimina julgamento humano
 
 Alguém ainda precisa decidir:
 
@@ -1790,7 +1790,7 @@ Alguém ainda precisa decidir:
 - se o teste está acoplado demais à implementação;
 - se uma mudança no requisito exige mudar o teste.
 
-### 19.5 PASS, FAIL, ERROR e SKIP não são sinônimos
+## 19.5 PASS, FAIL, ERROR e SKIP não são sinônimos
 
 Runners diferentes usam vocabulários próprios, mas uma distinção operacional útil é:
 
@@ -1813,7 +1813,7 @@ O estado editorial `NOT_RUN` usado no QA deste documento também não é sinôni
 
 Um teste isolado reduz dependências não relacionadas ao comportamento que pretende verificar.
 
-### 20.1 Estado compartilhado cria testes dependentes de ordem
+## 20.1 Estado compartilhado cria testes dependentes de ordem
 
 Imagine:
 
@@ -1835,7 +1835,7 @@ B → PASS
 B sozinho → FAIL
 ```
 
-### 20.2 Prefira preparar o próprio estado necessário
+## 20.2 Prefira preparar o próprio estado necessário
 
 ```text
 Teste B:
@@ -1845,7 +1845,7 @@ Teste B:
 4. limpa recurso, quando necessário
 ```
 
-### 20.3 Isolamento não significa “nenhuma dependência”
+## 20.3 Isolamento não significa “nenhuma dependência”
 
 Todo teste executa sobre alguma infraestrutura:
 
@@ -1868,7 +1868,7 @@ Isolar significa **controlar e tornar explícito o que é relevante**, não fing
 
 Um teste pode ser automatizado e ainda ser instável.
 
-### 21.1 Fontes comuns
+## 21.1 Fontes comuns
 
 ```text
 relógio atual
@@ -1883,7 +1883,7 @@ concorrência
 serviço terceiro
 ```
 
-### 21.2 Exemplo com aleatoriedade
+## 21.2 Exemplo com aleatoriedade
 
 Fraco:
 
@@ -1902,7 +1902,7 @@ Uma estratégia melhor depende do contrato:
 - usar seed quando isso realmente torna a sequência contratualmente reproduzível;
 - separar algoritmo determinístico da origem aleatória.
 
-### 21.3 Testes não devem depender da Internet sem necessidade
+## 21.3 Testes não devem depender da Internet sem necessidade
 
 Para fundamentos, use dados sintéticos e dependências locais. Um teste que chama serviço real pode falhar por:
 
@@ -1958,7 +1958,7 @@ Execução:
 python -m unittest -v test_shipping_fee.py
 ```
 
-### 22.1 O que interessa pedagogicamente
+## 22.1 O que interessa pedagogicamente
 
 ```text
 cada método
@@ -2021,7 +2021,7 @@ Execução:
 node --test shipping-fee.test.mjs
 ```
 
-### 23.1 O runner interpreta throw como falha
+## 23.1 O runner interpreta throw como falha
 
 No `node:test`, uma função de teste síncrona que lança exceção falha; uma que termina normalmente passa.
 
@@ -2073,7 +2073,7 @@ public class ShippingFeeTest {
 }
 ```
 
-### 24.1 Por que não usar apenas `assert` da linguagem aqui
+## 24.1 Por que não usar apenas `assert` da linguagem aqui
 
 Porque o objetivo do harness é executar as verificações sempre que ele for chamado. A instrução Java `assert` pode estar desabilitada.
 
@@ -2151,7 +2151,7 @@ fi
 printf '%s\n' 'PASS'
 ```
 
-### 25.1 Particularidade importante
+## 25.1 Particularidade importante
 
 No harness acima, o padrão:
 
@@ -2182,7 +2182,7 @@ T23 aprofundará o modelo de processos/streams/status. Aqui basta não confundi-
 
 Automação só traz valor se o sinal produzido pela suíte for confiável.
 
-### 26.1 Falso positivo de confiança
+## 26.1 Falso positivo de confiança
 
 Se o teste sempre passa, mesmo quando a implementação é quebrada, ele não protege o contrato.
 
@@ -2196,7 +2196,7 @@ def test_fee() -> None:
 
 A comparação é tautológica.
 
-### 26.2 Testar o próprio teste
+## 26.2 Testar o próprio teste
 
 Uma técnica simples ao criar um teste importante:
 
@@ -2206,7 +2206,7 @@ Uma técnica simples ao criar um teste importante:
 
 Isso não é uma disciplina completa de mutation testing. É apenas uma verificação prática de que a assertion possui poder de detecção.
 
-### 26.3 Mensagem de falha deve ajudar
+## 26.3 Mensagem de falha deve ajudar
 
 Compare:
 
@@ -2235,7 +2235,7 @@ A segunda saída reduz o custo de iniciar a investigação no T19.
 
 Regressão é a quebra de algo que antes funcionava ou o retorno de um defeito anteriormente corrigido.
 
-### 27.1 Fluxo mínimo após encontrar um bug
+## 27.1 Fluxo mínimo após encontrar um bug
 
 ```text
 BUG OBSERVADO
@@ -2253,7 +2253,7 @@ SUÍTE DE REGRESSÃO PASSA
 CASO É MANTIDO PARA O FUTURO
 ```
 
-### 27.2 O teste deve demonstrar o defeito anterior
+## 27.2 O teste deve demonstrar o defeito anterior
 
 Se possível, antes da correção:
 
@@ -2273,7 +2273,7 @@ versão corrigida
 
 Isso é muito mais forte do que escrever o teste apenas depois e presumir que ele teria capturado o defeito.
 
-### 27.3 Regressão não é apenas “rodar de novo”
+## 27.3 Regressão não é apenas “rodar de novo”
 
 Reteste:
 
@@ -2292,7 +2292,7 @@ corrigi C04
 
 Ambos importam.
 
-### 27.4 Regressão também sustenta mudanças internas
+## 27.4 Regressão também sustenta mudanças internas
 
 Uma suíte de regressão não serve apenas para reencontrar bugs antigos. Ela também fornece evidência repetível de que uma refatoração ou reorganização interna preservou os comportamentos protegidos pelo contrato.
 
@@ -2316,7 +2316,7 @@ def calculate_shipping_fee(order_total_cents: int) -> int:
 
 O operador está errado: `>` em vez de `>=`.
 
-### 28.1 Caso de regressão
+## 28.1 Caso de regressão
 
 No mesmo estilo de `unittest` usado como ferramenta didática em §22:
 
@@ -2349,7 +2349,7 @@ return 0 if order_total_cents >= 10_000 else 1_500
 PASS
 ```
 
-### 28.2 Por que manter o teste
+## 28.2 Por que manter o teste
 
 Sem o caso de `10000`, uma refatoração futura pode reintroduzir exatamente o erro de fronteira.
 
@@ -2376,7 +2376,7 @@ REFACTOR
 melhorar estrutura preservando os testes
 ```
 
-### 29.1 Relação com T20
+## 29.1 Relação com T20
 
 TDD é uma estratégia de desenvolvimento orientada por testes. T20 exige algo mais fundamental:
 
@@ -2390,7 +2390,7 @@ saber preservar regressões
 
 Você pode dominar T20 sem adotar TDD como método obrigatório.
 
-### 29.2 Lição útil de regressão
+## 29.2 Lição útil de regressão
 
 No exemplo de Nöteberg, quando uma regex é modificada para satisfazer um novo caso, os casos anteriores continuam sendo executados. Essa é a essência operacional da regressão:
 
@@ -2408,7 +2408,7 @@ comportamento anterior preservado
 
 T09 trata validação. T20 testa se essa validação realmente cumpre o contrato.
 
-### 30.1 Exemplo
+## 30.1 Exemplo
 
 Contrato:
 
@@ -2427,7 +2427,7 @@ Casos:
 | `-1` | inválido | rejeitar |
 | `131` | inválido | rejeitar |
 
-### 30.2 O teste não substitui a validação
+## 30.2 O teste não substitui a validação
 
 ```text
 VALIDAÇÃO
@@ -2445,7 +2445,7 @@ verifica que a validação se comporta conforme esperado
 
 T18 define como programas sinalizam e tratam falhas. T20 verifica esses contratos.
 
-### 31.1 Caminho de sucesso não basta
+## 31.1 Caminho de sucesso não basta
 
 Se uma função pode:
 
@@ -2457,7 +2457,7 @@ sinalizar entrada inválida
 
 precisamos testar ambos.
 
-### 31.2 Falha esperada é PASS
+## 31.2 Falha esperada é PASS
 
 Um caso de entrada inválida que produz exatamente a falha especificada **passou**.
 
@@ -2493,7 +2493,7 @@ Se o erro era esperado e foi corretamente verificado, o teste passa.
 
 O T19 fornece o processo de investigação; T20 fornece casos repetíveis.
 
-### 32.1 Um bom bug report pode virar teste
+## 32.1 Um bom bug report pode virar teste
 
 Entrada conhecida:
 
@@ -2515,7 +2515,7 @@ Observado no incidente:
 
 Isso já contém a semente de um teste de regressão.
 
-### 32.2 Não depure alterando o teste para ficar verde
+## 32.2 Não depure alterando o teste para ficar verde
 
 Ao encontrar:
 
@@ -2556,13 +2556,13 @@ ARGUMENTO DE CORREÇÃO
 → explica por que uma estratégia deve funcionar sob condições declaradas
 ```
 
-### 33.1 Muitos testes ainda são finitos
+## 33.1 Muitos testes ainda são finitos
 
 Mesmo um milhão de casos é um conjunto finito de execuções.
 
 Isso pode ser excelente evidência de engenharia, mas não transforma automaticamente a suíte em prova formal para todo domínio infinito ou muito grande.
 
-### 33.2 Testes ajudam a falsificar hipóteses
+## 33.2 Testes ajudam a falsificar hipóteses
 
 Se o contrato diz:
 
@@ -2580,7 +2580,7 @@ Esse poder de encontrar contraexemplo é uma das razões pelas quais testes de l
 
 # 34. Anti-padrões
 
-### 34.1 Só testar o caminho feliz
+## 34.1 Só testar o caminho feliz
 
 ```text
 entrada comum
@@ -2590,7 +2590,7 @@ entrada comum
 
 Faltam limites, negativos e inválidos.
 
-### 34.2 Escrever esperado a partir do observado
+## 34.2 Escrever esperado a partir do observado
 
 ```text
 actual = 73
@@ -2599,7 +2599,7 @@ expected = 73 porque foi isso que saiu
 
 Sem oracle independente, o teste pode canonizar um bug.
 
-### 34.3 Assertion tautológica
+## 34.3 Assertion tautológica
 
 ```javascript
 assert.strictEqual(actual, actual);
@@ -2607,13 +2607,13 @@ assert.strictEqual(actual, actual);
 
 Não verifica contrato.
 
-### 34.4 Um teste gigantesco para muitas regras
+## 34.4 Um teste gigantesco para muitas regras
 
 Quando falha, é difícil identificar qual expectativa foi violada.
 
 Prefira casos com intenção clara e escopo compreensível.
 
-### 34.5 Testes dependentes de ordem
+## 34.5 Testes dependentes de ordem
 
 ```text
 B só passa se A executar antes
@@ -2621,7 +2621,7 @@ B só passa se A executar antes
 
 Isso cria falsos diagnósticos e fragilidade.
 
-### 34.6 Teste que modifica produção real
+## 34.6 Teste que modifica produção real
 
 Evite, em fundamentos:
 
@@ -2635,7 +2635,7 @@ Evite, em fundamentos:
 
 Use dados e ambientes sintéticos.
 
-### 34.7 `sleep` como sincronização universal
+## 34.7 `sleep` como sincronização universal
 
 ```text
 sleep 5
@@ -2643,7 +2643,7 @@ sleep 5
 
 não prova que uma condição ficou pronta; apenas espera tempo. Estratégias robustas de sincronização ficam para camadas posteriores, mas o princípio já deve ser conhecido.
 
-### 34.8 Confiar apenas em cobertura percentual
+## 34.8 Confiar apenas em cobertura percentual
 
 Cobertura pode indicar **quais caminhos foram executados**, mas não prova que as assertions verificaram o contrato correto. Uma linha pode estar coberta por um teste tautológico e continuar sem proteção semântica. Use cobertura como sinal de caminhos possivelmente não exercitados, não como sinônimo isolado de qualidade. Métricas serão aprofundadas depois.
 
@@ -2665,7 +2665,7 @@ Um bom caso tende a ser:
 | Diagnóstico | quando falha, sei qual expectativa divergiu? |
 | Relevante | protege contrato real, não detalhe acidental? |
 
-### 35.1 Nome do teste como documentação
+## 35.1 Nome do teste como documentação
 
 Ruim:
 
@@ -2695,7 +2695,7 @@ Estado mutável cria uma pergunta adicional:
 
 > **qual era o estado antes e qual deve ser o estado depois?**
 
-### 36.1 Exemplo conceitual
+## 36.1 Exemplo conceitual
 
 ```text
 saldo inicial: 10000
@@ -2716,7 +2716,7 @@ ASSERT
 saldo == 8500
 ```
 
-### 36.2 Verifique ausência de mudança quando necessário
+## 36.2 Verifique ausência de mudança quando necessário
 
 Se saque inválido deve ser rejeitado sem alterar saldo:
 
@@ -2738,7 +2738,7 @@ Uma assertion apenas sobre a exceção pode perder uma corrupção de estado.
 
 Ao testar coleções, pergunte se **ordem faz parte do contrato**.
 
-### 37.1 Ordem contratada
+## 37.1 Ordem contratada
 
 ```text
 sort_values(...)
@@ -2746,7 +2746,7 @@ sort_values(...)
 
 A ordem é essencial.
 
-### 37.2 Ordem não contratada
+## 37.2 Ordem não contratada
 
 Se o contrato diz apenas “retornar os identificadores encontrados”, exigir uma ordem interna acidental pode tornar o teste frágil.
 
@@ -2777,7 +2777,7 @@ ausência de chave
 status 0 em Bash
 ```
 
-### 38.1 Atenção especial ao Bash
+## 38.1 Atenção especial ao Bash
 
 Em Bash:
 
@@ -2797,7 +2797,7 @@ Esse contraste torna especialmente perigoso transportar intuições de booleanos
 
 # 39. Testes de exceções e mensagens
 
-### 39.1 Prefira testar o contrato mais estável
+## 39.1 Prefira testar o contrato mais estável
 
 Se o contrato é:
 
@@ -2818,7 +2818,7 @@ que exigir texto completo:
 "Error 23 at line 91: order total -1 is invalid!!!!"
 ```
 
-### 39.2 Quando a mensagem importa
+## 39.2 Quando a mensagem importa
 
 Mensagem faz parte do contrato quando é:
 
@@ -2844,7 +2844,7 @@ exit status
 arquivos alterados
 ```
 
-### 40.1 Não confunda conteúdo e status
+## 40.1 Não confunda conteúdo e status
 
 Um comando pode:
 
@@ -2862,7 +2862,7 @@ status 2
 
 Testar apenas stdout pode perder a semântica de sucesso/falha.
 
-### 40.2 Fronteira com T23
+## 40.2 Fronteira com T23
 
 T23 explicará em profundidade processos, stdin/stdout/stderr, pipes e exit codes. T20 usa somente o necessário para construir expectativas observáveis em Bash.
 
@@ -2884,7 +2884,7 @@ Função conceitual:
 is_allowed_vlan(vlan_id)
 ```
 
-### 41.1 Casos
+## 41.1 Casos
 
 | VLAN | Classe | Esperado |
 |---:|---|---|
@@ -2896,7 +2896,7 @@ is_allowed_vlan(vlan_id)
 | `99` | negativo/política | não permitido |
 | `201` | negativo/política | não permitido |
 
-### 41.2 Python
+## 41.2 Python
 
 ```python
 def is_allowed_vlan(vlan_id: int) -> bool:
@@ -2909,7 +2909,7 @@ assert not is_allowed_vlan(99)
 assert not is_allowed_vlan(201)
 ```
 
-### 41.3 JavaScript
+## 41.3 JavaScript
 
 ```javascript
 function isAllowedVlan(vlanId) {
@@ -2917,7 +2917,7 @@ function isAllowedVlan(vlanId) {
 }
 ```
 
-### 41.4 Java
+## 41.4 Java
 
 ```java
 static boolean isAllowedVlan(int vlanId) {
@@ -2925,7 +2925,7 @@ static boolean isAllowedVlan(int vlanId) {
 }
 ```
 
-### 41.5 Bash
+## 41.5 Bash
 
 ```bash
 is_allowed_vlan() {
@@ -3805,41 +3805,41 @@ Os exercícios desta seção são **abertos**: o objetivo é justificar a expect
 
 Você domina T20 no nível esperado quando consegue, sem decorar framework:
 
-### 44.1 Resultado esperado
+## 44.1 Resultado esperado
 
 - derivar expectativa de um contrato;
 - escrevê-la antes de observar a execução;
 - distinguir comportamento relevante de detalhe acidental;
 - identificar oracle circular.
 
-### 44.2 Casos
+## 44.2 Casos
 
 - registrar entrada, esperado e observado;
 - escolher mais de um caso quando um exemplo isolado é insuficiente;
 - incluir cenários de erro quando fazem parte do contrato.
 
-### 44.3 Classes
+## 44.3 Classes
 
 - explicar normal, positivo, negativo, limite e inválido;
 - reconhecer sobreposição entre classes;
 - não confundir negativo com inválido;
 - escolher casos imediatamente ao redor de transições.
 
-### 44.4 Assertions
+## 44.4 Assertions
 
 - explicar condição esperada e falha explícita;
 - separar assertion de validação;
 - reconhecer semântica específica de Python e Java;
 - não fabricar palavra-chave `assert` para ECMAScript ou Bash.
 
-### 44.5 Automação
+## 44.5 Automação
 
 - transformar inspeção manual em comparação repetível;
 - isolar estado mínimo;
 - reconhecer fontes de não determinismo;
 - executar exemplos básicos nas quatro linguagens conforme seus modelos reais.
 
-### 44.6 Regressão
+## 44.6 Regressão
 
 - escrever caso que falha antes da correção;
 - fazer o mesmo caso passar após a correção;
@@ -3937,7 +3937,7 @@ Use como checklist final:
 | **20.5 Testes automatizados** | repetibilidade, isolamento, determinismo e runners/harnesses introdutórios | coberto |
 | **20.6 Regressão** | bug → teste vermelho → correção → verde → suíte e preservação | coberto |
 
-### 47.1 Fronteiras preservadas
+## 47.1 Fronteiras preservadas
 
 - depuração aprofundada permanece em T19;
 - I/O e persistência permanecem em T21;
@@ -3945,7 +3945,7 @@ Use como checklist final:
 - argumentos de correção algorítmica permanecem em T24;
 - frameworks e estratégias avançadas de testes foram apenas introduzidos quando necessários para demonstrar automação.
 
-### 47.2 Linguagens canônicas
+## 47.2 Linguagens canônicas
 
 - Python: coberta;
 - JavaScript / ECMAScript + Node.js quando API de host é necessária: coberta;
@@ -3960,7 +3960,7 @@ Use como checklist final:
 
 Na versão `0.1.0`, a auditoria bibliográfica então exigida pelo Prompt Mestre v1.6.0 foi executada **antes do fechamento daquela iteração**. A revisão `0.2.0` também registrou sua própria passagem bibliográfica. A **R3 / v0.3.0** reabriu materialmente as fontes locais listadas em [48.4](#484-fontes-locais-reabertas-nesta-r3-v030). As R4 e R5 **não renomeiam retroativamente essa proveniência**: preservam o marcador da rodada em que a fonte foi realmente reaberta e revalidam apenas as afirmações alteradas, versionáveis ou afetadas pela revisão corrente.
 
-### 48.1 Fontes locais registradas nas revisões anteriores
+## 48.1 Fontes locais registradas nas revisões anteriores
 
 | Fonte local | Contribuição material para T20 |
 |---|---|
@@ -3971,7 +3971,7 @@ Na versão `0.1.0`, a auditoria bibliográfica então exigida pelo Prompt Mestre
 | Luciano Ramalho — *Fluent Python*, 2ª ed., 2022 | doctest como exemplo executável, explicitação de comportamento antes da implementação e uso pedagógico de testes automatizados |
 | GNU Bash Reference Manual 5.3, 2025 | semântica normativa local de exit status, `test`, `[`, `[[` e condicionais do shell |
 
-### 48.2 Fontes encontradas, mas não usadas para inflar a bibliografia
+## 48.2 Fontes encontradas, mas não usadas para inflar a bibliografia
 
 A busca também retornou obras com menções genéricas ou antigas a testes. Elas não foram adicionadas automaticamente porque fontes mais atuais/específicas já cobriam o mesmo papel.
 
@@ -3985,7 +3985,7 @@ CONSULTADO COMO FONTE MATERIAL
 OBRIGAÇÃO DE CITAR
 ```
 
-### 48.3 Papel dos livros versus documentação oficial
+## 48.3 Papel dos livros versus documentação oficial
 
 ```text
 LIVROS
@@ -4009,7 +4009,7 @@ Essa separação foi estabelecida/revalidada materialmente na R3 e **preservada 
 ---
 
 
-### 48.4 Fontes locais reabertas nesta R3 (v0.3.0)
+## 48.4 Fontes locais reabertas nesta R3 (v0.3.0)
 
 A R3 reabriu fontes locais para não herdar automaticamente a proveniência da revisão anterior. A File Library permite localizar obra e conteúdo, mas **não expõe os bytes brutos dos PDFs ao processo**, portanto SHA-256 dos PDFs locais permanece `NOT_AVAILABLE` nesta interface.
 
@@ -4025,7 +4025,7 @@ A R3 reabriu fontes locais para não herdar automaticamente a proveniência da r
 
 Luciano Ramalho permanece na bibliografia histórica do tópico, mas não é apresentado como **reaberto nesta R3** quando a busca corrente não forneceu um trecho novo necessário ao fechamento.
 
-### 48.5 Síntese multifonte aplicada na R3 (v0.3.0)
+## 48.5 Síntese multifonte aplicada na R3 (v0.3.0)
 
 A síntese foi reconciliada por capacidade, não por autoridade agregada:
 
@@ -4054,7 +4054,7 @@ DOCUMENTAÇÃO OFICIAL ATUAL
 
 Não foi encontrada contradição material que exigisse escalada de fontes. Diferenças de linguagem continuam explícitas em vez de fundidas artificialmente.
 
-### 48.6 Herança explícita de evidência — R4 e R5
+## 48.6 Herança explícita de evidência — R4 e R5
 
 ```text
 R3-REABERTA
