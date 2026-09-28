@@ -22,7 +22,7 @@
 {{FOOTER}}
 {{PAGE_TEMPLATES}}
 <button aria-label="Voltar ao topo" class="back-top" id="backTop" title="Voltar ao topo" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="m6 14 6-6 6 6"></path></svg></button>
-{{SEARCH_DIALOG}}
+<dialog aria-labelledby="searchTitle" class="search-dialog" id="searchDialog"><span class="sr-only" id="searchTitle">Busca na coleção</span><div class="search-box"><label class="sr-only" for="searchInput">Buscar na coleção</label><input autocomplete="off" id="searchInput" placeholder="Buscar tópico ou seção…" type="search"><button aria-label="Fechar busca" class="icon-btn" id="closeSearch" type="button">×</button></div><div id="searchResults"><p class="search-group-label">Busca na coleção</p><p class="search-empty">Digite para buscar nas páginas disponíveis.</p></div></dialog>
 <div aria-live="polite" class="sr-only" id="announcer"></div>
 {{PAGE_SCRIPTS}}
 </body>

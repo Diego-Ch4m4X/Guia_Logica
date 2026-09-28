@@ -22,7 +22,6 @@ test('release metadata is synchronized', async () => {
   const distPkg = await readJson('dist/data/package.json');
   const nodeVersion = (await readFile(path.join(ROOT, '.node-version'), 'utf8')).trim();
 
-  assert.equal(pkg.version, '1.2.0');
   assert.equal(lock.version, pkg.version);
   assert.equal(lock.packages[''].version, pkg.version);
   assert.equal(distPkg.version, pkg.version);

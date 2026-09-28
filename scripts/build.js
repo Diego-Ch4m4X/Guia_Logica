@@ -16,8 +16,9 @@ import { buildGuide, buildToc, buildDrawer } from './lib/navigation.js';
 import { applyTemplate, extractSlot, escapeHtml } from './lib/html.js';
 import { renderHomeSeoHead, renderTopicSeoHead, renderSitemap } from './lib/seo.js';
 import { renderHomeTopicGrid } from './lib/home.js';
+import { projectVersion } from './lib/config.js';
 
-const ASSET_VERSION = '1.2.0';
+const ASSET_VERSION = projectVersion();
 const HOME_TITLE = 'Lógica, Fundamentos, Algoritmos e Estruturas de Dados';
 const HOME_DESCRIPTION = 'Coleção técnica de 35 tópicos sobre lógica, fundamentos, algoritmos e estruturas de dados.';
 
@@ -30,7 +31,10 @@ async function copyDir(src, dest) {
     const from = path.join(src, entry.name);
     const to = path.join(dest, entry.name);
     if (entry.isDirectory()) await copyDir(from, to);
-    else await fs.copyFile(from, to);
+    else if (path.dirname(from) === path.join(assetDir, 'js') && entry.name.endsWith('.js')) {
+      const source = await read(from);
+      await write(to, source.replaceAll('__ASSET_VERSION__', ASSET_VERSION));
+    } else await fs.copyFile(from, to);
   }
 }
 
@@ -67,10 +71,18 @@ function related(topic, topics) {
   return `<h2 id="related-title">Continue explorando</h2><div class="related-grid">${card('Anterior',prev)}${card('Próximo',next)}</div>`;
 }
 
-async function renderPage(base, pageTemplate, pageValues, baseValues) {
+async function renderPage(base, pageTemplate, pageValues, baseValues, partials) {
+  const suffix = pageValues.TOPIC_ID_LOWER || 'home';
+  const values = {
+    ...pageValues,
+    BRAND_MARK_HEADER:applyTemplate(partials.brandMark, { LOGO_MASK_ID:`filomatia-logo-header-${suffix}` }),
+    BRAND_MARK_FOOTER:applyTemplate(partials.brandMark, { LOGO_MASK_ID:`filomatia-logo-footer-${suffix}` }),
+    SEARCH_THEME_ACTIONS:partials.searchThemeActions,
+    FOOTER_SOCIAL_LINKS:partials.socialLinks,
+  };
   const slots = {};
-  for (const slot of ['HEAD_STYLES','HEADER','MAIN','FOOTER','PAGE_TEMPLATES','SEARCH_DIALOG','PAGE_SCRIPTS']) {
-    slots[slot] = applyTemplate(extractSlot(pageTemplate, slot), pageValues);
+  for (const slot of ['HEAD_STYLES','HEADER','MAIN','FOOTER','PAGE_TEMPLATES','PAGE_SCRIPTS']) {
+    slots[slot] = applyTemplate(extractSlot(pageTemplate, slot), values);
   }
   return applyTemplate(base, { ...baseValues, ...slots });
 }
@@ -134,7 +146,7 @@ function topicContent(topic) {
   return { html:offsetTopicHeadings(html), sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
 }
 
-async function renderTopic(topic, topics, base, topicTpl) {
+async function renderTopic(topic, topics, base, topicTpl, partials) {
   const built = topicContent(topic);
   const renderedHeadings = headingsFromHtml(built.html);
   const guideHeadings = renderedHeadings.map(h => ({ ...h, text:built.sourceHeadingText.get(h.id) || h.text }));
@@ -159,7 +171,7 @@ async function renderTopic(topic, topics, base, topicTpl) {
   const html = await renderPage(base, topicTpl, values, {
     LANG:'pt-BR', META_DESCRIPTION:topic.description, SITE_ROOT:'../../',
     PAGE_TITLE:`${topic.id} — ${topic.title}`, SEO_HEAD:renderTopicSeoHead(topic), ASSET_VERSION, BODY_CLASS:'topic-page',
-  });
+  }, partials);
   await write(topicPath(topic), html);
   return { html, sourceHeadingText:built.sourceHeadingText };
 }
@@ -188,6 +200,11 @@ async function main() {
   const base = await read(path.join(templateDir, 'base.html'));
   const homeTpl = await read(path.join(templateDir, 'home.html'));
   const topicTpl = await read(path.join(templateDir, 'topic.html'));
+  const partials = {
+    brandMark:await read(path.join(templateDir, 'partials', 'brand-mark.html')),
+    searchThemeActions:await read(path.join(templateDir, 'partials', 'search-theme-actions.html')),
+    socialLinks:await read(path.join(templateDir, 'partials', 'social-links.html')),
+  };
 
   const homeValues = {
     SITE_ROOT:'./', ASSET_VERSION,
@@ -198,12 +215,12 @@ async function main() {
   const homeHtml = await renderPage(base, homeTpl, homeValues, {
     LANG:'pt-BR', META_DESCRIPTION:HOME_DESCRIPTION,
     SITE_ROOT:'./', PAGE_TITLE:HOME_TITLE, SEO_HEAD:renderHomeSeoHead({ title:HOME_TITLE, description:HOME_DESCRIPTION }), ASSET_VERSION, BODY_CLASS:'home-page',
-  });
+  }, partials);
   await write(path.join(distDir,'index.html'), homeHtml);
 
   const rendered = new Map();
   for (const topic of topics) {
-    rendered.set(topic.id, await renderTopic(topic, topics, base, topicTpl));
+    rendered.set(topic.id, await renderTopic(topic, topics, base, topicTpl, partials));
   }
 
   const topicsJson = topics.map(({ sourceBody, id, ...t }) => ({ ...t, url:`topicos/${id.toLowerCase()}/` }));
