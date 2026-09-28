@@ -80,7 +80,7 @@ async function main() {
   if (!Array.isArray(search) || !search.length) errors.push('search index empty');
   const expectedVersion = projectVersion();
   if (pkg.version !== expectedVersion) errors.push('data/package.json version mismatch');
-  const versionRef = /\?v=([0-9A-Za-z.-]+)/g;
+  const versionRef = /\?v=([^&#"'`\s]+)/g;
   const versionMismatches = [];
   for (const rel of ['index.html', ...Array.from({length:35}, (_,i) => `topicos/t${String(i+1).padStart(2,'0')}/index.html`)]) {
     const html = await fs.readFile(path.join(distDir, rel), 'utf8');

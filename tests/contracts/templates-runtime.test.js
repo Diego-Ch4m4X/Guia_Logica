@@ -8,6 +8,13 @@ import { projectVersion } from '../../scripts/lib/config.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (relative) => readFile(path.join(root, relative), 'utf8');
 
+async function cacheVersionParser() {
+  const source = await read('scripts/validate.js');
+  const declaration = source.match(/const versionRef = \/(.+)\/g;/);
+  assert.ok(declaration, 'validator must declare its cache query parser');
+  return new RegExp(declaration[1], 'g');
+}
+
 async function filesUnder(relative) {
   const result = [];
   for (const entry of await readdir(path.join(root, relative), { withFileTypes:true })) {
@@ -33,6 +40,7 @@ test('package version is the only operational release literal', async () => {
 
 test('project JavaScript sources use version tokens and published JavaScript resolves them', async () => {
   const version = projectVersion();
+  const versionRef = await cacheVersionParser();
   let tokenized = 0;
   for (const file of (await filesUnder('src/assets/js')).filter(name => name.endsWith('.js'))) {
     const source = await read(file);
@@ -41,11 +49,32 @@ test('project JavaScript sources use version tokens and published JavaScript res
     assert.ok(!source.includes(`?v=${version}`), file);
     assert.ok(!published.includes('__ASSET_VERSION__'), file);
     assert.equal(published, source.replaceAll('__ASSET_VERSION__', version), file);
-    for (const match of published.matchAll(/\?v=([0-9A-Za-z.-]+)/g)) {
+    for (const match of published.matchAll(versionRef)) {
       assert.equal(match[1], version, file);
     }
   }
   assert.ok(tokenized > 0, 'at least one project import must be tokenized');
+});
+
+test('only projectVersion validates SemVer and consumers preserve build metadata', async () => {
+  const config = await read('scripts/lib/config.js');
+  const validate = await read('scripts/validate.js');
+  const workflow = await read('.github/workflows/pages.yml');
+  const grammar = config.match(/!\/(.+)\/\.test\(pkg\.version\)/);
+  assert.ok(grammar, 'projectVersion must own the release grammar');
+  const canonicalFormat = new RegExp(grammar[1]);
+  const cacheRef = await cacheVersionParser();
+  for (const version of ['1.2.3+build.5', '1.2.3-rc.1+build.5']) {
+    assert.ok(canonicalFormat.test(version), `${version} must be accepted by projectVersion grammar`);
+    const references = [...`app.js?v=${version}&next=1`.matchAll(cacheRef)].map(match => match[1]);
+    assert.deepEqual(references, [version], `${version} must be captured and compared in full`);
+    assert.equal(references[0], version);
+  }
+  assert.ok(validate.includes('const expectedVersion = projectVersion();'));
+  assert.doesNotMatch(validate, /\\d\+\\\.\\d\+/);
+  assert.match(workflow, /test -n "\$published_version"/);
+  assert.doesNotMatch(workflow, /\$published_version"\s*=~/);
+  assert.match(workflow, /grep -Fq "\?v=\$\{published_version\}"/);
 });
 
 test('search dialog has one template source and appears once per published page', async () => {
