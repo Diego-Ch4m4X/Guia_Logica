@@ -6,6 +6,10 @@ import { fileURLToPath } from 'node:url';
 
 import { renderMarkdown, splitTableRow } from '../../scripts/lib/markdown.js';
 import {
+  classifyLabPartHeading,
+  normalizeSemanticHeading,
+  parseExerciseRootHeading,
+  parseLabHeading,
   renderGlossary,
   renderGlossaryGeneric,
   renderReferences,
@@ -13,6 +17,74 @@ import {
 } from '../../scripts/lib/components.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+test('semantic heading normalization preserves display text while exposing editorial prefixes', () => {
+  assert.deepEqual(
+    normalizeSemanticHeading('40. 🧪 Laboratório 1 — Requisito → operações → estrutura'),
+    {
+      original:'40. 🧪 Laboratório 1 — Requisito → operações → estrutura',
+      sectionPrefix:'40.',
+      semantic:'Laboratório 1 — Requisito → operações → estrutura',
+      hasLabEmoji:true,
+    },
+  );
+  assert.deepEqual(
+    normalizeSemanticHeading('40.9 Variação / transferência'),
+    {
+      original:'40.9 Variação / transferência',
+      sectionPrefix:'40.9',
+      semantic:'Variação / transferência',
+      hasLabEmoji:false,
+    },
+  );
+});
+
+test('LAB heading parser accepts corpus variants without depending on topic or section number', () => {
+  const cases = [
+    ['🧪 LAB 1 — contador', 1, 'contador'],
+    ['36. 🧪 LAB 2 — Rastrear busca linear', 2, 'Rastrear busca linear'],
+    ['30. LAB 3 — Visualizar crescimento', 3, 'Visualizar crescimento'],
+    ['40. 🧪 Laboratório 4 — Requisito → operações', 4, 'Requisito → operações'],
+  ];
+  for (const [source, activityIndex, title] of cases) {
+    const parsed = parseLabHeading(source);
+    assert.ok(parsed, source);
+    assert.equal(parsed.kind, 'lab');
+    assert.equal(parsed.activityIndex, activityIndex);
+    assert.equal(parsed.title, title);
+  }
+  assert.equal(parseLabHeading('PARTE VI — LABs, exercícios e critérios de domínio'), null);
+  assert.equal(parseLabHeading('40. LAB 1 - separador ASCII não contratado'), null);
+});
+
+test('exercise root parser accepts numbered and qualified roots but rejects chapter prose', () => {
+  assert.equal(parseExerciseRootHeading('20. Exercícios')?.qualifier, '');
+  assert.equal(parseExerciseRootHeading('44. Exercícios fundamentais')?.qualifier, 'fundamentais');
+  assert.equal(
+    parseExerciseRootHeading('45. Exercícios de transferência entre linguagens')?.qualifier,
+    'de transferência entre linguagens',
+  );
+  assert.equal(parseExerciseRootHeading('PARTE VI — LABs, exercícios e critérios de domínio'), null);
+});
+
+test('LAB part classifier normalizes only aliases proven by the corpus', () => {
+  const cases = [
+    ['Objetivo', 'objective'],
+    ['Testes / autoverificação', 'tests'],
+    ['40.7 Testes', 'tests'],
+    ['Transferência', 'transfer'],
+    ['Variação / transferência', 'transfer'],
+    ['Limpeza, quando aplicável', 'cleanup'],
+    ['40.10 Limpeza', 'cleanup'],
+    ['Critérios de aceite', 'criteria'],
+    ['Evidência', 'evidence'],
+  ];
+  for (const [source, expected] of cases) {
+    assert.equal(classifyLabPartHeading(source), expected, source);
+  }
+  assert.equal(classifyLabPartHeading('Parte A'), null);
+  assert.equal(classifyLabPartHeading('Registre'), null);
+});
 
 test('table rows preserve escaped pipes and pipes inside code spans', () => {
   assert.deepEqual(
