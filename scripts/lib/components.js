@@ -1,6 +1,6 @@
 import { escapeAttribute, escapeHtml } from './html.js';
 import { portableBaseSlug } from './slug.js';
-import { renderInline } from './markdown.js';
+import { renderInline, splitTableRow } from './markdown.js';
 
 const LAB_ICONS = {
   objective:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1.2"></circle></svg></span>',
@@ -231,7 +231,7 @@ export function publicationSlices(body) {
 
 export function renderGlossary(glossarySource, topicId='T25') {
   const rows = glossarySource.split('\n').filter(line => /^\|/.test(line)).slice(2);
-  const entries = rows.map(line => line.trim().replace(/^\||\|$/g,'').split('|').map(x=>x.trim())).filter(x=>x.length>=2);
+  const entries = rows.map(splitTableRow).filter(x=>x.length>=2);
   const groups = [];
   const map = new Map();
   for (const [term, definition] of entries) {
@@ -257,17 +257,56 @@ function listItems(source) {
   return source.split('\n').map(x=>x.match(/^\s*-\s+(.+)$/)?.[1]).filter(Boolean);
 }
 
+function trimReferenceUrl(value) {
+  let url = String(value);
+  while (/[.,;:]$/.test(url)) url = url.slice(0, -1);
+  while (url.endsWith(')')) {
+    const opens = (url.match(/\(/g) || []).length;
+    const closes = (url.match(/\)/g) || []).length;
+    if (closes <= opens) break;
+    url = url.slice(0, -1);
+  }
+  return url;
+}
+
+function cleanReferenceLabel(value) {
+  return String(value).replace(/[\s:;,.]+$/g, '').trim();
+}
+
+function referenceTarget(item) {
+  const text = String(item).trim();
+
+  const autolink = text.match(/<((?:https?):\/\/[^>\s]+)>/);
+  if (autolink) {
+    const label = cleanReferenceLabel(text.replace(autolink[0], ''));
+    return { url:autolink[1], label:label || autolink[1] };
+  }
+
+  const markdown = text.match(/\[([^\]]+)\]\(((?:https?):\/\/[^\s)]+)(?:\s+"[^"]*")?\)/);
+  if (markdown) {
+    const label = cleanReferenceLabel(text.replace(markdown[0], markdown[1]));
+    return { url:markdown[2], label:label || markdown[1] };
+  }
+
+  const bare = text.match(/(?:^|\s)(https?:\/\/[^\s<>]+)/);
+  if (bare) {
+    const url = trimReferenceUrl(bare[1]);
+    const label = cleanReferenceLabel(text.replace(bare[1], ''));
+    return { url, label:label || url };
+  }
+
+  return null;
+}
+
 function referenceCard(item, kind, domainLabel='') {
-  const m = item.match(/^(.*?):\s*<((?:https?):\/\/[^>]+)>\s*$/);
-  if (!m) {
+  const target = referenceTarget(item);
+  if (!target) {
     const cleaned = item.replace(/ disponível na File Library\.?$/, '.');
     return `<div class="reference-card no-link"><span class="reference-kind">${kind}</span><span class="reference-title">${renderInline(cleaned)}</span><span class="reference-domain">${domainLabel || 'Referência bibliográfica'}</span></div>`;
   }
-  const label = m[1] + ':';
-  const url = m[2];
   let domain = '';
-  try { domain = new URL(url).hostname; } catch { domain = domainLabel; }
-  return `<div class="reference-card"><span class="reference-kind">${kind}</span><a class="reference-title" href="${escapeAttribute(url)}" rel="noopener noreferrer" target="_blank">${renderInline(label)}</a><span class="reference-domain">${escapeHtml(domain)}</span></div>`;
+  try { domain = new URL(target.url).hostname; } catch { domain = domainLabel; }
+  return `<div class="reference-card"><span class="reference-kind">${kind}</span><a class="reference-title" href="${escapeAttribute(target.url)}" rel="noopener noreferrer" target="_blank">${renderInline(target.label)}</a><span class="reference-domain">${escapeHtml(domain)}</span></div>`;
 }
 
 export function renderReferences(body) {
@@ -411,7 +450,7 @@ export function publicationSlicesGeneric(body) {
 export function renderGlossaryGeneric(glossarySource, topicId) {
   const number = glossarySource.match(/^# (\d+)\. Glossário\s*$/m)?.[1] || '';
   const rows = glossarySource.split('\n').filter(line => /^\|/.test(line)).slice(2);
-  const entries = rows.map(line => line.trim().replace(/^\||\|$/g,'').split('|').map(x => x.trim())).filter(x => x.length >= 2);
+  const entries = rows.map(splitTableRow).filter(x => x.length >= 2);
   const groups = [];
   const map = new Map();
   for (const [term, definition] of entries) {
