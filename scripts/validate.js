@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { distDir } from './lib/paths.js';
+import { projectVersion } from './lib/config.js';
 
 async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
 function idsFrom(html) { return [...html.matchAll(/\sid=["']([^"']+)["']/g)].map(m => m[1]); }
@@ -77,8 +78,8 @@ async function main() {
     if (topics.find(x => x.number === n)?.url !== expectedUrl) errors.push(`T${String(n).padStart(2,'0')} url mismatch`);
   }
   if (!Array.isArray(search) || !search.length) errors.push('search index empty');
-  if (pkg.version !== '1.2.0') errors.push('data/package.json version mismatch');
-  const expectedVersion = '1.2.0';
+  const expectedVersion = projectVersion();
+  if (pkg.version !== expectedVersion) errors.push('data/package.json version mismatch');
   const versionRef = /\?v=([0-9A-Za-z.-]+)/g;
   const versionMismatches = [];
   for (const rel of ['index.html', ...Array.from({length:35}, (_,i) => `topicos/t${String(i+1).padStart(2,'0')}/index.html`)]) {
@@ -88,6 +89,7 @@ async function main() {
   for (const name of await fs.readdir(path.join(distDir, 'assets/js'))) {
     if (!name.endsWith('.js')) continue;
     const js = await fs.readFile(path.join(distDir, 'assets/js', name), 'utf8');
+    if (js.includes('__ASSET_VERSION__')) errors.push(`assets/js/${name}: unresolved version token`);
     for (const match of js.matchAll(versionRef)) if (match[1] !== expectedVersion) versionMismatches.push(`assets/js/${name}:${match[1]}`);
   }
   if (versionMismatches.length) errors.push(`cache-buster mismatch: ${versionMismatches.slice(0,10).join(', ')}`);
