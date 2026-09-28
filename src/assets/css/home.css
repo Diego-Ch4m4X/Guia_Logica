@@ -18,7 +18,7 @@
 .home-nav-panel svg{width:19px;height:19px;fill:none;stroke:var(--fil-brand);stroke-linecap:round;stroke-linejoin:round;stroke-width:1.7}
 
 .home-hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(360px,.82fr);gap:clamp(38px,6vw,92px);align-items:center;min-height:min(720px,calc(100vh - var(--fil-header-height)));padding:clamp(64px,9vw,128px) 0 84px;border-bottom:1px solid var(--fil-border);overflow:hidden}
-.home-hero::before{position:absolute;z-index:0;inset:0;background-image:url(../img/project-cover-hero.webp);background-position:center 48%;background-size:cover;background-repeat:no-repeat;content:"";filter:grayscale(.68) saturate(.34) brightness(.8) contrast(1.08);opacity:.38;pointer-events:none}
+.home-hero::before{position:absolute;z-index:0;inset:0;background-image:url(../img/project-cover-hero.webp?v=__ASSET_VERSION__);background-position:center 48%;background-size:cover;background-repeat:no-repeat;content:"";filter:grayscale(.68) saturate(.34) brightness(.8) contrast(1.08);opacity:.38;pointer-events:none}
 .home-hero::after{position:absolute;z-index:0;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--fil-bg) 88%,transparent) 0%,color-mix(in srgb,var(--fil-bg) 76%,transparent) 34%,color-mix(in srgb,var(--fil-bg) 52%,transparent) 62%,color-mix(in srgb,var(--fil-bg) 24%,transparent) 100%);content:"";pointer-events:none}
 .home-hero>*{position:relative;z-index:1}
 :root[data-theme="dark"] .home-hero::before{filter:grayscale(.74) saturate(.26) brightness(.68) contrast(1.12);opacity:.5}
