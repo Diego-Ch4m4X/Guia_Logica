@@ -4,7 +4,7 @@
 .activity-header{min-width:0;padding:0 0 20px;border-bottom:1px solid var(--fil-border)}
 .activity-kicker{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 13px;margin:0 0 7px;color:var(--fil-brand);font-size:.76rem;font-weight:800;letter-spacing:.13em;line-height:1.35;text-transform:uppercase}
 .activity-kicker span{color:var(--fil-text-muted);font-size:.65rem;font-weight:700;letter-spacing:.08em}
-.lab-activity .activity-header>:is(h2,h3,h4,h5,h6),.exercise-activity .activity-header h3{margin:0;padding:0;border:0;color:var(--fil-text);letter-spacing:-.025em}
+.lab-activity .activity-header>:is(h2,h3,h4,h5,h6),.exercise-activity .activity-header>:is(h2,h3,h4,h5,h6){margin:0;padding:0;border:0;color:var(--fil-text);letter-spacing:-.025em}
 .lab-activity .activity-header>:is(h2,h3,h4,h5,h6){font-size:clamp(1.72rem,3.5vw,2.7rem)}
 .lab-compact-body{min-width:0;padding-top:17px}
 .lab-compact-body>:first-child{margin-top:0}
@@ -49,30 +49,34 @@
 /* Exercise suite — a connected sequence inspired by the application/decision reference. */
 .exercise-suite{position:relative;display:grid;gap:20px;margin:1.8rem 0 2.6rem;padding-left:42px}
 .exercise-suite::before{position:absolute;top:28px;bottom:28px;left:15px;width:1px;background:linear-gradient(180deg,var(--fil-brand),var(--fil-border-strong) 12%,var(--fil-border-strong) 88%,var(--fil-brand));content:""}
+.exercise-suite-intro{margin:1rem 0 1.25rem}
+.exercise-suite-intro>:first-child{margin-top:0}
+.exercise-suite-intro>:last-child{margin-bottom:0}
+.exercise-suite--flat{padding-left:0}
+.exercise-suite--flat::before{display:none}
 .exercise-activity{margin:0;padding:22px 24px;overflow:visible}
 .exercise-marker{position:absolute;z-index:2;top:22px;left:-43px;display:grid;width:33px;height:33px;place-items:center;border:1px solid var(--fil-border-strong);background:var(--fil-bg);color:var(--fil-text-secondary);font:700 .76rem var(--fil-font-code)}
 .exercise-activity:first-child .exercise-marker{border-color:var(--fil-brand);background:var(--fil-brand);color:var(--fil-on-action)}
 .exercise-activity .activity-header{padding-bottom:16px}
-.exercise-activity .activity-header h3{font-size:clamp(1.45rem,3vw,2.15rem)}
+.exercise-activity .activity-header>:is(h2,h3,h4,h5,h6){font-size:clamp(1.45rem,3vw,2.15rem)}
 .exercise-body{min-width:0;padding-top:17px}
 .exercise-body>p:first-child,.exercise-body>ol:first-child,.exercise-body>ul:first-child,.exercise-body>.code-block:first-child{margin-top:0}
 .exercise-body>ol{display:grid;gap:9px;margin:0;padding:0;list-style:none;counter-reset:exercise-item}
 .exercise-body>ol>li{position:relative;min-height:48px;margin:0;padding:12px 14px 12px 52px;border:1px solid var(--fil-border);background:color-mix(in srgb,var(--fil-surface-muted) 46%,transparent);counter-increment:exercise-item}
 .exercise-body>ol>li::before{position:absolute;top:11px;left:13px;display:grid;width:25px;height:25px;place-items:center;border:1px solid color-mix(in srgb,var(--fil-brand) 58%,var(--fil-border));color:var(--fil-brand);content:counter(exercise-item);font:700 .67rem var(--fil-font-code)}
-.exercise-activity[data-exercise="49.3"] .exercise-body>ul{display:grid;gap:8px;margin:14px 0 18px;padding:0;list-style:none}
-.exercise-activity[data-exercise="49.3"] .exercise-body>ul>li{position:relative;margin:0;padding:10px 12px 10px 34px;border-left:2px solid color-mix(in srgb,var(--fil-brand) 58%,var(--fil-border));background:color-mix(in srgb,var(--fil-surface-muted) 36%,transparent)}
-.exercise-activity[data-exercise="49.3"] .exercise-body>ul>li::before{position:absolute;top:15px;left:13px;width:7px;height:7px;background:var(--fil-brand);content:""}
+.exercise-body>ul{display:grid;gap:8px;margin:14px 0 18px;padding:0;list-style:none}
+.exercise-body>ul>li{position:relative;margin:0;padding:10px 12px 10px 34px;border-left:2px solid color-mix(in srgb,var(--fil-brand) 58%,var(--fil-border));background:color-mix(in srgb,var(--fil-surface-muted) 36%,transparent)}
+.exercise-body>ul>li::before{position:absolute;top:15px;left:13px;width:7px;height:7px;background:var(--fil-brand);content:""}
 .exercise-rubric{max-width:none;margin:20px 0 0;padding:18px 19px;border:1px solid color-mix(in srgb,var(--fil-brand) 56%,var(--fil-border));border-left:3px solid var(--fil-brand);background:linear-gradient(135deg,color-mix(in srgb,var(--fil-action-soft) 70%,transparent),var(--fil-surface))}
 .exercise-rubric>p:first-child{margin-top:0;color:var(--fil-brand)}
 .exercise-rubric>p:last-child{margin-bottom:0}
 .exercise-rubric>ul{display:grid;gap:4px;margin:12px 0;padding:0;list-style:none}
 .exercise-rubric .task-label{padding:7px 0;border:0;background:transparent}
 .exercise-rubric .task-item:has(.interactive-check:checked) .task-label{background:transparent}
-.exercise-activity[data-exercise="49.4"] .code-block{margin-top:0}
-.exercise-activity[data-exercise="49.4"] .activity-disclosure{margin-top:14px}
+.exercise-body>.activity-disclosure{margin-top:14px}
 .exercise-suite-footer{display:flex;justify-content:flex-end;margin:-.7rem 0 3.3rem;padding-top:12px;border-top:1px solid var(--fil-border)}
 .exercise-suite-footer a{font-size:.78rem;font-weight:700;text-decoration:none}
-@container technicalArticle (max-width:620px){.learning-activity{margin:2.8rem 0;padding:18px}.lab-summary-grid{grid-template-columns:1fr}.lab-summary-grid .lab-panel:nth-child(n){border-right:0;border-bottom:1px solid var(--fil-border)}.lab-summary-grid .lab-panel:last-child{border-bottom:0}.activity-header{padding-bottom:16px}.exercise-suite{gap:14px;padding-left:30px}.exercise-suite::before{left:10px}.exercise-marker{left:-33px;width:27px;height:27px}.exercise-activity{padding:18px}.exercise-body>ol>li{padding-left:46px}.exercise-body>ol>li::before{left:11px}}
+@container technicalArticle (max-width:620px){.learning-activity{margin:2.8rem 0;padding:18px}.lab-summary-grid{grid-template-columns:1fr}.lab-summary-grid .lab-panel:nth-child(n){border-right:0;border-bottom:1px solid var(--fil-border)}.lab-summary-grid .lab-panel:last-child{border-bottom:0}.activity-header{padding-bottom:16px}.exercise-suite{gap:14px;padding-left:30px}.exercise-suite--flat{padding-left:0}.exercise-suite::before{left:10px}.exercise-marker{left:-33px;width:27px;height:27px}.exercise-activity{padding:18px}.exercise-body>ol>li{padding-left:46px}.exercise-body>ol>li::before{left:11px}}
 
 /* Containment hardening: keep wide code/tables scrollable inside the activity instead of expanding the disclosure/grid track. */
 .lab-disclosures,.activity-disclosure,.activity-disclosure>*{min-width:0}
