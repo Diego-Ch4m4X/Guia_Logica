@@ -109,6 +109,12 @@ test('table rows preserve escaped pipes and pipes inside code spans', () => {
   assert.match(html, /<td>left \| right<\/td>/);
 });
 
+test('standalone checklist rendering uses a neutral prefix when no topicId is supplied', () => {
+  const html = renderMarkdown('- [ ] item', { skipFirstH1:false }).html;
+  assert.match(html, /data-check-key="content-check-001"/);
+  assert.doesNotMatch(html, /data-check-key="t25-check-/);
+});
+
 test('canonical glossary renderer preserves pipe-bearing technical notation', () => {
   const source = [
     '# 52. Glossário',
