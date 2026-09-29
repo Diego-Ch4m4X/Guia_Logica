@@ -2,6 +2,63 @@ import { escapeAttribute, escapeHtml } from './html.js';
 import { portableBaseSlug } from './slug.js';
 import { renderInline, splitTableRow } from './markdown.js';
 
+const SEMANTIC_LAB_PARTS = new Map([
+  ['objetivo', 'objective'],
+  ['pré-requisitos', 'prerequisites'],
+  ['estado inicial', 'state'],
+  ['tarefa', 'task'],
+  ['procedimento', 'procedure'],
+  ['o que observar', 'observe'],
+  ['testes', 'tests'],
+  ['testes / autoverificação', 'tests'],
+  ['explicação', 'explanation'],
+  ['variação / transferência', 'transfer'],
+  ['transferência', 'transfer'],
+  ['limpeza', 'cleanup'],
+  ['limpeza, quando aplicável', 'cleanup'],
+  ['critérios de aceite', 'criteria'],
+  ['evidência', 'evidence'],
+]);
+
+export function normalizeSemanticHeading(value) {
+  const original = String(value ?? '').replace(/\s+/g, ' ').trim();
+  const numbered = original.match(/^(\d+(?:\.\d+)*\.?)\s+(.+)$/);
+  const sectionPrefix = numbered?.[1] || '';
+  let semantic = (numbered?.[2] || original).trim();
+  const hasLabEmoji = /^🧪\s*/u.test(semantic);
+  if (hasLabEmoji) semantic = semantic.replace(/^🧪\s*/u, '').trim();
+  return { original, sectionPrefix, semantic, hasLabEmoji };
+}
+
+export function parseLabHeading(value) {
+  const normalized = normalizeSemanticHeading(value);
+  const match = normalized.semantic.match(/^(LAB|Laboratório)\s+(\d+)\s+—\s+(.+)$/iu);
+  if (!match) return null;
+  return {
+    ...normalized,
+    kind: 'lab',
+    label: match[1],
+    activityIndex: Number(match[2]),
+    title: match[3].trim(),
+  };
+}
+
+export function parseExerciseRootHeading(value) {
+  const normalized = normalizeSemanticHeading(value);
+  const match = normalized.semantic.match(/^Exercícios(?:\s+(.+))?$/iu);
+  if (!match) return null;
+  return {
+    ...normalized,
+    kind: 'exercises',
+    qualifier: (match[1] || '').trim(),
+  };
+}
+
+export function classifyLabPartHeading(value) {
+  const { semantic } = normalizeSemanticHeading(value);
+  return SEMANTIC_LAB_PARTS.get(semantic.toLocaleLowerCase('pt-BR')) || null;
+}
+
 export function offsetTopicHeadings(html) {
   return html.replace(/<h([1-6])(\b[^>]*)>([\s\S]*?)<\/h\1>/gi, (heading, level, attributes, content) => {
     const next = Number(level) + 1;
