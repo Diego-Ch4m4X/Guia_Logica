@@ -20,6 +20,15 @@ const SEMANTIC_LAB_PARTS = new Map([
   ['evidência', 'evidence'],
 ]);
 
+const LANGUAGE_TAB_META = {
+  python:{ key:'python', label:'Python' },
+  javascript:{ key:'javascript', label:'JavaScript' },
+  java:{ key:'java', label:'Java' },
+  shell:{ key:'shell', label:'Shell / GNU Bash' },
+};
+
+const LANGUAGE_CONTEXT_EXCLUSION = /(?:referencias|bibliografia|documentacao|fontes?\s+(?:oficiais|primarias)|exercicios|evidencias?\s+de\s+dominio|glossario|troubleshooting|problemas reais|historico|apendic|laboratorio|\blab\b)/i;
+
 export function normalizeSemanticHeading(value) {
   const original = String(value ?? '').replace(/\s+/g, ' ').trim();
   const numbered = original.match(/^(\d+(?:\.\d+)*\.?)\s+(.+)$/);
@@ -57,6 +66,17 @@ export function parseExerciseRootHeading(value) {
 export function classifyLabPartHeading(value) {
   const { semantic } = normalizeSemanticHeading(value);
   return SEMANTIC_LAB_PARTS.get(semantic.toLocaleLowerCase('pt-BR')) || null;
+}
+
+export function classifyLanguageHeading(value) {
+  const { semantic } = normalizeSemanticHeading(value);
+  const plain = semantic.replace(/`/g, '').trim();
+  if (/^Python(?:$|\s|[—:/])/iu.test(plain)) return 'python';
+  if (/^(?:JavaScript|ECMAScript)(?:$|\s|[—:/])/iu.test(plain)) return 'javascript';
+  if (/^Java(?:$|\s|[—:/])/iu.test(plain)) return 'java';
+  if (/^(?:GNU\s+)?Bash(?:$|\s|[—:/])/iu.test(plain)) return 'shell';
+  if (/^Shell\s*\/\s*GNU\s+Bash(?:$|\s|[—:/])/iu.test(plain)) return 'shell';
+  return null;
 }
 
 export function offsetTopicHeadings(html) {
@@ -128,6 +148,188 @@ function wrapTabGroup(html, config) {
   const content = panels.map((p,i) => `<div aria-labelledby="${config.key}-tab-${p.key}" class="tab-panel" id="${config.key}-panel-${p.key}" role="tabpanel"${i===0?'':' hidden=""'}>${p.content}</div>`).join('');
   const wrapped = `<section aria-label="Comparação por linguagem — ${config.key}" class="language-tabs" data-tabs=""><div aria-label="Linguagens" class="tab-list" role="tablist">${buttons}</div>${content}</section>`;
   return html.slice(0, whole.start) + wrapped + html.slice(whole.end);
+}
+
+function foldLanguageContext(value) {
+  return normalizeSemanticHeading(value).semantic
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLocaleLowerCase('pt-BR');
+}
+
+function languageHeadingAliasStart(html, start) {
+  const before = html.slice(0, start);
+  const aliases = before.match(/(?:<a aria-hidden="true" class="anchor-alias" id="[^"]+"><\/a>)+$/);
+  return aliases ? start - aliases[0].length : start;
+}
+
+function languageHeadingTree(html) {
+  const re = /<h([1-5])([^>]*)\bid="([^"]+)"([^>]*)>([\s\S]*?)<\/h\1>/g;
+  const nodes = [];
+  const stack = [];
+
+  for (const match of html.matchAll(re)) {
+    const node = {
+      level:Number(match[1]),
+      id:match[3],
+      text:decodeText(match[5]),
+      inner:match[5],
+      start:match.index,
+      aliasStart:languageHeadingAliasStart(html, match.index),
+      heading:match[0],
+      parent:null,
+      children:[],
+      end:html.length,
+    };
+    node.language = classifyLanguageHeading(node.text);
+    while (stack.length && stack.at(-1).level >= node.level) stack.pop();
+    node.parent = stack.at(-1) || null;
+    if (node.parent) node.parent.children.push(node);
+    nodes.push(node);
+    stack.push(node);
+  }
+
+  for (let i = 0; i < nodes.length; i += 1) {
+    for (let j = i + 1; j < nodes.length; j += 1) {
+      if (nodes[j].level <= nodes[i].level) {
+        nodes[i].end = nodes[j].aliasStart;
+        break;
+      }
+    }
+  }
+  return nodes;
+}
+
+function languageGroupContexts(parent, siblings, index) {
+  if (parent) {
+    const contexts = [];
+    let current = parent;
+    while (current) {
+      contexts.push(current);
+      current = current.parent;
+    }
+    return contexts;
+  }
+
+  const contexts = [];
+  for (let i = index - 1; i >= 0 && contexts.length < 2; i -= 1) {
+    if (!siblings[i].language) contexts.push(siblings[i]);
+  }
+  return contexts;
+}
+
+function eligibleLanguageContext(contexts) {
+  return contexts.every(context => {
+    if (parseLabHeading(context.text) || parseExerciseRootHeading(context.text)) return false;
+    return !LANGUAGE_CONTEXT_EXCLUSION.test(foldLanguageContext(context.text));
+  });
+}
+
+function languageGroupBaseKey(contexts) {
+  for (const context of contexts) {
+    const folded = foldLanguageContext(context.text);
+    if (folded.includes('transferencia') && (folded.includes('linguag') || /python.*javascript.*java.*bash/.test(folded))) return 'transferencia';
+    if (folded.includes('biblioteca')) return 'bibliotecas';
+    if (folded.includes('mapeamento') || folded.includes('dicionario')) return 'mapeamento';
+    if (/\bfila\b/.test(folded)) return 'fila';
+  }
+  const fallback = contexts[0]?.text || 'linguagens';
+  const semantic = normalizeSemanticHeading(fallback).semantic.normalize('NFD').replace(/\p{M}/gu, '');
+  return portableBaseSlug(semantic) || 'linguagens';
+}
+
+function allocateLanguageGroupKey(base, used, occupiedIds) {
+  let key = base;
+  let suffix = 2;
+  const collides = candidate => used.has(candidate)
+    || Object.values(LANGUAGE_TAB_META).some(meta =>
+      occupiedIds.has(`${candidate}-tab-${meta.key}`) || occupiedIds.has(`${candidate}-panel-${meta.key}`),
+    );
+  while (collides(key)) {
+    key = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  used.add(key);
+  return key;
+}
+
+function languagePanelContent(html, panel, end) {
+  const aliases = html.slice(panel.aliasStart, panel.start);
+  const body = html.slice(panel.start, end);
+  return aliases + firstHeadingToPanel(body);
+}
+
+export function wrapLanguageTabsSemantic(html) {
+  const original = html;
+  const nodes = languageHeadingTree(original);
+  const roots = nodes.filter(node => !node.parent);
+  const containers = [{ children:roots, parent:null, end:original.length }, ...nodes.map(node => ({
+    children:node.children,
+    parent:node,
+    end:node.end,
+  }))];
+
+  const candidates = [];
+  for (const container of containers) {
+    const siblings = container.children;
+    for (let i = 0; i + 3 < siblings.length;) {
+      const panels = siblings.slice(i, i + 4);
+      const languages = panels.map(panel => panel.language);
+      const isGroup = languages.every(Boolean) && new Set(languages).size === 4;
+      if (!isGroup) {
+        i += 1;
+        continue;
+      }
+
+      const contexts = languageGroupContexts(container.parent, siblings, i);
+      if (eligibleLanguageContext(contexts)) {
+        candidates.push({
+          start:panels[0].aliasStart,
+          end:siblings[i + 4]?.aliasStart ?? container.end,
+          panels,
+          contexts,
+        });
+      }
+      i += 4;
+    }
+  }
+
+  candidates.sort((a, b) => a.start - b.start || b.end - a.end);
+  const selected = [];
+  for (const candidate of candidates) {
+    if (selected.length && candidate.start < selected.at(-1).end) continue;
+    selected.push(candidate);
+  }
+  if (!selected.length) return html;
+
+  const occupiedIds = new Set([...original.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
+  const usedKeys = new Set();
+  const replacements = selected.map(group => {
+    const base = languageGroupBaseKey(group.contexts);
+    const key = allocateLanguageGroupKey(base, usedKeys, occupiedIds);
+    const panels = group.panels.map((panel, index) => {
+      const meta = LANGUAGE_TAB_META[panel.language];
+      const end = group.panels[index + 1]?.aliasStart ?? group.end;
+      return { ...meta, content:languagePanelContent(original, panel, end) };
+    });
+
+    const buttons = panels.map((panel, index) =>
+      `<button aria-controls="${key}-panel-${panel.key}" aria-selected="${index === 0 ? 'true' : 'false'}" class="tab" id="${key}-tab-${panel.key}" role="tab" tabindex="${index === 0 ? '0' : '-1'}" type="button">${panel.label}</button>`,
+    ).join('');
+    const content = panels.map((panel, index) =>
+      `<div aria-labelledby="${key}-tab-${panel.key}" class="tab-panel" id="${key}-panel-${panel.key}" role="tabpanel"${index === 0 ? '' : ' hidden=""'}>${panel.content}</div>`,
+    ).join('');
+    const replacement = `<section aria-label="Comparação por linguagem — ${key}" class="language-tabs" data-tabs=""><div aria-label="Linguagens" class="tab-list" role="tablist">${buttons}</div>${content}</section>`;
+    return { start:group.start, end:group.end, replacement };
+  });
+
+  let out = '';
+  let cursor = 0;
+  for (const item of replacements) {
+    out += original.slice(cursor, item.start) + item.replacement;
+    cursor = item.end;
+  }
+  return out + original.slice(cursor);
 }
 
 function splitH2Sections(segment) {
@@ -334,25 +536,7 @@ export function wrapExercisesSemantic(html, topicId) {
 }
 
 function enhanceTopicHtml(html, topicId='T25') {
-  const groups = [
-    { key:'transferencia', endId:'19-mesmo-adt-mecanismos-diferentes', panels:[
-      {id:'15-python--abstração-e-implementação-concreta',key:'python',label:'Python'},
-      {id:'16-javascript--contrato-sem-queue-padrão',key:'javascript',label:'JavaScript'},
-      {id:'17-java--interface-e-implementação-explícitas',key:'java',label:'Java'},
-      {id:'18-gnu-bash--abstração-por-disciplina-de-funções-e-estado',key:'shell',label:'Shell / GNU Bash'}]},
-    { key:'bibliotecas', endId:'parte-v--contratos-substituição-decisão-e-diagnóstico', panels:[
-      {id:'21-python--list-deque-dict-e-a-camada-correta',key:'python',label:'Python'},
-      {id:'22-javascript--semântica-padronizada-não-implica-layout-padronizado',key:'javascript',label:'JavaScript'},
-      {id:'23-java--uma-interface-pode-ter-várias-implementações',key:'java',label:'Java'},
-      {id:'24-bash--indexed-array-e-associative-array-não-são-adts-universais',key:'shell',label:'Shell / GNU Bash'}]},
-    { key:'mapeamento', endId:'257-mesma-intenção-semânticas-diferentes', panels:[
-      {id:'253-python',key:'python',label:'Python'}, {id:'254-javascript',key:'javascript',label:'JavaScript'},
-      {id:'255-java',key:'java',label:'Java'}, {id:'256-bash',key:'shell',label:'Shell / GNU Bash'}]},
-    { key:'fila', endId:'396-o-que-foi-transferido', panels:[
-      {id:'392-python',key:'python',label:'Python'}, {id:'393-javascript',key:'javascript',label:'JavaScript'},
-      {id:'394-java',key:'java',label:'Java'}, {id:'395-bash',key:'shell',label:'Shell / GNU Bash'}]}
-  ];
-  for (const group of groups) html = wrapTabGroup(html, group);
+  html = wrapLanguageTabsSemantic(html);
   html = wrapLabsSemantic(html, topicId);
   html = wrapExercisesSemantic(html, topicId);
   return html;
@@ -694,7 +878,8 @@ export function wrapLabsSemantic(html, topicId) {
 
 export function enhanceTopicHtmlGeneric(html, topicId) {
   if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
-  let out = wrapLabsSemantic(html, topicId);
+  let out = wrapLanguageTabsSemantic(html);
+  out = wrapLabsSemantic(out, topicId);
   out = wrapExercisesSemantic(out, topicId);
   const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
   out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
