@@ -105,3 +105,16 @@ test('semantic LAB wrapper keeps the approved T25 structural shape available', (
   assert.match(html, /class="lab-reflection-grid"/);
   assert.match(html, /class="lab-panel lab-panel--criteria"/);
 });
+
+test('T25 LAB 2, 3 and 6 content compatibility remains covered by the golden', async () => {
+  const components = await readFile(path.join(ROOT, 'scripts/lib/components.js'), 'utf8');
+  const actual = await readFile(path.join(ROOT, 'dist/topicos/t25/index.html'), 'utf8');
+  const golden = await readFile(path.join(ROOT, 'tests/fixtures/t25/golden.html'), 'utf8');
+  const codeBlocks = html => [...html.matchAll(/<pre><code>([\s\S]*?)<\/code><\/pre>/g)]
+    .map(match => match[1].replaceAll('&#x27;', "'").replaceAll('&#39;', "'"));
+  const actualBlocks = codeBlocks(actual);
+  const goldenBlocks = codeBlocks(golden);
+
+  assert.match(components, /function applyT25LabContentCompatibility\(/);
+  for (const index of [127, 128, 131]) assert.equal(actualBlocks[index], goldenBlocks[index], `T25 code block ${index + 1}`);
+});

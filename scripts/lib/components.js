@@ -102,12 +102,6 @@ const LAB_ICONS = {
   criteria:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="m8.5 12 2.3 2.3 5-5"></path></svg></span>'
 };
 
-const LAB_PARTS = new Map([
-  ['Objetivo','objective'], ['Pré-requisitos','prerequisites'], ['Estado inicial','state'], ['Tarefa','task'],
-  ['Procedimento','procedure'], ['O que observar','observe'], ['Testes','tests'], ['Explicação','explanation'],
-  ['Variação / transferência','transfer'], ['Limpeza','cleanup'], ['Critérios de aceite','criteria']
-]);
-
 function decodeText(html) {
   return html.replace(/<code>(.*?)<\/code>/g, '$1').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').trim();
 }
@@ -332,18 +326,6 @@ export function wrapLanguageTabsSemantic(html) {
   return out + original.slice(cursor);
 }
 
-function splitH2Sections(segment) {
-  const re = /<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g;
-  const matches = [...segment.matchAll(re)];
-  return matches.map((m,i) => ({ id:m[1], title:decodeText(m[2]), heading:m[0], content:segment.slice(m.index + m[0].length, matches[i+1]?.index ?? segment.length) }));
-}
-
-function panelHtml(section, part) {
-  const extra = part === 'procedure' ? ' lab-panel--procedure' : part === 'criteria' ? ' lab-panel--criteria' : '';
-  const heading = `<h2 id="${escapeAttribute(section.id)}">${LAB_ICONS[part]}<span class="lab-panel-heading-text">${escapeHtml(section.title)}</span></h2>`;
-  return `<section class="lab-panel${extra}" data-lab-part="${part}">${heading}${section.content}</section>`;
-}
-
 function decorateDisclosure(html) {
   return html.replace(/<details>/g, (m, offset, whole) => {
     const tail = whole.slice(offset, offset + 240);
@@ -351,93 +333,6 @@ function decorateDisclosure(html) {
     if (tail.includes('Solução de referência') || tail.includes('Respostas esperadas')) return '<details class="activity-disclosure activity-solution">';
     return '<details class="activity-disclosure">';
   });
-}
-
-function wrapLabs(html, topicId='T25') {
-  const original = html;
-  const labRe = /<h1 class="chapter-title" id="([^"]+)">(\d+)\.\s*🧪\s*LAB\s+(\d+)\s+—\s+([\s\S]*?)<\/h1>/g;
-  const matches = [...original.matchAll(labRe)];
-  if (!matches.length) return html;
-  const replacements = [];
-  for (let x = 0; x < matches.length; x += 1) {
-    const m = matches[x];
-    const start = m.index;
-    const afterRoot = start + m[0].length;
-    let end;
-    if (matches[x + 1]) end = matches[x + 1].index;
-    else {
-      const next = original.indexOf('<h1 class="chapter-title"', afterRoot);
-      end = next < 0 ? original.length : next;
-    }
-    const body = original.slice(afterRoot, end);
-    const sections = splitH2Sections(body);
-    if (sections.length < 10) continue;
-    const byPart = new Map();
-    for (const sec of sections) {
-      const part = LAB_PARTS.get(sec.title);
-      if (part) byPart.set(part, sec);
-    }
-    const criteria = byPart.get('criteria');
-    if (!criteria) continue;
-    let criteriaContent = criteria.content;
-    const disclosureAt = criteriaContent.indexOf('<details');
-    let disclosures = '';
-    if (disclosureAt >= 0) {
-      disclosures = criteriaContent.slice(disclosureAt);
-      criteriaContent = criteriaContent.slice(0, disclosureAt);
-      criteria.content = criteriaContent;
-    }
-    let footer = '';
-    const footerMatch = disclosures.match(/<p><a href="#(?:índice|%C3%ADndice)">↑ Voltar ao índice<\/a><\/p>\s*$/);
-    if (footerMatch) {
-      footer = `<footer class="activity-footer"><a href="#%C3%ADndice">↑ Voltar ao índice</a></footer>`;
-      disclosures = disclosures.slice(0, footerMatch.index);
-    }
-    disclosures = decorateDisclosure(disclosures);
-    const summary = ['objective','prerequisites','state','task'].map(part => panelHtml(byPart.get(part), part)).join('');
-    const procedure = panelHtml(byPart.get('procedure'),'procedure');
-    const validation = ['observe','tests'].map(part => panelHtml(byPart.get(part), part)).join('');
-    const reflection = ['explanation','transfer','cleanup'].map(part => panelHtml(byPart.get(part), part)).join('');
-    const criteriaPanel = panelHtml(criteria,'criteria');
-    const titleHtml = m[4];
-    if (m[3] === '2') disclosures = disclosures.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (_, code) => `<pre><code>${code.replace(/\n\n+/g, '\n')}</code></pre>`);
-    if (m[3] === '3') disclosures = disclosures.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (_, code) => `<pre><code>${code.replace(/\n\n+/g, '\n').replace(/^    /gm, '')}</code></pre>`);
-    if (m[3] === '6') disclosures = disclosures.replace(/queue_enqueue B\n\nprintf/, 'queue_enqueue B\nprintf');
-    const replacement = `<div aria-labelledby="${m[1]}" class="learning-activity lab-activity" data-activity="lab" data-lab="${m[3]}" role="region"><header class="activity-header"><p class="activity-kicker">LAB ${m[3]}<span>${topicId} · atividade prática</span></p><h1 class="chapter-title" id="${m[1]}">${titleHtml}</h1></header><div class="lab-summary-grid">${summary}</div>${procedure}<div class="lab-validation-grid">${validation}</div><div class="lab-reflection-grid">${reflection}</div>${criteriaPanel}<div class="lab-disclosures">${disclosures}</div>${footer}</div>`;
-    replacements.push({ start, end, replacement });
-  }
-  let out = '';
-  let cursor = 0;
-  for (const item of replacements) {
-    out += original.slice(cursor, item.start) + item.replacement;
-    cursor = item.end;
-  }
-  return out + original.slice(cursor);
-}
-
-function wrapExercises(html, topicId='T25') {
-  const whole = sectionSlice(html, '49-exercícios', '50-evidências-de-domínio');
-  if (!whole) return html;
-  const rootEnd = whole.text.indexOf('</h1>') + 5;
-  const root = whole.text.slice(0, rootEnd);
-  const rest = whole.text.slice(rootEnd);
-  const sections = splitH2Sections(rest).filter(x => /^49[1-4]-/.test(x.id));
-  if (sections.length !== 4) return html;
-  let suiteFooter = '';
-  const pieces = sections.map((sec,i) => {
-    const n = `49.${i+1}`;
-    let body = decorateDisclosure(sec.content);
-    if (i === 2) body = body.replace('<blockquote>', '<blockquote class="exercise-rubric">');
-    if (i === 3) {
-      const footerMatch = body.match(/<p><a href="#(?:índice|%C3%ADndice)">↑ Voltar ao índice<\/a><\/p>\s*$/);
-      if (footerMatch) {
-        suiteFooter = `<p class="exercise-suite-footer"><a href="#%C3%ADndice">↑ Voltar ao índice</a></p>`;
-        body = body.slice(0, footerMatch.index);
-      }
-    }
-    return `<div aria-labelledby="${sec.id}" class="learning-activity exercise-activity" data-activity="exercise" data-exercise="${n}" data-exercise-step="${i+1}" role="region"><span aria-hidden="true" class="exercise-marker">${i+1}</span><header class="activity-header"><p class="activity-kicker">ATIVIDADE DE CONSOLIDAÇÃO<span>${topicId} · exercícios</span></p>${sec.heading}</header><div class="exercise-body">${body}</div></div>`;
-  }).join('');
-  return html.slice(0,whole.start) + root + `<div class="exercise-suite">${pieces}${suiteFooter}</div>` + html.slice(whole.end);
 }
 
 function decorateExerciseBody(html) {
@@ -535,67 +430,78 @@ export function wrapExercisesSemantic(html, topicId) {
   return out + original.slice(cursor);
 }
 
-function enhanceTopicHtml(html, topicId='T25') {
-  html = wrapLanguageTabsSemantic(html);
-  html = wrapLabsSemantic(html, topicId);
-  html = wrapExercisesSemantic(html, topicId);
-  return html;
+export function enhanceTopicHtml(html, topicId) {
+  let out = wrapLanguageTabsSemantic(html);
+  out = wrapLabsSemantic(out, topicId);
+  out = wrapExercisesSemantic(out, topicId);
+  const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(match => match[1]));
+  return out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
 }
 
-function publicationSlices(body) {
-  const normalized = String(body).replace(/\r\n?/g,'\n');
-  const glossaryAt = normalized.search(/^# 52\. Glossário\s*$/m);
-  const appendixAt = normalized.search(/^# APÊNDICES\b.*$/m);
-  if (glossaryAt < 0 || appendixAt < 0) return { core:normalized, postGlossary:'', glossarySource:'' };
-  const between = normalized.slice(glossaryAt, appendixAt);
-  const returnMatch = between.match(/^\[↑ Voltar ao índice\]\(#índice\)\s*$/m);
-  const rel = returnMatch ? returnMatch.index : between.length;
-  let core = normalized.slice(0, glossaryAt);
-  core = core.replace(/^### Gate de Cobertura Prática \/ Operacional\s*$[\s\S]*?(?=^\[↑ Voltar ao índice\]\(#índice\)\s*$)/m, '');
-  core = core.replace(/^<a id=["']apendices["']><\/a>\s*$/m, '');
-  core = core.replace('- [APÊNDICES — auditoria, referências, QA e histórico](#apendices)', '- [Referências](#referências)');
-  core = core.replace('- [52. Glossário](#52-glossário)', `- [52. Glossário](#52-glossário)
-- [Referências](#referências)
-  - [Bibliografia](#bibliografia)
-  - [Python — documentação oficial](#python--documentação-oficial)
-  - [JavaScript / ECMAScript — especificação e referência](#javascript--ecmascript--especificação-e-referência)
-  - [Java — documentação oficial](#java--documentação-oficial)
-  - [GNU Bash — documentação oficial](#gnu-bash--documentação-oficial)`);
-  core = core.split('\n').filter(line => {
-    const m = line.match(/^\s*-\s+\[(5[3-7](?:\.|\s))/);
-    if (m) return false;
-    if (/\]\(#apendices\)\s*$/.test(line)) return false;
-    return true;
-  }).join('\n');
-  return {
-    core,
-    glossarySource: between.slice(0, rel),
-    postGlossary: between.slice(rel).replace(/^<a id=["']apendices["']><\/a>\s*$/m, ''),
-  };
-}
+export function publicationSlices(body, topicId = '') {
+  const normalized = String(body).replace(/\r\n?/g, '\n');
+  const glossary = topLevelSection(normalized, '\\d+\\. Glossário');
+  const references = topLevelSection(normalized, '\\d+\\. Referências');
+  if (!glossary || !references) return { core:normalized, glossarySource:'', referencesSource:'', postGlossary:'' };
 
-export function renderGlossary(glossarySource, topicId='T25') {
-  const rows = glossarySource.split('\n').filter(line => /^\|/.test(line)).slice(2);
-  const entries = rows.map(splitTableRow).filter(x=>x.length>=2);
-  const groups = [];
-  const map = new Map();
-  for (const [term, definition] of entries) {
-    const letter = term.replace(/`/g,'').trim().charAt(0).toUpperCase();
-    if (!map.has(letter)) { map.set(letter,[]); groups.push(letter); }
-    map.get(letter).push([term,definition]);
+  const appendix = topLevelSection(normalized, 'APÊNDICES\\b.*');
+  const appendixAnchor = appendix && [...normalized.matchAll(/<a id=["']([^"']+)["']><\/a>/g)]
+    .find(match => match.index > glossary.start && match.index < appendix.start);
+  if (topicId === 'T25' && appendix && appendix.start > glossary.start && appendixAnchor && references.start > appendix.start) {
+    const between = normalized.slice(glossary.start, appendix.start);
+    const returnLink = between.match(/^\[↑ Voltar ao índice\]\(#índice\)\s*$/m);
+    const returnIndex = returnLink ? returnLink.index : between.length;
+    const referenceHeadings = headingsFromHtml(renderReferences(references.text, normalized));
+    const referenceLinks = referenceHeadings.map(heading => `${heading.level === 1 ? '- ' : '  - '}[${heading.text}](#${heading.id})`);
+    const appendixNumbers = new Set([...normalized.slice(appendix.start).matchAll(/^# (\d+)\./gm)].map(match => Number(match[1])));
+    const lines = normalized.slice(0, glossary.start).split('\n');
+    const gateStart = lines.findIndex(line => /^### .*\bGate\b/i.test(line));
+    if (gateStart >= 0) {
+      const gateEnd = lines.findIndex((line, index) => index > gateStart && /^\[↑ Voltar ao índice\]\(#índice\)\s*$/.test(line));
+      if (gateEnd >= 0) lines.splice(gateStart, gateEnd - gateStart);
+    }
+
+    const glossaryNumber = glossary.heading.match(/^# (\d+)\./)?.[1];
+    const glossaryLink = new RegExp(`^(\\s*-\\s+\\[${glossaryNumber}\\. [^\\]]+\\]\\(#[^)]+\\))\\s*$`);
+    let expandedGlossaryLink = false;
+    const core = lines.flatMap(line => {
+      const menuLink = line.match(/^(\s*-\s+)\[([^\]]+)\]\(#([^)]+)\)\s*$/);
+      if (menuLink && menuLink[3] === appendixAnchor[1]) {
+        const referenceRoot = referenceHeadings[0];
+        return [`${menuLink[1]}[${referenceRoot.text}](#${referenceRoot.id})`];
+      }
+      const glossaryMenuLink = line.match(glossaryLink);
+      if (glossaryMenuLink && !expandedGlossaryLink) {
+        expandedGlossaryLink = true;
+        return [glossaryMenuLink[1], ...referenceLinks];
+      }
+      const number = line.match(/^\s*-\s+\[(\d+)(?:\.|\s)/)?.[1];
+      return number && appendixNumbers.has(Number(number)) ? [] : [line];
+    }).join('\n');
+    const postGlossary = between.slice(returnIndex).replace(
+      new RegExp(`<a id=["']${appendixAnchor[1]}["']><\\/a>\\s*$`, 'm'),
+      '',
+    );
+    return { core, glossarySource:between.slice(0, returnIndex), referencesSource:references.text, postGlossary };
   }
-  const lower = topicId.toLowerCase();
-  const nav = groups.map(l => `<a href="#gloss-${lower}-${portableBaseSlug(l)}">${escapeHtml(l)}</a>`).join('');
-  const content = groups.map(letter => {
-    const items = map.get(letter).map(([term,def]) => `<article class="glossary-item" id="gloss-${lower}-${portableBaseSlug(term.replace(/`/g,''))}"><h4>${renderInline(term)}</h4><p>${renderInline(def)}</p></article>`).join('');
-    return `<section class="glossary-letter-group" id="gloss-${lower}-${portableBaseSlug(letter)}"><h3 class="glossary-letter">${escapeHtml(letter)}</h3><div class="glossary-grid">${items}</div></section>`;
-  }).join('');
-  return `<h1 class="chapter-title" id="52-glossário">52. Glossário</h1><h2 id="52-1-glossário-a-z">52.1 Glossário A–Z</h2><p class="glossary-intro">Termos do ${topicId} em ordem alfabética, com navegação direta por letra.</p><nav aria-label="Índice alfabético do glossário" class="glossary-letters">${nav}</nav>${content}`;
-}
 
-function referenceSection(body, headingPattern) {
-  const match = body.match(new RegExp(`^## ${headingPattern}\\s*$([\\s\\S]*?)(?=^## |^# |\\Z)`, 'm'));
-  return match ? match[1] : '';
+  let core = normalized.slice(0, glossary.start);
+  const referenceNumber = references.heading.match(/^# (\d+)\./)?.[1];
+  if (referenceNumber) {
+    core = core.replace(new RegExp(`^- \\[${referenceNumber}\\. Referências\\]\\(#${referenceNumber}-referências\\)\\s*$`, 'm'), '- [Referências](#referências)');
+  }
+  const appendixAnchorIndex = normalized.indexOf('<a id="apendices"></a>');
+  const appendixOmitted = appendixAnchorIndex >= 0 && appendixAnchorIndex > glossary.start;
+  core = core.split('\n').filter(line => {
+    if (appendixOmitted && /\]\(#apendices\)/.test(line)) return false;
+    const match = line.match(/\]\(#(\d+)-/);
+    if (!match) return true;
+    const number = Number(match[1]);
+    if (number < Number(glossary.heading.match(/^# (\d+)\./)?.[1] || 999)) return true;
+    if (referenceNumber && number === Number(referenceNumber) && /\]\(#referências\)/.test(line)) return true;
+    return false;
+  }).join('\n');
+  return { core, glossarySource:glossary.text, referencesSource:references.text, postGlossary:'' };
 }
 
 function listItems(source) {
@@ -654,23 +560,6 @@ function referenceCard(item, kind, domainLabel='') {
   return `<div class="reference-card"><span class="reference-kind">${kind}</span><a class="reference-title" href="${escapeAttribute(target.url)}" rel="noopener noreferrer" target="_blank">${renderInline(target.label)}</a><span class="reference-domain">${escapeHtml(domain)}</span></div>`;
 }
 
-export function renderReferences(body) {
-  const configs = [
-    ['55\\.2 Literatura local efetivamente consultada','Bibliografia','REFERÊNCIA','Referência bibliográfica'],
-    ['55\\.3 Python — documentação oficial','Python — documentação oficial','FONTE OFICIAL',''],
-    ['55\\.4 JavaScript / ECMAScript — especificação e referência','JavaScript / ECMAScript — especificação e referência','FONTE OFICIAL',''],
-    ['55\\.5 Java — documentação oficial','Java — documentação oficial','FONTE OFICIAL',''],
-    ['55\\.6 GNU Bash — documentação oficial','GNU Bash — documentação oficial','FONTE OFICIAL',''],
-  ];
-  const sections = configs.map(([pattern,title,kind,domain],idx) => {
-    const items = listItems(referenceSection(body,pattern));
-    const id = idx === 0 ? 'bibliografia' : portableBaseSlug(title);
-    return `<section class="reference-section"><h2 id="${id}">${escapeHtml(title)}</h2><div class="reference-directory">${items.map(item=>referenceCard(item,kind,domain)).join('')}</div></section>`;
-  }).join('');
-  const end = body.match(/^\*\*Fim — ([^\n]+)\*\*\s*$/m)?.[0] || '';
-  return `<h1 class="chapter-title" id="referências">Referências</h1>${sections}<hr>${end ? `<p>${renderInline(end)}</p>` : ''}`;
-}
-
 export function headingsFromHtml(html) {
   const re = /<h([1-6])([^>]*)id="([^"]+)"([^>]*)>([\s\S]*?)<\/h\1>/g;
   const out=[];
@@ -681,72 +570,11 @@ export function headingsFromHtml(html) {
 }
 
 
-function splitHeadingSectionsGeneric(segment, level) {
-  const re = new RegExp(`<h${level} id="([^"]+)">([\\s\\S]*?)<\\/h${level}>`, 'g');
-  const matches = [...segment.matchAll(re)];
-  return matches.map((m, i) => ({
-    id: m[1],
-    title: decodeText(m[2]),
-    heading: m[0],
-    content: segment.slice(m.index + m[0].length, matches[i + 1]?.index ?? segment.length),
-  }));
-}
-
 function panelHtmlGeneric(section, part, level) {
   if (!section) return '';
   const extra = part === 'procedure' ? ' lab-panel--procedure' : part === 'criteria' ? ' lab-panel--criteria' : '';
   const heading = `<h${level} id="${escapeAttribute(section.id)}">${LAB_ICONS[part]}<span class="lab-panel-heading-text">${escapeHtml(section.title)}</span></h${level}>`;
   return `<section class="lab-panel${extra}" data-lab-part="${part}">${heading}${section.content}</section>`;
-}
-
-function wrapLabsGeneric(html, topicId) {
-  const original = html;
-  const labRe = /<h([1-5])([^>]*)id="([^"]+)"([^>]*)>\s*🧪\s*LAB\s+(\d+)\s+—\s+([\s\S]*?)<\/h\1>/g;
-  const matches = [...original.matchAll(labRe)];
-  if (!matches.length) return html;
-  const replacements = [];
-  for (let x = 0; x < matches.length; x += 1) {
-    const m = matches[x];
-    const rootLevel = Number(m[1]);
-    let start = m.index;
-    const provisionalLabId = m[3].startsWith('lab-') ? `-${m[3]}` : m[3];
-    const aliasHtml = `<a aria-hidden="true" class="anchor-alias" id="${escapeAttribute(provisionalLabId)}"></a>`;
-    if (original.slice(0, start).endsWith(aliasHtml)) start -= aliasHtml.length;
-    const afterRoot = m.index + m[0].length;
-    let end = matches[x + 1]?.index ?? original.length;
-    if (!matches[x + 1]) {
-      const tail = original.slice(afterRoot);
-      const boundary = tail.match(new RegExp(`<h[1-${rootLevel}]\\b`));
-      if (boundary) end = afterRoot + boundary.index;
-    }
-    const body = original.slice(afterRoot, end);
-    const partLevel = Math.min(rootLevel + 1, 6);
-    const sections = splitHeadingSectionsGeneric(body, partLevel);
-    const byPart = new Map();
-    for (const sec of sections) {
-      const part = LAB_PARTS.get(sec.title);
-      if (part) byPart.set(part, sec);
-    }
-    const required = ['objective','prerequisites','state','task','procedure','observe','tests','explanation','transfer','cleanup'];
-    if (!required.every(part => byPart.has(part))) continue;
-    const summary = ['objective','prerequisites','state','task'].map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
-    const procedure = panelHtmlGeneric(byPart.get('procedure'), 'procedure', partLevel);
-    const validation = ['observe','tests'].map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
-    const reflection = ['explanation','transfer','cleanup'].map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
-    const criteria = byPart.get('criteria') ? panelHtmlGeneric(byPart.get('criteria'), 'criteria', partLevel) : '';
-    const titleHtml = m[6];
-    const titleClass = rootLevel === 1 ? ' class="chapter-title"' : '';
-    const labId = provisionalLabId;
-    const replacement = `<div aria-labelledby="${labId}" class="learning-activity lab-activity" data-activity="lab" data-lab="${m[5]}" role="region"><header class="activity-header"><p class="activity-kicker">LAB ${m[5]}<span>${topicId} · atividade prática</span></p><h${rootLevel}${titleClass} id="${labId}">${titleHtml}</h${rootLevel}></header><div class="lab-summary-grid">${summary}</div>${procedure}<div class="lab-validation-grid">${validation}</div><div class="lab-reflection-grid">${reflection}</div>${criteria}</div>`;
-    replacements.push({ start, end, replacement });
-  }
-  let out = '';
-  let cursor = 0;
-  for (const item of replacements) {
-    out += original.slice(cursor, item.start) + item.replacement;
-    cursor = item.end;
-  }
-  return out + original.slice(cursor);
 }
 
 function splitHeadingSectionsSemantic(segment, level) {
@@ -876,16 +704,6 @@ export function wrapLabsSemantic(html, topicId) {
   return out + original.slice(cursor);
 }
 
-export function enhanceTopicHtmlGeneric(html, topicId) {
-  if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
-  let out = wrapLanguageTabsSemantic(html);
-  out = wrapLabsSemantic(out, topicId);
-  out = wrapExercisesSemantic(out, topicId);
-  const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
-  out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
-  return out;
-}
-
 function topLevelSection(source, headingPattern) {
   const re = new RegExp(`^# ${headingPattern}\\s*$`, 'm');
   const m = source.match(re);
@@ -898,36 +716,7 @@ function topLevelSection(source, headingPattern) {
   return { start, end, text: source.slice(start, end), heading: m[0] };
 }
 
-export function publicationSlicesGeneric(body, topicId = '') {
-  const normalized = String(body).replace(/\r\n?/g, '\n');
-  if (topicId === 'T25') {
-    const legacy = publicationSlices(normalized);
-    const references = topLevelSection(normalized, '\\d+\\. Referências');
-    return { ...legacy, referencesSource:references?.text || '' };
-  }
-  const glossary = topLevelSection(normalized, '\\d+\\. Glossário');
-  const references = topLevelSection(normalized, '\\d+\\. Referências');
-  if (!glossary || !references) return { core: normalized, glossarySource: '', referencesSource: '', postGlossary: '' };
-  let core = normalized.slice(0, glossary.start);
-  const refNum = references.heading.match(/^# (\d+)\./)?.[1];
-  if (refNum) {
-    core = core.replace(new RegExp(`^- \\[${refNum}\\. Referências\\]\\(#${refNum}-referências\\)\\s*$`, 'm'), '- [Referências](#referências)');
-  }
-  const appendixAnchor = normalized.indexOf('<a id="apendices"></a>');
-  const appendixOmitted = appendixAnchor >= 0 && appendixAnchor > glossary.start;
-  core = core.split('\n').filter(line => {
-    if (appendixOmitted && /\]\(#apendices\)/.test(line)) return false;
-    const m = line.match(/\]\(#(\d+)-/);
-    if (!m) return true;
-    const n = Number(m[1]);
-    if (n < Number(glossary.heading.match(/^# (\d+)\./)?.[1] || 999)) return true;
-    if (refNum && n === Number(refNum) && /\]\(#referências\)/.test(line)) return true;
-    return false;
-  }).join('\n');
-  return { core, glossarySource: glossary.text, referencesSource: references.text, postGlossary: '' };
-}
-
-export function renderGlossaryGeneric(glossarySource, topicId) {
+export function renderGlossary(glossarySource, topicId) {
   const number = glossarySource.match(/^# (\d+)\. Glossário\s*$/m)?.[1] || '';
   const normalizedGlossary = String(glossarySource).replace(/\r\n?/g, '\n');
   const rows = normalizedGlossary.split('\n').filter(line => /^\|/.test(line)).slice(2);
@@ -974,7 +763,7 @@ export function renderGlossaryGeneric(glossarySource, topicId) {
   return `<h1 class="chapter-title" id="${rootId}">${number}. Glossário</h1><h2 id="${subId}">${number}.1 Glossário A–Z</h2><p class="glossary-intro">Termos do ${topicId} em ordem alfabética, com navegação direta por letra.</p><nav aria-label="Índice alfabético do glossário" class="glossary-letters">${nav}</nav>${content}${footer}`;
 }
 
-export function renderReferencesGeneric(referenceSource, fullBody, topicId = '') {
+export function renderReferences(referenceSource, fullBody) {
   const number = referenceSource.match(/^# (\d+)\. Referências\s*$/m)?.[1] || '';
   const sectionRe = new RegExp(`^## ${number}\\.(\\d+)\\s+(.+?)\\s*$([\\s\\S]*?)(?=^## ${number}\\.|(?![\\s\\S]))`, 'gm');
   const sections = [];

@@ -5,10 +5,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  publicationSlicesGeneric,
-  renderGlossaryGeneric,
-  renderReferencesGeneric,
+  publicationSlices,
+  renderGlossary,
+  renderReferences,
 } from '../../scripts/lib/components.js';
+import { parseDocument } from '../../scripts/lib/metadata.js';
 import { splitTableRow } from '../../scripts/lib/markdown.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -80,12 +81,12 @@ test('unified glossary renderer preserves compact and generic anchor contracts',
   const regular = compact.replace('# 52. Glossário', '# 23. Glossário')
     + '\n\n[↑ Voltar ao índice](#índice)\n';
 
-  const t25 = renderGlossaryGeneric(compact, 'T25');
+  const t25 = renderGlossary(compact, 'T25');
   assert.match(t25, /id="gloss-t25-a"/);
   assert.doesNotMatch(t25, /id="gloss-t25-letter-a"/);
   assert.doesNotMatch(t25, /↑ Voltar ao índice/);
 
-  const t01 = renderGlossaryGeneric(regular, 'T01');
+  const t01 = renderGlossary(regular, 'T01');
   assert.match(t01, /id="gloss-t01-letter-a"/);
   assert.match(t01, /↑ Voltar ao índice/);
 });
@@ -101,7 +102,7 @@ test('unified glossary renderer de-duplicates repeated term IDs without losing e
     '',
     '[↑ Voltar ao índice](#índice)',
   ].join('\n');
-  const html = renderGlossaryGeneric(source, 'T99');
+  const html = renderGlossary(source, 'T99');
   assert.match(html, /id="gloss-t99-map"/);
   assert.match(html, /id="gloss-t99-map-1"/);
   assert.equal((html.match(/class="glossary-item"/g) || []).length, 2);
@@ -120,7 +121,7 @@ test('unified reference renderer normalizes bibliography semantically and links 
     '',
     '- [Python](https://docs.python.org/3/)',
   ].join('\n');
-  const html = renderReferencesGeneric(source, '**Fim — teste**', 'T99');
+  const html = renderReferences(source, '**Fim — teste**');
   assert.match(html, /<h2 id="bibliografia">Bibliografia<\/h2>/);
   assert.match(html, /class="reference-card no-link"/);
   assert.match(html, /href="https:\/\/example\.com\/manual"/);
@@ -137,14 +138,14 @@ test('reference renderer excludes QA evidence headings from reference sections',
     '## 49.5 Estado de QA e evidência da revisão',
     '- PASS: validação executada',
   ].join('\n');
-  const html = renderReferencesGeneric(source, '', 'T20');
+  const html = renderReferences(source, '');
 
   assert.equal((html.match(/class="reference-section"/g) || []).length, 1);
   assert.match(html, /id="documentação-oficial"/);
   assert.doesNotMatch(html, /Estado de QA/);
 });
 
-test('T25 publication compatibility now supplies the canonical references section to the unified renderer', () => {
+test('canonical publication slicing preserves appendix variant with explicit T25 compatibility', () => {
   const source = [
     '# 1. Núcleo',
     '',
@@ -178,12 +179,26 @@ test('T25 publication compatibility now supplies the canonical references sectio
     '# 56. QA e evidências',
   ].join('\n');
 
-  const slices = publicationSlicesGeneric(source, 'T25');
+  const slices = publicationSlices(source, 'T25');
   assert.match(slices.glossarySource, /^# 52\. Glossário/m);
   assert.doesNotMatch(slices.glossarySource, /↑ Voltar ao índice/);
   assert.match(slices.postGlossary, /↑ Voltar ao índice/);
   assert.match(slices.referencesSource, /^# 55\. Referências/m);
   assert.doesNotMatch(slices.referencesSource, /^# 56\./m);
+});
+
+test('canonical publication slicing keeps the established generic result for structurally similar topics', async () => {
+  const dir = path.join(ROOT, 'content/topics');
+  for (const id of ['T26', 'T27', 'T28', 'T29', 'T30', 'T31', 'T32']) {
+    const name = (await readdir(dir)).find(file => file.startsWith(`${id}_`));
+    assert.ok(name, `${id}: source topic missing`);
+    const source = await readFile(path.join(dir, name), 'utf8');
+    const body = parseDocument(source).body;
+    const slices = publicationSlices(body, id);
+    assert.equal(slices.postGlossary, '', `${id}: unexpected post-glossary slice`);
+    assert.match(slices.glossarySource, /^# \d+\. Glossário/m, `${id}: glossary missing`);
+    assert.match(slices.referencesSource, /^# \d+\. Referências/m, `${id}: references missing`);
+  }
 });
 
 test('canonical T01-T35 glossary rows and reference cards have source/render parity', async () => {
@@ -218,8 +233,24 @@ test('canonical T01-T35 glossary rows and reference cards have source/render par
 
 test('T25 uses unified glossary/reference renderers while legacy renderers stay inactive for P05 cleanup', async () => {
   const source = await readFile(path.join(ROOT, 'scripts/lib/components.js'), 'utf8');
-  assert.doesNotMatch(source, /return renderGlossary\(glossarySource,\s*topicId\)/);
-  assert.doesNotMatch(source, /return renderReferences\(fullBody\)/);
-  assert.equal((source.match(/export function renderGlossary\(/g) || []).length, 1);
-  assert.equal((source.match(/export function renderReferences\(/g) || []).length, 1);
+  const build = await readFile(path.join(ROOT, 'scripts/build.js'), 'utf8');
+  for (const legacy of [
+    /function wrapLabs\(/,
+    /function wrapLabsGeneric\(/,
+    /function wrapExercises\(/,
+    /enhanceTopicHtmlGeneric/,
+    /publicationSlicesGeneric/,
+    /renderGlossaryGeneric/,
+    /renderReferencesGeneric/,
+    /function referenceSection\(/,
+  ]) assert.doesNotMatch(source, legacy);
+  for (const name of ['enhanceTopicHtml', 'publicationSlices', 'renderGlossary', 'renderReferences']) {
+    assert.equal((source.match(new RegExp(`export function ${name}\\(`, 'g')) || []).length, 1, name);
+    assert.match(build, new RegExp(`\\b${name}\\(`), name);
+  }
+  assert.match(source, /function applyT25LabContentCompatibility\(/);
+  assert.match(source, /applyT25LabContentCompatibility\(decorateDisclosure\(disclosures\), topicId, parsed\.activityIndex\)/);
+  assert.match(source, /if \(topicId === 'T25' && appendix &&/);
+  assert.match(build, /publicationSlices\(topic\.sourceBody, topic\.id\)/);
+  assert.match(build, /enhanceTopicHtml\(core\.html, topic\.id\)/);
 });

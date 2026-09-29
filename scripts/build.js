@@ -6,10 +6,10 @@ import { parseDocument, topicIdFromFilename } from './lib/metadata.js';
 import { renderMarkdown } from './lib/markdown.js';
 import {
   headingsFromHtml,
-  publicationSlicesGeneric,
-  enhanceTopicHtmlGeneric,
-  renderGlossaryGeneric,
-  renderReferencesGeneric,
+  publicationSlices,
+  enhanceTopicHtml,
+  renderGlossary,
+  renderReferences,
   offsetTopicHeadings,
 } from './lib/components.js';
 import { buildGuide, buildToc, buildDrawer } from './lib/navigation.js';
@@ -147,16 +147,16 @@ function searchEntriesForTopic(topic, html, sourceHeadingText) {
 }
 
 function topicContent(topic) {
-  const slices = publicationSlicesGeneric(topic.sourceBody, topic.id);
+  const slices = publicationSlices(topic.sourceBody, topic.id);
   const core = renderMarkdown(slices.core, {
     topicId:topic.id,
     canonicalAliases:topic.number !== 24 && topic.number !== 25,
     normalizeHeadingJumps:topic.number !== 24,
   });
-  let html = enhanceTopicHtmlGeneric(core.html, topic.id);
-  html += renderGlossaryGeneric(slices.glossarySource, topic.id);
+  let html = enhanceTopicHtml(core.html, topic.id);
+  html += renderGlossary(slices.glossarySource, topic.id);
   if (slices.postGlossary) html += renderMarkdown(slices.postGlossary, { topicId:topic.id }).html;
-  html += renderReferencesGeneric(slices.referencesSource, topic.sourceBody, topic.id);
+  html += renderReferences(slices.referencesSource, topic.sourceBody);
   return { html:offsetTopicHeadings(html), sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
 }
 
