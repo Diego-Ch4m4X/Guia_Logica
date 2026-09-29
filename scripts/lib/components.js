@@ -78,6 +78,7 @@ const LAB_ICONS = {
   explanation:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8 14c-1.2-1-2-2.6-2-4.3A6 6 0 0 1 12 4a6 6 0 0 1 6 5.7c0 1.7-.8 3.3-2 4.3-.8.7-1 1.2-1.3 2H9.3c-.3-.8-.5-1.3-1.3-2Z"></path></svg></span>',
   transfer:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><path d="M7 7h11m-4-3 4 3-4 3M17 17H6m4-3-4 3 4 3"></path></svg></span>',
   cleanup:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><path d="M4 20h8M14 4h3l3 3-9 9-4 1 1-4 6-9Z"></path><path d="m12.5 6.5 3 3"></path></svg></span>',
+  evidence:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"></path></svg></span>',
   criteria:'<span aria-hidden="true" class="lab-panel-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="m8.5 12 2.3 2.3 5-5"></path></svg></span>'
 };
 
@@ -257,7 +258,7 @@ function enhanceTopicHtml(html, topicId='T25') {
       {id:'394-java',key:'java',label:'Java'}, {id:'395-bash',key:'shell',label:'Shell / GNU Bash'}]}
   ];
   for (const group of groups) html = wrapTabGroup(html, group);
-  html = wrapLabs(html, topicId);
+  html = wrapLabsSemantic(html, topicId);
   html = wrapExercises(html, topicId);
   return html;
 }
@@ -469,9 +470,136 @@ function wrapLabsGeneric(html, topicId) {
   return out + original.slice(cursor);
 }
 
+function splitHeadingSectionsSemantic(segment, level) {
+  const re = new RegExp(`<h${level}([^>]*)\\bid="([^"]+)"([^>]*)>([\\s\\S]*?)<\\/h${level}>`, 'g');
+  const matches = [...segment.matchAll(re)];
+  return {
+    prefix: matches.length ? segment.slice(0, matches[0].index) : segment,
+    sections: matches.map((m, i) => ({
+      id: m[2],
+      title: decodeText(m[4]),
+      heading: m[0],
+      content: segment.slice(m.index + m[0].length, matches[i + 1]?.index ?? segment.length),
+    })),
+  };
+}
+
+function extractActivityFooter(segment) {
+  const match = segment.match(/<p><a href="#(?:índice|%C3%ADndice)">↑ Voltar ao índice<\/a><\/p>\s*$/);
+  if (!match) return { body:segment, footer:'' };
+  return {
+    body:segment.slice(0, match.index),
+    footer:'<footer class="activity-footer"><a href="#%C3%ADndice">↑ Voltar ao índice</a></footer>',
+  };
+}
+
+function aliasOnly(segment) {
+  return segment
+    .replace(/<a aria-hidden="true" class="anchor-alias" id="[^"]+"><\/a>/g, '')
+    .trim() === '';
+}
+
+function labTitleHtml(innerHtml, fallback) {
+  const at = innerHtml.indexOf('—');
+  return at >= 0 ? innerHtml.slice(at + 1).trim() : escapeHtml(fallback);
+}
+
+function applyT25LabContentCompatibility(html, topicId, labIndex) {
+  if (topicId !== 'T25') return html;
+  let out = html;
+  if (labIndex === 2) {
+    out = out.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (_, code) => `<pre><code>${code.replace(/\n\n+/g, '\n')}</code></pre>`);
+  }
+  if (labIndex === 3) {
+    out = out.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (_, code) => `<pre><code>${code.replace(/\n\n+/g, '\n').replace(/^    /gm, '')}</code></pre>`);
+  }
+  if (labIndex === 6) out = out.replace(/queue_enqueue B\n\nprintf/, 'queue_enqueue B\nprintf');
+  return out;
+}
+
+export function wrapLabsSemantic(html, topicId) {
+  const original = html;
+  const headingRe = /<h([1-5])([^>]*)\bid="([^"]+)"([^>]*)>([\s\S]*?)<\/h\1>/g;
+  const matches = [...original.matchAll(headingRe)]
+    .map(match => ({ match, parsed:parseLabHeading(decodeText(match[5])) }))
+    .filter(item => item.parsed);
+  if (!matches.length) return html;
+
+  const replacements = [];
+  for (const { match:m, parsed } of matches) {
+    const rootLevel = Number(m[1]);
+    let start = m.index;
+    const provisionalLabId = m[3].startsWith('lab-') ? `-${m[3]}` : m[3];
+    const aliasHtml = `<a aria-hidden="true" class="anchor-alias" id="${escapeAttribute(provisionalLabId)}"></a>`;
+    if (original.slice(0, start).endsWith(aliasHtml)) start -= aliasHtml.length;
+
+    const afterRoot = m.index + m[0].length;
+    const tail = original.slice(afterRoot);
+    const boundary = tail.match(new RegExp(`<h[1-${rootLevel}]\\b`));
+    const end = boundary ? afterRoot + boundary.index : original.length;
+    const extracted = extractActivityFooter(original.slice(afterRoot, end));
+    const body = extracted.body;
+    const partLevel = Math.min(rootLevel + 1, 6);
+    const split = splitHeadingSectionsSemantic(body, partLevel);
+    const mapped = split.sections.map(section => ({ section, part:classifyLabPartHeading(section.title) }));
+    const uniqueParts = new Set(mapped.map(item => item.part).filter(Boolean));
+    const structured = mapped.length >= 6
+      && mapped.every(item => item.part)
+      && uniqueParts.size === mapped.length
+      && aliasOnly(split.prefix);
+
+    const titleClass = rootLevel === 1 ? ' class="chapter-title"' : '';
+    const titleHtml = labTitleHtml(m[5], parsed.title);
+    const labId = provisionalLabId;
+    const header = `<header class="activity-header"><p class="activity-kicker">LAB ${parsed.activityIndex}<span>${topicId} · atividade prática</span></p><h${rootLevel}${titleClass} id="${labId}">${titleHtml}</h${rootLevel}></header>`;
+
+    let content;
+    if (!structured) {
+      content = `<div class="lab-compact-body">${decorateDisclosure(body)}</div>${extracted.footer}`;
+    } else {
+      const byPart = new Map(mapped.map(({ section, part }) => [part, { ...section }]));
+      let disclosures = '';
+      const criteria = byPart.get('criteria');
+      if (criteria) {
+        const disclosureAt = criteria.content.indexOf('<details');
+        if (disclosureAt >= 0) {
+          disclosures = criteria.content.slice(disclosureAt);
+          criteria.content = criteria.content.slice(0, disclosureAt);
+        }
+      }
+      disclosures = applyT25LabContentCompatibility(decorateDisclosure(disclosures), topicId, parsed.activityIndex);
+
+      const summary = ['objective','prerequisites','state','task']
+        .map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
+      const procedure = panelHtmlGeneric(byPart.get('procedure'), 'procedure', partLevel);
+      const validation = ['observe','tests','evidence']
+        .map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
+      const reflection = ['explanation','transfer','cleanup']
+        .map(part => panelHtmlGeneric(byPart.get(part), part, partLevel)).join('');
+      const criteriaPanel = panelHtmlGeneric(criteria, 'criteria', partLevel);
+      const summaryGrid = summary ? `<div class="lab-summary-grid">${summary}</div>` : '';
+      const validationGrid = validation ? `<div class="lab-validation-grid">${validation}</div>` : '';
+      const reflectionGrid = reflection ? `<div class="lab-reflection-grid">${reflection}</div>` : '';
+      const disclosureBlock = disclosures ? `<div class="lab-disclosures">${disclosures}</div>` : '';
+      content = `${split.prefix}${summaryGrid}${procedure}${validationGrid}${reflectionGrid}${criteriaPanel}${disclosureBlock}${extracted.footer}`;
+    }
+
+    const replacement = `<div aria-labelledby="${labId}" class="learning-activity lab-activity" data-activity="lab" data-lab="${parsed.activityIndex}" role="region">${header}${content}</div>`;
+    replacements.push({ start, end, replacement });
+  }
+
+  let out = '';
+  let cursor = 0;
+  for (const item of replacements) {
+    out += original.slice(cursor, item.start) + item.replacement;
+    cursor = item.end;
+  }
+  return out + original.slice(cursor);
+}
+
 export function enhanceTopicHtmlGeneric(html, topicId) {
   if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
-  let out = wrapLabsGeneric(html, topicId);
+  let out = wrapLabsSemantic(html, topicId);
   const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
   out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
   return out;
