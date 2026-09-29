@@ -899,11 +899,12 @@ function topLevelSection(source, headingPattern) {
 }
 
 export function publicationSlicesGeneric(body, topicId = '') {
-  if (topicId === 'T25') {
-    const legacy = publicationSlices(body);
-    return { ...legacy, referencesSource: '' };
-  }
   const normalized = String(body).replace(/\r\n?/g, '\n');
+  if (topicId === 'T25') {
+    const legacy = publicationSlices(normalized);
+    const references = topLevelSection(normalized, '\\d+\\. Referências');
+    return { ...legacy, referencesSource:references?.text || '' };
+  }
   const glossary = topLevelSection(normalized, '\\d+\\. Glossário');
   const references = topLevelSection(normalized, '\\d+\\. Referências');
   if (!glossary || !references) return { core: normalized, glossarySource: '', referencesSource: '', postGlossary: '' };
@@ -927,10 +928,23 @@ export function publicationSlicesGeneric(body, topicId = '') {
 }
 
 export function renderGlossaryGeneric(glossarySource, topicId) {
-  if (topicId === 'T25') return renderGlossary(glossarySource, topicId);
   const number = glossarySource.match(/^# (\d+)\. Glossário\s*$/m)?.[1] || '';
-  const rows = glossarySource.split('\n').filter(line => /^\|/.test(line)).slice(2);
+  const normalizedGlossary = String(glossarySource).replace(/\r\n?/g, '\n');
+  const rows = normalizedGlossary.split('\n').filter(line => /^\|/.test(line)).slice(2);
   const entries = rows.map(splitTableRow).filter(x => x.length >= 2);
+  const sourceOwnsReturnLink = /^\[↑ Voltar ao índice\]\(#índice\)\s*$/m.test(normalizedGlossary);
+  if (!entries.length) {
+    const headings = [...normalizedGlossary.matchAll(new RegExp(`^## ${number}\\.\\d+\\s+(.+?)\\s*$`, 'gm'))];
+    for (let index = 0; index < headings.length; index += 1) {
+      const heading = headings[index];
+      const end = headings[index + 1]?.index ?? normalizedGlossary.length;
+      let definition = normalizedGlossary.slice(heading.index + heading[0].length, end);
+      const footerAt = definition.search(/^\[↑ Voltar ao índice\]\(#índice\)\s*$/m);
+      if (footerAt >= 0) definition = definition.slice(0, footerAt);
+      const text = definition.replace(/\s+/g, ' ').trim();
+      if (text) entries.push([heading[1].trim(), text]);
+    }
+  }
   const groups = [];
   const map = new Map();
   for (const [term, definition] of entries) {
@@ -939,7 +953,10 @@ export function renderGlossaryGeneric(glossarySource, topicId) {
     map.get(letter).push([term, definition]);
   }
   const lower = topicId.toLowerCase();
-  const nav = groups.map(l => `<a href="#gloss-${lower}-letter-${portableBaseSlug(l)}">${escapeHtml(l)}</a>`).join('');
+  const letterId = letter => sourceOwnsReturnLink
+    ? `gloss-${lower}-letter-${portableBaseSlug(letter)}`
+    : `gloss-${lower}-${portableBaseSlug(letter)}`;
+  const nav = groups.map(letter => `<a href="#${letterId(letter)}">${escapeHtml(letter)}</a>`).join('');
   const glossaryIdCounts = new Map();
   const content = groups.map(letter => {
     const items = map.get(letter).map(([term, def]) => {
@@ -949,28 +966,29 @@ export function renderGlossaryGeneric(glossarySource, topicId) {
       const id = n === 0 ? base : `${base}-${n}`;
       return `<article class="glossary-item" id="${escapeAttribute(id)}"><h4>${renderInline(term)}</h4><p>${renderInline(def)}</p></article>`;
     }).join('');
-    return `<section class="glossary-letter-group" id="gloss-${lower}-letter-${portableBaseSlug(letter)}"><h3 class="glossary-letter">${escapeHtml(letter)}</h3><div class="glossary-grid">${items}</div></section>`;
+    return `<section class="glossary-letter-group" id="${letterId(letter)}"><h3 class="glossary-letter">${escapeHtml(letter)}</h3><div class="glossary-grid">${items}</div></section>`;
   }).join('');
   const rootId = `${number}-glossário`;
   const subId = `${number}-1-glossário-a-z`;
-  return `<h1 class="chapter-title" id="${rootId}">${number}. Glossário</h1><h2 id="${subId}">${number}.1 Glossário A–Z</h2><p class="glossary-intro">Termos do ${topicId} em ordem alfabética, com navegação direta por letra.</p><nav aria-label="Índice alfabético do glossário" class="glossary-letters">${nav}</nav>${content}<p><a href="#%C3%ADndice">↑ Voltar ao índice</a></p>`;
+  const footer = sourceOwnsReturnLink ? '<p><a href="#%C3%ADndice">↑ Voltar ao índice</a></p>' : '';
+  return `<h1 class="chapter-title" id="${rootId}">${number}. Glossário</h1><h2 id="${subId}">${number}.1 Glossário A–Z</h2><p class="glossary-intro">Termos do ${topicId} em ordem alfabética, com navegação direta por letra.</p><nav aria-label="Índice alfabético do glossário" class="glossary-letters">${nav}</nav>${content}${footer}`;
 }
 
 export function renderReferencesGeneric(referenceSource, fullBody, topicId = '') {
-  if (topicId === 'T25') return renderReferences(fullBody);
   const number = referenceSource.match(/^# (\d+)\. Referências\s*$/m)?.[1] || '';
-  const sectionRe = new RegExp(`^## ${number}\\.(\\d+)\\s+(.+?)\\s*$([\\s\\S]*?)(?=^## ${number}\\.|\\Z)`, 'gm');
+  const sectionRe = new RegExp(`^## ${number}\\.(\\d+)\\s+(.+?)\\s*$([\\s\\S]*?)(?=^## ${number}\\.|(?![\\s\\S]))`, 'gm');
   const sections = [];
   const idCounts = new Map();
   for (const m of referenceSource.matchAll(sectionRe)) {
     const sub = Number(m[1]);
     if (sub < 2 || sub > 6) continue;
     const title = m[2].trim();
+    if (/^Estado de QA\b/i.test(title)) continue;
     const items = listItems(m[3]);
     if (!items.length) continue;
     const isBibliography = /literatura|bibliografia/i.test(title);
-    const cleanTitle = topicId === 'T24' && isBibliography ? 'Bibliografia' : title;
-    const baseId = topicId === 'T24' && isBibliography ? 'bibliografia' : (portableBaseSlug(cleanTitle) || 'referencia');
+    const cleanTitle = isBibliography ? 'Bibliografia' : title;
+    const baseId = isBibliography ? 'bibliografia' : (portableBaseSlug(cleanTitle) || 'referencia');
     const n = idCounts.get(baseId) || 0;
     const id = n === 0 ? baseId : `${baseId}-${n}`;
     idCounts.set(baseId, n + 1);
