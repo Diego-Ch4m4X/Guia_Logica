@@ -219,10 +219,10 @@ test('T25 keeps its four approved LanguageTabs keys and excludes documentation/r
   }
 });
 
-test('legacy T25 tab configuration is inactive and reserved for P05 cleanup', async () => {
+test('semantic LanguageTabs has one shared call path without a legacy T25 configuration', async () => {
   const source = await readFile(path.join(ROOT, 'scripts/lib/components.js'), 'utf8');
   assert.equal((source.match(/\bwrapTabGroup\(/g) || []).length, 1, 'legacy wrapper must have definition only');
   assert.doesNotMatch(source, /15-python--abstração-e-implementação-concreta/);
   assert.doesNotMatch(source, /253-python/);
-  assert.equal((source.match(/\bwrapLanguageTabsSemantic\(/g) || []).length, 3, 'semantic wrapper must have one definition and two active calls');
+  assert.equal((source.match(/\bwrapLanguageTabsSemantic\(/g) || []).length, 2, 'semantic wrapper must have one definition and one active call');
 });

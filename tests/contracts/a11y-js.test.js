@@ -115,7 +115,6 @@ test('direct topic H5 headings retain the former H4 visual metrics', async () =>
 
 test('dead build helpers and internal-only exports stay removed', async () => {
   const pairs = [
-    ['scripts/lib/components.js', ['enhanceTopicHtml', 'publicationSlices']],
     ['scripts/lib/metadata.js', ['splitFrontMatter', 'parseYamlSubset']],
     ['scripts/lib/paths.js', ['srcDir']],
     ['scripts/lib/seo.js', ['canonicalForHome', 'canonicalForTopic', 'buildHomeJsonLd', 'buildTopicJsonLd']],

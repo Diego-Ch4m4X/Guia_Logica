@@ -11,9 +11,7 @@ import {
   parseExerciseRootHeading,
   parseLabHeading,
   renderGlossary,
-  renderGlossaryGeneric,
   renderReferences,
-  renderReferencesGeneric,
 } from '../../scripts/lib/components.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -111,7 +109,7 @@ test('table rows preserve escaped pipes and pipes inside code spans', () => {
   assert.match(html, /<td>left \| right<\/td>/);
 });
 
-test('both glossary renderers preserve pipe-bearing technical notation', () => {
+test('canonical glossary renderer preserves pipe-bearing technical notation', () => {
   const source = [
     '# 52. Glossário',
     '',
@@ -120,12 +118,13 @@ test('both glossary renderers preserve pipe-bearing technical notation', () => {
     '| Tamanho da entrada | Usa `|V|` vértices e `|E|` arestas |',
   ].join('\n');
 
-  for (const html of [renderGlossary(source, 'T25'), renderGlossaryGeneric(source, 'T24')]) {
+  for (const topicId of ['T25', 'T24']) {
+    const html = renderGlossary(source, topicId);
     assert.match(html, /Usa <code>\|V\|<\/code> vértices e <code>\|E\|<\/code> arestas/);
   }
 });
 
-test('both reference renderers link canonical URL forms', () => {
+test('canonical reference renderer links canonical URL forms', () => {
   const body = [
     '# 55. Referências',
     '',
@@ -146,13 +145,11 @@ test('both reference renderers link canonical URL forms', () => {
     '**Fim — teste**',
   ].join('\n');
 
-  const genericSource = body;
-  for (const html of [renderReferences(body), renderReferencesGeneric(genericSource, body, 'T24')]) {
-    assert.match(html, /href="https:\/\/example\.com\/direct"/);
-    assert.match(html, /href="https:\/\/example\.com\/manual"/);
-    assert.match(html, /href="https:\/\/example\.com\/spec"/);
-    assert.match(html, /href="https:\/\/docs\.python\.org\/3\/"/);
-  }
+  const html = renderReferences(body, body);
+  assert.match(html, /href="https:\/\/example\.com\/direct"/);
+  assert.match(html, /href="https:\/\/example\.com\/manual"/);
+  assert.match(html, /href="https:\/\/example\.com\/spec"/);
+  assert.match(html, /href="https:\/\/docs\.python\.org\/3\/"/);
 });
 
 test('generated corpus preserves known pipe-bearing expressions', async () => {
