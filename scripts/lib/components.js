@@ -238,6 +238,101 @@ function wrapExercises(html, topicId='T25') {
   return html.slice(0,whole.start) + root + `<div class="exercise-suite">${pieces}${suiteFooter}</div>` + html.slice(whole.end);
 }
 
+function decorateExerciseBody(html) {
+  const decorated = decorateDisclosure(html);
+  return decorated.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (whole, content) => {
+    return /rubrica de autoavaliação/i.test(decodeText(content))
+      ? `<blockquote class="exercise-rubric">${content}</blockquote>`
+      : whole;
+  });
+}
+
+function extractExerciseFooter(segment) {
+  const match = segment.match(/<p><a href="#(?:índice|%C3%ADndice)">↑ Voltar ao índice<\/a><\/p>\s*$/);
+  if (!match) return { body:segment, footer:'' };
+  return {
+    body:segment.slice(0, match.index),
+    footer:'<p class="exercise-suite-footer"><a href="#%C3%ADndice">↑ Voltar ao índice</a></p>',
+  };
+}
+
+function exercisePrefixMode(prefix) {
+  const normalized = prefix
+    .replace(/<a aria-hidden="true" class="anchor-alias" id="[^"]+"><\/a>/g, '')
+    .trim();
+  if (!normalized) return 'none';
+  return /<(?:ol|ul|pre|details|blockquote|table)\b|class="(?:code-block|table-wrap)"/i.test(normalized)
+    ? 'activity'
+    : 'intro';
+}
+
+function exerciseSectionKey(section, index) {
+  return normalizeSemanticHeading(section.title).sectionPrefix || String(index + 1);
+}
+
+function exerciseActivityHtml(section, step, topicId) {
+  const key = exerciseSectionKey(section, step);
+  const body = decorateExerciseBody(section.content);
+  return `<div aria-labelledby="${section.id}" class="learning-activity exercise-activity" data-activity="exercise" data-exercise="${escapeAttribute(key)}" data-exercise-step="${step + 1}" role="region"><span aria-hidden="true" class="exercise-marker">${step + 1}</span><header class="activity-header"><p class="activity-kicker">ATIVIDADE DE CONSOLIDAÇÃO<span>${topicId} · exercícios</span></p>${section.heading}</header><div class="exercise-body">${body}</div></div>`;
+}
+
+function exerciseGroupHtml(rootId, body, step, topicId) {
+  return `<div aria-labelledby="${rootId}" class="learning-activity exercise-activity exercise-activity--group" data-activity="exercise" data-exercise-step="${step + 1}" role="region"><span aria-hidden="true" class="exercise-marker">${step + 1}</span><header class="activity-header"><p class="activity-kicker">ATIVIDADE DE CONSOLIDAÇÃO<span>${topicId} · exercícios</span></p></header><div class="exercise-body">${decorateExerciseBody(body)}</div></div>`;
+}
+
+export function wrapExercisesSemantic(html, topicId) {
+  const original = html;
+  const rootRe = /<h1([^>]*)\bid="([^"]+)"([^>]*)>([\s\S]*?)<\/h1>/g;
+  const matches = [...original.matchAll(rootRe)]
+    .map(match => ({ match, parsed: parseExerciseRootHeading(decodeText(match[4])) }))
+    .filter(item => item.parsed);
+  if (!matches.length) return html;
+
+  const replacements = [];
+  for (const { match:m } of matches) {
+    const start = m.index;
+    const afterRoot = start + m[0].length;
+    const tail = original.slice(afterRoot);
+    const boundary = tail.match(/<h1\b/);
+    const end = boundary ? afterRoot + boundary.index : original.length;
+    const extracted = extractExerciseFooter(original.slice(afterRoot, end));
+    const split = splitHeadingSectionsSemantic(extracted.body, 2);
+    const prefixMode = exercisePrefixMode(split.prefix);
+    const rootId = m[2];
+
+    let suite;
+    if (!split.sections.length) {
+      const card = `<div aria-labelledby="${rootId}" class="learning-activity exercise-activity exercise-activity--flat" data-activity="exercise" role="region"><header class="activity-header"><p class="activity-kicker">ATIVIDADE DE CONSOLIDAÇÃO<span>${topicId} · exercícios</span></p></header><div class="exercise-body">${decorateExerciseBody(extracted.body)}</div></div>`;
+      suite = `<div class="exercise-suite exercise-suite--flat">${card}${extracted.footer}</div>`;
+    } else {
+      let step = 0;
+      let intro = '';
+      const pieces = [];
+      if (prefixMode === 'intro') {
+        intro = `<div class="exercise-suite-intro">${decorateExerciseBody(split.prefix)}</div>`;
+      } else if (prefixMode === 'activity') {
+        pieces.push(exerciseGroupHtml(rootId, split.prefix, step, topicId));
+        step += 1;
+      }
+      for (const section of split.sections) {
+        pieces.push(exerciseActivityHtml(section, step, topicId));
+        step += 1;
+      }
+      suite = `${intro}<div class="exercise-suite">${pieces.join('')}${extracted.footer}</div>`;
+    }
+
+    replacements.push({ start, end, replacement:m[0] + suite });
+  }
+
+  let out = '';
+  let cursor = 0;
+  for (const item of replacements) {
+    out += original.slice(cursor, item.start) + item.replacement;
+    cursor = item.end;
+  }
+  return out + original.slice(cursor);
+}
+
 function enhanceTopicHtml(html, topicId='T25') {
   const groups = [
     { key:'transferencia', endId:'19-mesmo-adt-mecanismos-diferentes', panels:[
@@ -259,7 +354,7 @@ function enhanceTopicHtml(html, topicId='T25') {
   ];
   for (const group of groups) html = wrapTabGroup(html, group);
   html = wrapLabsSemantic(html, topicId);
-  html = wrapExercises(html, topicId);
+  html = wrapExercisesSemantic(html, topicId);
   return html;
 }
 
@@ -600,6 +695,7 @@ export function wrapLabsSemantic(html, topicId) {
 export function enhanceTopicHtmlGeneric(html, topicId) {
   if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
   let out = wrapLabsSemantic(html, topicId);
+  out = wrapExercisesSemantic(out, topicId);
   const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
   out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
   return out;
