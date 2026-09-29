@@ -59,10 +59,23 @@ function articleHead(topic) {
 
 function topicOverview(topic, body) {
   const labs = (body.match(/^#{1,6}\s+.*(?:LAB|Laboratório)\s+\d+/gmi) || []).length;
-  if (topic.number === 25) {
-    return `<div class="quick-answer"><h2 class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</h2><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e pela <a href="#visao-panoramica">Visão panorâmica</a>. Depois avance de ADT e contrato para representação, invariantes, custos e transferência entre linguagens.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div><div class="info-grid"><section class="info-card"><h2>Filosofia operacional</h2><ul><li>Compreender o problema</li><li>Modelar pelo contrato</li><li>Separar interface e representação</li><li>Validar invariantes e custos</li><li>Transferir o modelo entre linguagens</li></ul></section><section class="info-card"><h2>Escopo</h2><ul><li>ADT, contratos e invariantes</li><li>Fila FIFO como estudo canônico</li><li>Python, JavaScript, Java e GNU Bash</li><li>Modelagem, decisão e trade-offs</li></ul></section></div>`;
-  }
-  return `<div class="quick-answer"><h2 class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Comece por aqui</h2><p><strong>Estudando ${topic.id} pela primeira vez?</strong> Comece pelo <a href="#resumo-executivo">Resumo executivo</a> e avance pela visão panorâmica, conceitos, exemplos e atividades.</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div>`;
+  const enabledLanguages = Object.entries(topic.languages || {})
+    .filter(([, enabled]) => enabled)
+    .map(([language]) => ({ python:'Python', javascript:'JavaScript', java:'Java', bash:'GNU Bash' })[language] || language);
+  const difficulty = Array.isArray(topic.difficulty) ? topic.difficulty : topic.difficulty ? [topic.difficulty] : [];
+  const scopeItems = [
+    topic.category && `Categoria: ${topic.category}`,
+    ...difficulty.map(level => `Nível: ${level}`),
+  ].filter(Boolean);
+  const infoCards = [
+    ['Escopo', scopeItems],
+    ['Linguagens', enabledLanguages],
+  ].filter(([, items]) => items.length)
+    .map(([title, items]) => `<section class="info-card"><h2>${escapeHtml(title)}</h2><ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`)
+    .join('');
+  const infoGrid = infoCards ? `<div class="info-grid">${infoCards}</div>` : '';
+
+  return `<div class="quick-answer"><h2 class="quick-kicker"><span aria-hidden="true" class="quick-symbol"></span>Visão geral</h2><p>${escapeHtml(topic.description)}</p></div><div class="stat-grid"><div class="stat-card"><strong>${labs}</strong><span>LABs</span></div><div class="stat-card"><strong>${escapeHtml(topic.version)}</strong><span>Versão do material</span></div></div>${infoGrid}`;
 }
 
 function related(topic, topics) {
@@ -142,7 +155,7 @@ function topicContent(topic) {
   });
   let html = enhanceTopicHtmlGeneric(core.html, topic.id);
   html += renderGlossaryGeneric(slices.glossarySource, topic.id);
-  if (slices.postGlossary) html += renderMarkdown(slices.postGlossary).html;
+  if (slices.postGlossary) html += renderMarkdown(slices.postGlossary, { topicId:topic.id }).html;
   html += renderReferencesGeneric(slices.referencesSource, topic.sourceBody, topic.id);
   return { html:offsetTopicHeadings(html), sourceHeadingText:new Map(core.headings.map(h => [h.id, h.text])) };
 }
