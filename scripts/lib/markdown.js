@@ -221,7 +221,7 @@ export function renderMarkdown(body, options = {}) {
   let previousRenderedHeadingLevel = 1;
   const canonicalCounts = new Map();
   const canonicalUsed = new Set(reserved);
-  const context = { checkCounter: 0, checkPrefix: String(options.topicId || 'T25').toLowerCase() };
+  const context = { checkCounter: 0, checkPrefix: String(options.topicId || 'content').toLowerCase() };
 
   while (i < lines.length) {
     const line = lines[i];
