@@ -89,8 +89,11 @@ test('continuous SMIL animations pause and resume, including cloned nodes', asyn
   delete globalThis.document;
 });
 
-test('legacy T25 checklist storage key remains stable', async () => {
-  assert.match(await read('src/assets/js/checklists.js'), /logic\.t25\.checks\.v1/);
+test('checklists use a shared key and retain the legacy key for migration', async () => {
+  const source = await read('src/assets/js/checklists.js');
+  assert.match(source, /logic\.guide\.checks\.v1/);
+  assert.match(source, /logic\.t25\.checks\.v1/);
+  assert.doesNotMatch(source, /const storageKey\s*=\s*['"]logic\.t25\.checks\.v1/);
 });
 
 test('direct topic H5 headings retain the former H4 visual metrics', async () => {
