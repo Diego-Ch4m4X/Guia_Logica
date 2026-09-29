@@ -695,6 +695,7 @@ export function wrapLabsSemantic(html, topicId) {
 export function enhanceTopicHtmlGeneric(html, topicId) {
   if (topicId === 'T25') return enhanceTopicHtml(html, topicId);
   let out = wrapLabsSemantic(html, topicId);
+  out = wrapExercisesSemantic(out, topicId);
   const realIds = new Set([...out.matchAll(/<(?!a\b)[A-Za-z][^>]*\sid="([^"]+)"[^>]*>/g)].map(m => m[1]));
   out = out.replace(/<a aria-hidden="true" class="anchor-alias" id="([^"]+)"><\/a>/g, (whole, id) => realIds.has(id) ? '' : whole);
   return out;
