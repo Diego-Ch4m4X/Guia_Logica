@@ -40,17 +40,36 @@ function markdownLabCount(source) {
   return count;
 }
 
-test('semantic LAB wrapper preserves compact variants and enriches structured variants', () => {
+test('semantic LAB wrapper renders compact, sectioned and structured variants intentionally', () => {
   const compact = wrapLabsSemantic([
     '<h2 id="lab-compacto">🧪 Laboratório 1 — Compacto</h2>',
-    '<h3 id="objetivo">Objetivo</h3><p>Praticar.</p>',
-    '<h3 id="parte-a">Parte A</h3><p>Conteúdo próprio.</p>',
+    '<p>Executar a tarefa e registrar o resultado.</p>',
     '<h2 id="seguinte">Seção seguinte</h2>',
   ].join(''), 'T01');
   assert.equal((compact.match(/data-activity="lab"/g) || []).length, 1);
+  assert.match(compact, /class="learning-activity lab-activity lab-activity--compact"/);
+  assert.match(compact, /data-lab-layout="compact"/);
   assert.match(compact, /class="lab-compact-body"/);
-  assert.match(compact, /id="parte-a">Parte A<\/h3>/);
   assert.match(compact, /<h2 id="seguinte">Seção seguinte<\/h2>/);
+
+  const sectioned = wrapLabsSemantic([
+    '<h2 id="lab-secionado">🧪 Laboratório 2 — Seções próprias</h2>',
+    '<h3 id="objetivo">Objetivo</h3><p>Praticar.</p>',
+    '<h3 id="parte-a">Parte A</h3><p>Conteúdo próprio.</p>',
+    '<hr><a aria-hidden="true" class="anchor-alias" id="-seguinte"></a>',
+    '<h2 id="seguinte">Seção seguinte</h2>',
+  ].join(''), 'T01');
+  assert.equal((sectioned.match(/data-activity="lab"/g) || []).length, 1);
+  assert.match(sectioned, /class="learning-activity lab-activity lab-activity--sectioned"/);
+  assert.match(sectioned, /data-lab-layout="sectioned"/);
+  assert.match(sectioned, /class="lab-section-list"/);
+  assert.match(sectioned, /data-lab-part="objective"/);
+  assert.match(sectioned, /data-lab-section="custom"/);
+  assert.match(sectioned, /id="parte-a"/);
+  assert.doesNotMatch(sectioned, /class="lab-compact-body"/);
+  assert.doesNotMatch(sectioned, /class="lab-summary-grid"/);
+  assert.match(sectioned, /<\/section><\/div><\/div><hr><a aria-hidden="true" class="anchor-alias" id="-seguinte"><\/a><h2 id="seguinte">/);
+  assert.match(sectioned, /<h2 id="seguinte">Seção seguinte<\/h2>/);
 
   const structured = wrapLabsSemantic([
     '<h1 class="chapter-title" id="36-lab-2">36. 🧪 LAB 2 — Rastrear busca linear</h1>',
@@ -66,6 +85,7 @@ test('semantic LAB wrapper preserves compact variants and enriches structured va
   assert.match(structured, /class="lab-panel lab-panel--procedure"/);
   assert.match(structured, /class="lab-validation-grid"/);
   assert.doesNotMatch(structured, /class="lab-compact-body"/);
+  assert.doesNotMatch(structured, /data-lab-layout=/);
 });
 
 test('every canonical LAB heading is rendered as a LabActivity in T01-T35', async () => {
@@ -83,6 +103,42 @@ test('every canonical LAB heading is rendered as a LabActivity in T01-T35', asyn
     const actual = (html.match(/data-activity="lab"/g) || []).length;
     assert.equal(actual, expected, `${id}: LAB source/render count mismatch`);
   }
+});
+
+test('every non-structured LAB has an explicit compact or sectioned presentation', async () => {
+  let totalLabs = 0;
+  let totalStructured = 0;
+  let totalSectioned = 0;
+  let totalCompact = 0;
+
+  for (let number = 1; number <= 35; number += 1) {
+    const id = `t${String(number).padStart(2, '0')}`;
+    const html = await readFile(path.join(ROOT, `dist/topicos/${id}/index.html`), 'utf8');
+    const labs = (html.match(/data-activity="lab"/g) || []).length;
+    const sectioned = (html.match(/data-lab-layout="sectioned"/g) || []).length;
+    const compact = (html.match(/data-lab-layout="compact"/g) || []).length;
+    const structured = labs - sectioned - compact;
+
+    assert.ok(structured >= 0, `${id}: LAB layout accounting underflow`);
+    assert.equal(labs, structured + sectioned + compact, `${id}: LAB layout accounting mismatch`);
+    assert.doesNotMatch(html, /lab-activity--sectioned[^"\n]*lab-activity--compact|lab-activity--compact[^"\n]*lab-activity--sectioned/, `${id}: ambiguous LAB layout class`);
+
+    totalLabs += labs;
+    totalStructured += structured;
+    totalSectioned += sectioned;
+    totalCompact += compact;
+  }
+
+  assert.equal(totalLabs, 302, 'canonical LAB corpus changed unexpectedly');
+  assert.equal(totalStructured, 159, 'previously structured LABs must remain structured');
+  assert.equal(totalSectioned + totalCompact, 143, 'non-structured LAB baseline changed unexpectedly');
+
+  const t01 = await readFile(path.join(ROOT, 'dist/topicos/t01/index.html'), 'utf8');
+  assert.equal((t01.match(/data-lab-layout="sectioned"/g) || []).length, 3, 'T01 custom-section LABs must use the sectioned presentation');
+
+  const t25 = await readFile(path.join(ROOT, 'dist/topicos/t25/index.html'), 'utf8');
+  assert.equal((t25.match(/data-activity="lab"/g) || []).length, 8);
+  assert.doesNotMatch(t25, /data-lab-layout=/, 'T25 structured LAB baseline must remain on the approved layout');
 });
 
 test('semantic LAB wrapper keeps the approved T25 structural shape available', () => {

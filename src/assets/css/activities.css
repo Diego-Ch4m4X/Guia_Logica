@@ -6,8 +6,26 @@
 .activity-kicker span{color:var(--fil-text-muted);font-size:.65rem;font-weight:700;letter-spacing:.08em}
 .lab-activity .activity-header>:is(h2,h3,h4,h5,h6),.exercise-activity .activity-header>:is(h2,h3,h4,h5,h6){margin:0;padding:0;border:0;color:var(--fil-text);letter-spacing:-.025em}
 .lab-activity .activity-header>:is(h2,h3,h4,h5,h6){font-size:clamp(1.72rem,3.5vw,2.7rem)}
-.lab-compact-body{min-width:0;padding-top:17px}
+.lab-activity--sectioned,.lab-activity--compact{margin:2.7rem 0;padding:clamp(18px,2.2vw,24px);box-shadow:0 10px 30px color-mix(in srgb,var(--fil-text) 5%,transparent)}
+.lab-activity--sectioned .activity-header,.lab-activity--compact .activity-header{padding-bottom:14px}
+.lab-activity--sectioned .activity-header>:is(h2,h3,h4,h5,h6){font-size:clamp(1.45rem,2.8vw,2rem)}
+.lab-activity--compact .activity-header>:is(h2,h3,h4,h5,h6){font-size:clamp(1.28rem,2.4vw,1.72rem)}
+.lab-activity--compact .activity-kicker{margin-bottom:5px;font-size:.71rem}
+.lab-compact-body{min-width:0;padding-top:14px}
 .lab-compact-body>:first-child{margin-top:0}
+.lab-compact-body>:last-child{margin-bottom:0}
+.lab-compact-body>:is(h3,h4,h5,h6){margin:1.35rem 0 .55rem;color:var(--fil-brand);font-size:clamp(.98rem,1.5vw,1.08rem);letter-spacing:0;line-height:1.35}
+.lab-section-lead{min-width:0;margin-top:14px;padding:14px 16px;border-left:2px solid color-mix(in srgb,var(--fil-brand) 54%,var(--fil-border));background:color-mix(in srgb,var(--fil-surface-muted) 38%,transparent)}
+.lab-section-lead>:first-child{margin-top:0}
+.lab-section-lead>:last-child{margin-bottom:0}
+.lab-section-list{min-width:0;margin-top:14px;border:1px solid var(--fil-border);background:color-mix(in srgb,var(--fil-surface) 96%,var(--fil-surface-muted) 4%)}
+.lab-section{min-width:0;padding:16px 18px}
+.lab-section+.lab-section{border-top:1px solid var(--fil-border)}
+.lab-section>:is(h3,h4,h5,h6){display:flex;align-items:center;gap:9px;margin:0 0 8px;color:var(--fil-brand);font-size:clamp(.98rem,1.6vw,1.12rem);letter-spacing:0;line-height:1.35}
+.lab-section--custom>:is(h3,h4,h5,h6){color:var(--fil-text-secondary)}
+.lab-section-heading-text{min-width:0}
+.lab-section>p:first-of-type,.lab-section>ol:first-of-type,.lab-section>ul:first-of-type{margin-top:0}
+.lab-section>p:last-child,.lab-section>ol:last-child,.lab-section>ul:last-child{margin-bottom:0}
 .lab-summary-grid,.lab-validation-grid,.lab-reflection-grid{display:grid;min-width:0}
 .lab-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:2px;border:1px solid var(--fil-border)}
 .lab-summary-grid .lab-panel{padding:17px 19px;background:color-mix(in srgb,var(--fil-surface-muted) 44%,transparent)}
@@ -76,7 +94,7 @@
 .exercise-body>.activity-disclosure{margin-top:14px}
 .exercise-suite-footer{display:flex;justify-content:flex-end;margin:-.7rem 0 3.3rem;padding-top:12px;border-top:1px solid var(--fil-border)}
 .exercise-suite-footer a{font-size:.78rem;font-weight:700;text-decoration:none}
-@container technicalArticle (max-width:620px){.learning-activity{margin:2.8rem 0;padding:18px}.lab-summary-grid{grid-template-columns:1fr}.lab-summary-grid .lab-panel:nth-child(n){border-right:0;border-bottom:1px solid var(--fil-border)}.lab-summary-grid .lab-panel:last-child{border-bottom:0}.activity-header{padding-bottom:16px}.exercise-suite{gap:14px;padding-left:30px}.exercise-suite--flat{padding-left:0}.exercise-suite::before{left:10px}.exercise-marker{left:-33px;width:27px;height:27px}.exercise-activity{padding:18px}.exercise-body>ol>li{padding-left:46px}.exercise-body>ol>li::before{left:11px}}
+@container technicalArticle (max-width:620px){.learning-activity{margin:2.8rem 0;padding:18px}.lab-activity--sectioned,.lab-activity--compact{margin:2.2rem 0;padding:16px}.lab-section{padding:14px}.lab-summary-grid{grid-template-columns:1fr}.lab-summary-grid .lab-panel:nth-child(n){border-right:0;border-bottom:1px solid var(--fil-border)}.lab-summary-grid .lab-panel:last-child{border-bottom:0}.activity-header{padding-bottom:16px}.exercise-suite{gap:14px;padding-left:30px}.exercise-suite--flat{padding-left:0}.exercise-suite::before{left:10px}.exercise-marker{left:-33px;width:27px;height:27px}.exercise-activity{padding:18px}.exercise-body>ol>li{padding-left:46px}.exercise-body>ol>li::before{left:11px}}
 
 /* Containment hardening: keep wide code/tables scrollable inside the activity instead of expanding the disclosure/grid track. */
 .lab-disclosures,.activity-disclosure,.activity-disclosure>*{min-width:0}
