@@ -17,6 +17,21 @@ test('published CSS has no !important declarations', async () => {
   }
 });
 
+test('LAB presentation has one CSS owner and explicit compact/sectioned contracts', async () => {
+  const names = (await readdir(cssDir)).filter(name => name.endsWith('.css'));
+  const labSelector = /\.(?:learning-activity|lab-activity|lab-compact-body|lab-section(?:-lead|-list|-heading-text|--semantic|--custom)?|lab-summary-grid|lab-validation-grid|lab-reflection-grid|lab-panel(?:-icon|-heading-text|--procedure|--criteria)?|lab-disclosures)\b/;
+
+  for (const name of names.filter(name => name !== 'activities.css')) {
+    assert.doesNotMatch(withoutComments(await css(name)), labSelector, `${name} must not own LAB presentation`);
+  }
+
+  const activities = await css('activities.css');
+  assert.match(activities, /\.lab-activity--sectioned,\.lab-activity--compact\{/);
+  assert.match(activities, /\.lab-section-list\{/);
+  assert.match(activities, /\.lab-section--custom>:is\(h3,h4,h5,h6\)\{/);
+  assert.match(activities, /\.lab-compact-body>:is\(h3,h4,h5,h6\)\{/);
+});
+
 test('technical side panel has one structural owner and an inner scroller', async () => {
   const topic = await css('topic.css');
   const reference = await css('topic-reference.css');

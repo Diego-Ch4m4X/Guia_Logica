@@ -577,6 +577,17 @@ function panelHtmlGeneric(section, part, level) {
   return `<section class="lab-panel${extra}" data-lab-part="${part}">${heading}${section.content}</section>`;
 }
 
+function sectionHtmlGeneric(section, part, level) {
+  const modifier = part ? ' lab-section--semantic' : ' lab-section--custom';
+  const metadata = part
+    ? ` data-lab-part="${escapeAttribute(part)}"`
+    : ' data-lab-section="custom"';
+  const icon = part ? LAB_ICONS[part] : '';
+  const headingContent = section.inner || escapeHtml(section.title);
+  const heading = `<h${level} id="${escapeAttribute(section.id)}">${icon}<span class="lab-section-heading-text">${headingContent}</span></h${level}>`;
+  return `<section class="lab-section${modifier}"${metadata}>${heading}${decorateDisclosure(section.content)}</section>`;
+}
+
 function splitHeadingSectionsSemantic(segment, level) {
   const re = new RegExp(`<h${level}([^>]*)\\bid="([^"]+)"([^>]*)>([\\s\\S]*?)<\\/h${level}>`, 'g');
   const matches = [...segment.matchAll(re)];
@@ -585,6 +596,7 @@ function splitHeadingSectionsSemantic(segment, level) {
     sections: matches.map((m, i) => ({
       id: m[2],
       title: decodeText(m[4]),
+      inner: m[4],
       heading: m[0],
       content: segment.slice(m.index + m[0].length, matches[i + 1]?.index ?? segment.length),
     })),
@@ -597,6 +609,15 @@ function extractActivityFooter(segment) {
   return {
     body:segment.slice(0, match.index),
     footer:'<footer class="activity-footer"><a href="#%C3%ADndice">↑ Voltar ao índice</a></footer>',
+  };
+}
+
+function extractActivitySeparator(segment) {
+  const match = segment.match(/\s*<hr>\s*(?:(?:<p>)?<a\b[^>]*\bid="[^"]+"[^>]*><\/a>(?:<\/p>)?\s*)*$/);
+  if (!match) return { body:segment, separator:'' };
+  return {
+    body:segment.slice(0, match.index),
+    separator:match[0],
   };
 }
 
@@ -643,17 +664,28 @@ export function wrapLabsSemantic(html, topicId) {
     const afterRoot = m.index + m[0].length;
     const tail = original.slice(afterRoot);
     const boundary = tail.match(new RegExp(`<h[1-${rootLevel}]\\b`));
-    const end = boundary ? afterRoot + boundary.index : original.length;
-    const extracted = extractActivityFooter(original.slice(afterRoot, end));
-    const body = extracted.body;
+    const rawEnd = boundary ? afterRoot + boundary.index : original.length;
+    const extracted = extractActivityFooter(original.slice(afterRoot, rawEnd));
+    let body = extracted.body;
     const partLevel = Math.min(rootLevel + 1, 6);
-    const split = splitHeadingSectionsSemantic(body, partLevel);
-    const mapped = split.sections.map(section => ({ section, part:classifyLabPartHeading(section.title) }));
+    let split = splitHeadingSectionsSemantic(body, partLevel);
+    let mapped = split.sections.map(section => ({ section, part:classifyLabPartHeading(section.title) }));
     const uniqueParts = new Set(mapped.map(item => item.part).filter(Boolean));
     const structured = mapped.length >= 6
       && mapped.every(item => item.part)
       && uniqueParts.size === mapped.length
       && aliasOnly(split.prefix);
+    let end = rawEnd;
+    if (!structured && boundary) {
+      const separated = extractActivitySeparator(body);
+      if (separated.separator) {
+        body = separated.body;
+        end -= separated.separator.length;
+        split = splitHeadingSectionsSemantic(body, partLevel);
+        mapped = split.sections.map(section => ({ section, part:classifyLabPartHeading(section.title) }));
+      }
+    }
+    const sectioned = !structured && mapped.length >= 2;
 
     const titleClass = rootLevel === 1 ? ' class="chapter-title"' : '';
     const titleHtml = labTitleHtml(m[5], parsed.title);
@@ -661,9 +693,9 @@ export function wrapLabsSemantic(html, topicId) {
     const header = `<header class="activity-header"><p class="activity-kicker">LAB ${parsed.activityIndex}<span>${topicId} · atividade prática</span></p><h${rootLevel}${titleClass} id="${labId}">${titleHtml}</h${rootLevel}></header>`;
 
     let content;
-    if (!structured) {
-      content = `<div class="lab-compact-body">${decorateDisclosure(body)}</div>${extracted.footer}`;
-    } else {
+    let layoutClass = '';
+    let layoutData = '';
+    if (structured) {
       const byPart = new Map(mapped.map(({ section, part }) => [part, { ...section }]));
       let disclosures = '';
       const criteria = byPart.get('criteria');
@@ -689,9 +721,23 @@ export function wrapLabsSemantic(html, topicId) {
       const reflectionGrid = reflection ? `<div class="lab-reflection-grid">${reflection}</div>` : '';
       const disclosureBlock = disclosures ? `<div class="lab-disclosures">${disclosures}</div>` : '';
       content = `${split.prefix}${summaryGrid}${procedure}${validationGrid}${reflectionGrid}${criteriaPanel}${disclosureBlock}${extracted.footer}`;
+    } else if (sectioned) {
+      layoutClass = ' lab-activity--sectioned';
+      layoutData = ' data-lab-layout="sectioned"';
+      const prefix = split.prefix.trim()
+        ? (aliasOnly(split.prefix) ? split.prefix : `<div class="lab-section-lead">${decorateDisclosure(split.prefix)}</div>`)
+        : '';
+      const sections = mapped
+        .map(({ section, part }) => sectionHtmlGeneric(section, part, partLevel))
+        .join('');
+      content = `${prefix}<div class="lab-section-list">${sections}</div>${extracted.footer}`;
+    } else {
+      layoutClass = ' lab-activity--compact';
+      layoutData = ' data-lab-layout="compact"';
+      content = `<div class="lab-compact-body">${decorateDisclosure(body)}</div>${extracted.footer}`;
     }
 
-    const replacement = `<div aria-labelledby="${labId}" class="learning-activity lab-activity" data-activity="lab" data-lab="${parsed.activityIndex}" role="region">${header}${content}</div>`;
+    const replacement = `<div aria-labelledby="${labId}" class="learning-activity lab-activity${layoutClass}" data-activity="lab" data-lab="${parsed.activityIndex}"${layoutData} role="region">${header}${content}</div>`;
     replacements.push({ start, end, replacement });
   }
 
