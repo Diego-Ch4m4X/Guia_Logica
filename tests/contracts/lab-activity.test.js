@@ -64,6 +64,7 @@ test('semantic LAB wrapper renders compact, sectioned and structured variants in
   assert.match(sectioned, /data-lab-layout="sectioned"/);
   assert.match(sectioned, /class="lab-section-list"/);
   assert.match(sectioned, /data-lab-part="objective"/);
+  assert.doesNotMatch(sectioned, /lab-section--semantic/, 'semantic sections use data-lab-part instead of an unstyled marker class');
   assert.match(sectioned, /data-lab-section="custom"/);
   assert.match(sectioned, /id="parte-a"/);
   assert.doesNotMatch(sectioned, /class="lab-compact-body"/);
@@ -173,4 +174,45 @@ test('T25 LAB 2, 3 and 6 content compatibility remains covered by the golden', a
 
   assert.match(components, /function applyT25LabContentCompatibility\(/);
   for (const index of [127, 128, 131]) assert.equal(actualBlocks[index], goldenBlocks[index], `T25 code block ${index + 1}`);
+});
+
+test('structured LAB markup exposes stable semantic hooks for adaptive summary layout', () => {
+  const asymmetric = wrapLabsSemantic([
+    '<h1 class="chapter-title" id="lab-asymmetric">🧪 LAB 1 — Assimétrico</h1>',
+    '<h2 id="objective-asymmetric">Objetivo</h2><p>Objetivo curto.</p>',
+    '<h2 id="prerequisites-asymmetric">Pré-requisitos</h2><p>Nenhum.</p>',
+    '<h2 id="state-asymmetric">Estado inicial</h2><p>Casos:</p><blockquote><p>A</p></blockquote><p>B:</p><blockquote><p>B</p></blockquote><p>C:</p><blockquote><p>C</p></blockquote>',
+    '<h2 id="task-asymmetric">Tarefa</h2><p>Resolver.</p>',
+    '<h2 id="procedure-asymmetric">Procedimento</h2><p>Executar.</p>',
+    '<h2 id="observe-asymmetric">O que observar</h2><p>Saída.</p>',
+    '<h2 id="tests-asymmetric">Testes</h2><p>Casos.</p>',
+    '<h2 id="evidence-asymmetric">Evidência</h2><pre><code>resultado</code></pre>',
+    '<h2 id="transfer-asymmetric">Variação / transferência</h2><p>Variar.</p>',
+  ].join(''), 'T01');
+
+  assert.match(asymmetric, /class="lab-summary-grid"/);
+  assert.match(asymmetric, /data-lab-part="state"/);
+  assert.match(asymmetric, /data-lab-part="task"/);
+  assert.match(asymmetric, /data-lab-part="evidence"/);
+  assert.match(asymmetric, /data-lab-part="transfer"/);
+  assert.doesNotMatch(asymmetric, /data-lab-layout=/, 'adaptive structured LABs must not be reclassified');
+
+  const balanced = wrapLabsSemantic([
+    '<h1 class="chapter-title" id="lab-balanced">🧪 LAB 2 — Equilibrado</h1>',
+    '<h2 id="objective-balanced">Objetivo</h2><p>A</p>',
+    '<h2 id="prerequisites-balanced">Pré-requisitos</h2><p>B</p>',
+    '<h2 id="state-balanced">Estado inicial</h2><p>C</p>',
+    '<h2 id="task-balanced">Tarefa</h2><p>D</p>',
+    '<h2 id="procedure-balanced">Procedimento</h2><p>E</p>',
+    '<h2 id="observe-balanced">O que observar</h2><p>F</p>',
+    '<h2 id="tests-balanced">Testes</h2><p>G</p>',
+    '<h2 id="explanation-balanced">Explicação</h2><p>H</p>',
+    '<h2 id="transfer-balanced">Variação / transferência</h2><p>I</p>',
+    '<h2 id="cleanup-balanced">Limpeza</h2><p>J</p>',
+  ].join(''), 'T25');
+
+  assert.match(balanced, /class="lab-summary-grid"/);
+  assert.match(balanced, /class="lab-validation-grid"/);
+  assert.match(balanced, /class="lab-reflection-grid"/);
+  assert.doesNotMatch(balanced, /data-lab-layout=/, 'balanced T25-like LABs must remain structured');
 });

@@ -31,8 +31,14 @@
 .lab-summary-grid .lab-panel{padding:17px 19px;background:color-mix(in srgb,var(--fil-surface-muted) 44%,transparent)}
 .lab-summary-grid .lab-panel:nth-child(odd){border-right:1px solid var(--fil-border)}
 .lab-summary-grid .lab-panel:nth-child(-n+2){border-bottom:1px solid var(--fil-border)}
+.lab-summary-grid:has(>[data-lab-part="state"] :is(pre,table,details),>[data-lab-part="task"] :is(pre,table,details),>[data-lab-part="state"]>blockquote:nth-of-type(2),>[data-lab-part="task"]>blockquote:nth-of-type(2),>[data-lab-part="state"]>:nth-child(5),>[data-lab-part="task"]>:nth-child(5))>:is([data-lab-part="state"],[data-lab-part="task"]){grid-column:1/-1;border-right:0;border-bottom:1px solid var(--fil-border)}
+.lab-summary-grid .lab-panel:last-child{border-bottom:0}
 .lab-validation-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
-.lab-reflection-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+.lab-validation-grid>.lab-panel:only-child,.lab-validation-grid>.lab-panel:nth-child(3):last-child{grid-column:1/-1}
+.lab-reflection-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-top:14px}
+.lab-reflection-grid>.lab-panel{grid-column:span 2}
+.lab-reflection-grid>.lab-panel:only-child{grid-column:1/-1}
+.lab-reflection-grid>.lab-panel:first-child:nth-last-child(2),.lab-reflection-grid>.lab-panel:first-child:nth-last-child(2)+.lab-panel{grid-column:span 3}
 .lab-panel{min-width:0}
 .lab-panel>:is(h3,h4,h5,h6){display:flex;align-items:center;gap:10px;margin:0 0 8px;color:var(--fil-brand);font-size:clamp(1rem,1.7vw,1.2rem);line-height:1.3}
 .lab-panel-icon{display:inline-grid;flex:0 0 auto;width:1.25rem;height:1.25rem;place-items:center;color:var(--fil-brand)}
@@ -61,7 +67,7 @@
 .activity-footer a{font-size:.78rem;font-weight:700;text-decoration:none}
 .learning-activity .code-block,.learning-activity .table-wrap,.learning-activity pre{min-width:0;max-width:100%}
 .learning-activity .table-wrap{overflow:auto}
-@container technicalArticle (max-width:760px){.lab-reflection-grid{grid-template-columns:1fr}.lab-validation-grid{grid-template-columns:1fr}}
+@container technicalArticle (max-width:760px){.lab-reflection-grid,.lab-validation-grid{grid-template-columns:1fr}.lab-reflection-grid>.lab-panel,.lab-validation-grid>.lab-panel{grid-column:1/-1}}
 @media(max-width:767px){.learning-activity{box-shadow:none}.activity-kicker{gap:6px}.learning-activity .activity-disclosure .code-block,.learning-activity .activity-disclosure .table-wrap{width:calc(100% - 1.5rem);max-width:none;margin-right:.75rem;margin-left:.75rem}}
 
 /* Exercise suite — a connected sequence inspired by the application/decision reference. */

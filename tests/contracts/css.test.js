@@ -19,7 +19,7 @@ test('published CSS has no !important declarations', async () => {
 
 test('LAB presentation has one CSS owner and explicit compact/sectioned contracts', async () => {
   const names = (await readdir(cssDir)).filter(name => name.endsWith('.css'));
-  const labSelector = /\.(?:learning-activity|lab-activity|lab-compact-body|lab-section(?:-lead|-list|-heading-text|--semantic|--custom)?|lab-summary-grid|lab-validation-grid|lab-reflection-grid|lab-panel(?:-icon|-heading-text|--procedure|--criteria)?|lab-disclosures)\b/;
+  const labSelector = /\.(?:learning-activity|lab-activity|lab-compact-body|lab-section(?:-lead|-list|-heading-text|--custom)?|lab-summary-grid|lab-validation-grid|lab-reflection-grid|lab-panel(?:-icon|-heading-text|--procedure|--criteria)?|lab-disclosures)\b/;
 
   for (const name of names.filter(name => name !== 'activities.css')) {
     assert.doesNotMatch(withoutComments(await css(name)), labSelector, `${name} must not own LAB presentation`);
@@ -86,4 +86,18 @@ test('selection uses semantic tokens with unchanged theme values', async () => {
   for (const name of ['surface-strong', 'info-bg', 'success', 'success-bg', 'warning-bg', 'danger', 'danger-bg']) {
     assert.doesNotMatch(tokens, new RegExp(`--fil-${name}:`));
   }
+});
+
+test('structured LAB grids adapt to cardinality and structural weight without topic-specific CSS', async () => {
+  const activities = withoutComments(await css('activities.css'));
+
+  assert.match(activities, /\.lab-summary-grid:has\([^{}]*data-lab-part="state"[^{}]*data-lab-part="task"[^{}]*\)>:is\(\[data-lab-part="state"\],\[data-lab-part="task"\]\)\{grid-column:1\/-1;border-right:0;border-bottom:1px solid var\(--fil-border\)\}/);
+  assert.match(activities, /\.lab-summary-grid \.lab-panel:last-child\{border-bottom:0\}/);
+  assert.match(activities, /\.lab-validation-grid>\.lab-panel:only-child,\.lab-validation-grid>\.lab-panel:nth-child\(3\):last-child\{grid-column:1\/-1\}/);
+  assert.match(activities, /\.lab-reflection-grid\{grid-template-columns:repeat\(6,minmax\(0,1fr\)\);/);
+  assert.match(activities, /\.lab-reflection-grid>\.lab-panel\{grid-column:span 2\}/);
+  assert.match(activities, /\.lab-reflection-grid>\.lab-panel:only-child\{grid-column:1\/-1\}/);
+  assert.match(activities, /\.lab-reflection-grid>\.lab-panel:first-child:nth-last-child\(2\),\.lab-reflection-grid>\.lab-panel:first-child:nth-last-child\(2\)\+\.lab-panel\{grid-column:span 3\}/);
+  assert.match(activities, /@container technicalArticle \(max-width:760px\)\{\.lab-reflection-grid,\.lab-validation-grid\{grid-template-columns:1fr\}\.lab-reflection-grid>\.lab-panel,\.lab-validation-grid>\.lab-panel\{grid-column:1\/-1\}\}/);
+  assert.doesNotMatch(activities, /\bT(?:0[1-9]|[12]\d|3[0-5])\b/i, 'LAB CSS must not branch on a topic id');
 });
