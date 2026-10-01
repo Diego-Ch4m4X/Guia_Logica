@@ -578,7 +578,7 @@ function panelHtmlGeneric(section, part, level) {
 }
 
 function sectionHtmlGeneric(section, part, level) {
-  const modifier = part ? ' lab-section--semantic' : ' lab-section--custom';
+  const modifier = part ? '' : ' lab-section--custom';
   const metadata = part
     ? ` data-lab-part="${escapeAttribute(part)}"`
     : ' data-lab-section="custom"';
