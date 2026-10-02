@@ -163,6 +163,76 @@ test('semantic LAB wrapper keeps the approved T25 structural shape available', (
   assert.match(html, /class="lab-panel lab-panel--criteria"/);
 });
 
+test('structured LABs promote canonical criteria, hint and reference-solution disclosures out of semantic panels', () => {
+  const html = wrapLabsSemantic([
+    '<h1 class="chapter-title" id="40-lab-1">40. 🧪 Laboratório 1 — Requisito → operações → estrutura</h1>',
+    '<h2 id="401-objetivo">40.1 Objetivo</h2><p>A</p>',
+    '<h2 id="402-prerequisitos">40.2 Pré-requisitos</h2><p>B</p>',
+    '<h2 id="403-estado">40.3 Estado inicial</h2><p>C</p>',
+    '<h2 id="404-tarefa">40.4 Tarefa</h2><p>D</p>',
+    '<h2 id="405-procedimento">40.5 Procedimento</h2><p>E</p>',
+    '<h2 id="406-observar">40.6 O que observar</h2><p>F</p>',
+    '<h2 id="407-testes">40.7 Testes</h2><p>G</p>',
+    '<h2 id="408-explicacao">40.8 Explicação</h2><p>H</p>',
+    '<h2 id="409-transferencia">40.9 Variação / transferência</h2><p>I</p>',
+    '<details><summary><strong>Critérios de aceite</strong></summary><ul><li>J</li></ul></details>',
+    '<details><summary><strong>💡 Dica</strong></summary><p>K</p></details>',
+    '<details><summary><strong>Solução de referência — interpretação</strong></summary><p>L</p></details>',
+    '<h2 id="4010-limpeza">40.10 Limpeza</h2><p>M</p>',
+  ].join(''), 'T35');
+
+  const transferStart = html.indexOf('data-lab-part="transfer"');
+  const transferEnd = html.indexOf('</section>', transferStart);
+  const transfer = html.slice(transferStart, transferEnd);
+  assert.doesNotMatch(transfer, /<details\b/);
+  assert.match(html, /class="lab-panel lab-panel--criteria" data-lab-part="criteria"/);
+  assert.match(html, /class="lab-disclosures"/);
+  assert.match(html, /class="activity-disclosure activity-hint"/);
+  assert.match(html, /class="activity-disclosure activity-solution"/);
+  assert.ok(html.indexOf('class="lab-reflection-grid"') < html.indexOf('lab-panel--criteria'));
+  assert.ok(html.indexOf('lab-panel--criteria') < html.indexOf('class="lab-disclosures"'));
+  assert.match(html, />J<\/li>/);
+  assert.match(html, />K<\/p>/);
+  assert.match(html, />L<\/p>/);
+});
+
+test('structured LAB panel details use the activity disclosure contract without semantic relocation', () => {
+  const html = wrapLabsSemantic([
+    '<h2 id="lab-t01-01">🧪 Laboratório 1 — Transformar pedido vago em especificação</h2>',
+    '<h3 id="objetivo">Objetivo</h3><p>A</p>',
+    '<h3 id="pre">Pré-requisitos</h3><p>B</p>',
+    '<h3 id="estado">Estado inicial</h3><blockquote><p>C</p></blockquote>',
+    '<h3 id="tarefa">Tarefa</h3><p>D</p>',
+    '<h3 id="procedimento">Procedimento</h3><p>E</p>',
+    '<h3 id="observar">O que observar</h3><p>F</p>',
+    '<h3 id="testes">Testes / autoverificação</h3><p>G</p>',
+    '<h3 id="evidencia">Evidência</h3><p>H</p><details><summary>Solução-modelo mínima e explicação</summary><p>I</p></details>',
+    '<h3 id="transferencia">Variação / transferência</h3><p>J</p><blockquote><p>K</p></blockquote>',
+  ].join(''), 'T01');
+
+  const evidenceStart = html.indexOf('data-lab-part="evidence"');
+  const evidenceEnd = html.indexOf('</section>', evidenceStart);
+  const evidence = html.slice(evidenceStart, evidenceEnd);
+  assert.match(evidence, /<details class="activity-disclosure">/);
+  assert.match(evidence, /Solução-modelo mínima e explicação/);
+  assert.doesNotMatch(html, /<details>/);
+  assert.match(html, /data-lab-part="transfer"/);
+  assert.match(html, /<blockquote><p>K<\/p><\/blockquote>/);
+});
+
+test('canonical structured LABs keep criteria, hint and reference solution outside reflection panels', async () => {
+  const promotableSummary = /<summary\b[^>]*>[\s\S]*?(?:Critérios de aceite|💡 Dica|(?:🔎\s*)?Solução de referência)[\s\S]*?<\/summary>/iu;
+
+  for (let number = 1; number <= 35; number += 1) {
+    const id = `t${String(number).padStart(2, '0')}`;
+    const html = await readFile(path.join(ROOT, `dist/topicos/${id}/index.html`), 'utf8');
+    const panels = [...html.matchAll(/<section class="lab-panel[^\"]*" data-lab-part="(?:explanation|transfer|cleanup)">([\s\S]*?)<\/section>/g)];
+    for (const panel of panels) {
+      assert.doesNotMatch(panel[1], promotableSummary, `${id}: promotable disclosure remained inside a reflection panel`);
+    }
+  }
+});
+
 test('T25 LAB 2, 3 and 6 content compatibility remains covered by the golden', async () => {
   const components = await readFile(path.join(ROOT, 'scripts/lib/components.js'), 'utf8');
   const actual = await readFile(path.join(ROOT, 'dist/topicos/t25/index.html'), 'utf8');

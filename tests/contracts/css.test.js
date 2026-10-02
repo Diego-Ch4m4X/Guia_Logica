@@ -99,5 +99,7 @@ test('structured LAB grids adapt to cardinality and structural weight without to
   assert.match(activities, /\.lab-reflection-grid>\.lab-panel:only-child\{grid-column:1\/-1\}/);
   assert.match(activities, /\.lab-reflection-grid>\.lab-panel:first-child:nth-last-child\(2\),\.lab-reflection-grid>\.lab-panel:first-child:nth-last-child\(2\)\+\.lab-panel\{grid-column:span 3\}/);
   assert.match(activities, /@container technicalArticle \(max-width:760px\)\{\.lab-reflection-grid,\.lab-validation-grid\{grid-template-columns:1fr\}\.lab-reflection-grid>\.lab-panel,\.lab-validation-grid>\.lab-panel\{grid-column:1\/-1\}\}/);
+  assert.match(activities, /\.learning-activity blockquote\{width:100%;max-width:none;min-width:0;overflow-wrap:anywhere\}/);
+  assert.match(activities, /\.learning-activity \.activity-disclosure>summary\{[^{}]*overflow-wrap:anywhere[^{}]*\}/);
   assert.doesNotMatch(activities, /\bT(?:0[1-9]|[12]\d|3[0-5])\b/i, 'LAB CSS must not branch on a topic id');
 });
