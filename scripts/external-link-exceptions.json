@@ -13,6 +13,12 @@
       "reason": "Official ISO page independently verified as active; CI requests may be refused."
     },
     {
+      "url": "https://www.iso.org/standard/11955.html",
+      "expected": [403],
+      "classification": "automation-restricted",
+      "reason": "Official ISO 5807:1985 page independently verified as active; CI requests may be refused."
+    },
+    {
       "url": "https://www.linkedin.com/in/diegodsl/",
       "expected": [999],
       "classification": "automation-restricted",

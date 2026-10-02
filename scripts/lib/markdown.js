@@ -1,5 +1,6 @@
 import { escapeHtml, escapeAttribute } from './html.js';
 import { createSlugger, headingPlainText } from './slug.js';
+import { renderLogicReference } from './logic-reference.js';
 
 const COPY_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>';
 const WRAP_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h12a4 4 0 0 1 0 8H9"></path><path d="m12 11-3 3 3 3"></path><path d="M4 18h4"></path></svg>';
@@ -239,7 +240,7 @@ export function renderMarkdown(body, options = {}) {
       }
       if (i < lines.length) i += 1;
       const codeText = `${code.join('\n')}\n`;
-      out.push(lang === 'mermaid' ? renderMermaid(codeText) : renderCodeBlock(lang, codeText));
+      out.push(lang === 'mermaid' ? renderMermaid(codeText) : lang === 'logic-reference' ? renderLogicReference(codeText) : renderCodeBlock(lang, codeText));
       continue;
     }
 

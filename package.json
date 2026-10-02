@@ -15,7 +15,7 @@
     "validate:js": "node scripts/check-js-syntax.js",
     "check:external-links": "node scripts/check-external-links.js"
   },
-  "version": "1.2.0",
+  "version": "1.3.0",
   "devDependencies": {
     "vnu-jar": "26.8.30"
   }

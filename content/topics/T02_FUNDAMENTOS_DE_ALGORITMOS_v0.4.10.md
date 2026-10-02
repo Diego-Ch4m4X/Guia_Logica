@@ -1,10 +1,10 @@
 ---
 title: "Fundamentos de Algoritmos"
 slug: "fundamentos-de-algoritmos"
-description: "Guia técnico e didático sobre conceito de algoritmo, problema computacional, entrada/saída, propriedades, estado, correção, término, pré-condições, pós-condições e formas de representação."
+description: "Guia técnico e didático sobre conceito de algoritmo, problema computacional, entrada/saída, propriedades, estado, correção, término, pré-condições, pós-condições e formas de representação, incluindo pseudocódigo e fluxogramas."
 category: "Lógica de Programação"
 status: "baseline-estavel"
-version: "0.4.3"
+version: "0.4.10"
 
 contract:
   source: "PROMPT_MESTRE_LOGICA_FUNDAMENTOS_ALGORITMOS_E_ESTRUTURAS_DE_DADOS_v1.10.0.md"
@@ -40,7 +40,7 @@ tags:
   - "fluxograma"
 
 created: "2026-09-13"
-last_reviewed: "2026-09-16"
+last_reviewed: "2026-09-30"
 ---
 
 <a id="inicio"></a>
@@ -74,19 +74,23 @@ Uma visão útil é:
 ```text
 PROBLEMA
 ↓
-define quais resultados são corretos
+define o que deve ser resolvido e quais resultados são corretos
 
 ALGORITMO
 ↓
-define como produzir um resultado
+define o procedimento para produzir um resultado
+
+PROGRAMA / IMPLEMENTAÇÃO
+↓
+concretiza o algoritmo em uma linguagem e ambiente
 
 EXECUÇÃO
 ↓
-aplica o algoritmo a uma instância concreta
+aplica a implementação a uma instância concreta
 
-PROGRAMA
+RESULTADO
 ↓
-implementa um ou mais algoritmos em uma linguagem/ambiente
+deve satisfazer a especificação
 ```
 
 No MIT 6.006, um problema é modelado como uma relação entre entradas e saídas corretas, e um algoritmo resolve esse problema quando produz uma saída correta para cada entrada pertencente ao domínio considerado. Essa distinção é essencial:
@@ -124,8 +128,9 @@ A ideia central é:
 | “A mesma entrada sempre segue o mesmo caminho?” | Determinismo / randomização |
 | “Como descrevo sem depender de linguagem?” | Pseudocódigo / linguagem estruturada / fluxograma |
 | “Código compilou/executou; logo está certo?” | Não — execução ≠ correção |
+| “O código não compila/executa; logo o algoritmo está errado?” | Não necessariamente — erro de sintaxe/runtime pertence à implementação; o algoritmo deve ser analisado separadamente |
 
-> **Primeira vez aqui?** Para construir primeiro o modelo mental essencial, consulte a [rota de primeira passagem](#modo-primeira-passagem) antes de seguir a leitura completa.
+> **Primeira vez aqui? Rota essencial:** para construir primeiro o modelo mental central, consulte a [rota de primeira passagem](#modo-primeira-passagem) antes de seguir a leitura completa. Ela é a versão mínima recomendada; a leitura completa preserva aprofundamentos, troubleshooting e prática.
 
 ---
 
@@ -187,7 +192,7 @@ A ideia central é:
   - [9.2 Pós-condição](#92-pós-condição)
   - [9.3 Contrato](#93-contrato)
   - [9.4 Pré-condição não é validação](#94-pré-condição-não-é-validação)
-  - [9.5 Pós-condição não é “saída de exemplo”](#95-postcondição-não-é-saída-de-exemplo)
+  - [9.5 Pós-condição não é “saída de exemplo”](#95-pos-condicao-nao-e-saida-de-exemplo)
   - [9.6 Por que contratos ajudam](#96-por-que-contratos-ajudam)
 - [10. Correção](#10-correção)
   - [10.1 Correção para uma instância](#101-correção-para-uma-instância)
@@ -228,10 +233,22 @@ A ideia central é:
   - [15.5 Cuidado com “mágica”](#155-cuidado-com-mágica)
   - [15.6 Farrell: pseudocódigo × fluxograma](#156-farrell-pseudocódigo--fluxograma)
 - [16. Fluxograma](#16-fluxograma)
-  - [16.1 Exemplo conceitual](#161-exemplo-conceitual)
-  - [16.2 Vantagens](#162-vantagens)
-  - [16.3 Limitações](#163-limitações)
-  - [16.4 Regra deste guia](#164-regra-deste-guia)
+  - [16.1 O que é — e o que não é](#161-o-que-é--e-o-que-não-é)
+  - [16.2 Anatomia — nós, linhas de fluxo e caminhos](#162-anatomia--nós-linhas-de-fluxo-e-caminhos)
+  - [16.3 Tabela canônica de símbolos](#163-tabela-canônica-de-símbolos)
+  - [16.4 Núcleo essencial — como combinar forma e função](#164-núcleo-essencial--como-combinar-forma-e-função)
+  - [16.5 Conectores — linha de fluxo ≠ referência](#165-conectores--linha-de-fluxo--referência)
+  - [16.6 Processo predefinido / subprocesso](#166-processo-predefinido--subprocesso)
+  - [16.7 Símbolos complementares e fronteira de escopo](#167-símbolos-complementares-e-fronteira-de-escopo)
+  - [16.8 Sequência](#168-sequência)
+  - [16.9 Seleção / decisão](#169-seleção--decisão)
+  - [16.10 Repetição](#1610-repetição)
+  - [16.11 Regras de construção e legibilidade](#1611-regras-de-construção-e-legibilidade)
+  - [16.12 Exemplo progressivo — `MAXIMUM`](#1612-exemplo-progressivo--maximum)
+  - [16.13 Como ler e revisar um fluxograma](#1613-como-ler-e-revisar-um-fluxograma)
+  - [16.14 Fluxograma ↔ pseudocódigo](#1614-fluxograma--pseudocódigo)
+  - [16.15 Mermaid × notação conceitual](#1615-mermaid--notação-conceitual)
+  - [16.16 Vantagens, limitações e quando usar](#1616-vantagens-limitações-e-quando-usar)
 - [17. Exemplo progressivo — encontrar o maior valor](#17-exemplo-progressivo--encontrar-o-maior-valor)
   - [17.1 Problema](#171-problema)
   - [17.2 Contrato](#172-contrato)
@@ -258,7 +275,7 @@ A ideia central é:
   - [19.4 “Algoritmo sempre é determinístico”](#194-algoritmo-sempre-é-determinístico)
   - [19.5 “Todo programa deve terminar”](#195-todo-programa-deve-terminar)
   - [19.6 “Pré-condição é a mesma coisa que `if` de validação”](#196-pré-condição-é-a-mesma-coisa-que-if-de-validação)
-  - [19.7 “Pós-condição é um exemplo”](#197-postcondição-é-um-exemplo)
+  - [19.7 “Pós-condição é um exemplo”](#197-pos-condicao-e-um-exemplo)
   - [19.8 “Pseudocódigo possui sintaxe oficial”](#198-pseudocódigo-possui-sintaxe-oficial)
   - [19.9 “Fluxograma é obrigatório”](#199-fluxograma-é-obrigatório)
   - [19.10 “Inicializar máximo com zero funciona”](#1910-inicializar-máximo-com-zero-funciona)
@@ -309,6 +326,11 @@ A ideia central é:
   - [22.11 Contraexemplo](#2211-contraexemplo)
   - [22.12 Correção × eficiência](#2212-correção--eficiência)
   - [22.13 Desafio integrador](#2213-desafio-integrador)
+  - [22.14 Escolha o símbolo adequado](#2214-escolha-o-símbolo-adequado)
+  - [22.15 Linha de fluxo, conectores e subprocesso](#2215-linha-de-fluxo-conectores-e-subprocesso)
+  - [22.16 Depure o fluxograma](#2216-depure-o-fluxograma)
+  - [22.17 Fluxograma ↔ pseudocódigo](#2217-fluxograma--pseudocódigo)
+  - [22.18 Visualmente válido, logicamente incorreto](#2218-visualmente-válido-logicamente-incorreto)
 - [23. Evidências de domínio](#23-evidências-de-domínio)
   - [Você deve conseguir explicar](#você-deve-conseguir-explicar)
   - [Você deve conseguir aplicar](#você-deve-conseguir-aplicar)
@@ -322,8 +344,9 @@ A ideia central é:
   - [26.2 Currículo](#262-currículo)
   - [26.3 MIT OpenCourseWare](#263-mit-opencourseware)
   - [26.4 Stanford](#264-stanford)
-  - [26.5 Fontes locais efetivamente consultadas](#265-fontes-locais-efetivamente-consultadas)
-  - [26.6 Como as fontes foram usadas](#266-como-as-fontes-foram-usadas)
+  - [26.5 Normas e documentação oficial](#265-normas-e-documentação-oficial)
+  - [26.6 Fontes locais efetivamente consultadas](#266-fontes-locais-efetivamente-consultadas)
+  - [26.7 Como as fontes foram usadas](#267-como-as-fontes-foram-usadas)
 - [27. Histórico de versões](#27-histórico-de-versões)
 
 ---
@@ -487,6 +510,11 @@ FUNDAMENTOS DE ALGORITMOS
     ├── linguagem natural estruturada
     ├── pseudocódigo
     ├── fluxograma
+    │   ├── símbolos e suas funções
+    │   ├── linhas de fluxo e conectores
+    │   ├── sequência, decisão e repetição
+    │   ├── subprocessos
+    │   └── leitura, construção e revisão
     └── código
 ```
 
@@ -495,26 +523,32 @@ FUNDAMENTOS DE ALGORITMOS
 ```mermaid
 flowchart LR
     P[Problema] --> D[Domínio e critérios de saída]
-    D --> A[Algoritmo]
+    D --> A[Algoritmo proposto]
     A --> I[Estado inicial]
     I --> T[Transições de estado]
     T --> F[Estado final / saída]
     F --> C{Satisfaz a pós-condição?}
     C -- Não --> X[Contraexemplo / falha]
-    C -- Sim --> U{Vale para todas as entradas válidas?}
-    U -- Ainda não demonstrado --> R[Argumento de correção + testes]
-    U -- Sim --> OK[Correção no escopo declarado]
+    C -- Sim --> U{Correção geral já foi justificada?}
+    U -- Não --> R1[Construir argumento de correção]
+    R1 --> R2[Testar casos e procurar contraexemplos]
+    R2 --> U
+    U -- Sim --> V{Término também foi justificado?}
+    V -- Não --> Q[Fechar argumento de término]
+    Q --> V
+    V -- Sim --> OK[Correção total no escopo declarado]
 ```
 
 Leitura textual:
 
 1. o problema define quais entradas pertencem ao domínio e o que conta como saída correta;
-2. o algoritmo define um procedimento para transformar uma instância em resultado;
+2. o algoritmo proposto define um procedimento para transformar uma instância em resultado;
 3. a execução percorre estados por meio de transições;
 4. o estado final deve satisfazer a pós-condição;
 5. um único caso correto confirma apenas aquela instância;
 6. um contraexemplo é suficiente para refutar uma afirmação universal de correção;
-7. para correção total, além do resultado correto, é necessário que o procedimento termine no escopo assumido.
+7. quando ainda falta uma justificativa geral, o argumento de correção e a busca por contraexemplos cumprem papéis diferentes: testes ajudam a encontrar falhas, mas não substituem a demonstração exigida pelo contrato;
+8. para correção total, além da correção parcial, é necessário justificar o término para as entradas cobertas pela pré-condição.
 
 ### 2.3 Consulta rápida — conceito × pergunta × risco
 
@@ -530,7 +564,7 @@ Leitura textual:
 | Variante/progresso | “O que aproxima a execução do término?” | raciocinar sobre finitude | criar loop/recursão sem progresso |
 | Contraexemplo | “Existe entrada válida que quebra a afirmação?” | refutar correção | aceitar solução plausível sem estressá-la |
 | Pseudocódigo | “Como expresso a ideia com precisão suficiente?” | comunicar algoritmo sem prender à sintaxe | esconder operações vagas atrás de aparência formal |
-| Fluxograma | “A estrutura visual ajuda a ver decisões e fluxo?” | comunicar controle | tratar diagrama como requisito ou prova de correção |
+| Fluxograma | “A estrutura visual ajuda a ver decisões e fluxo?” | comunicar controle, caminhos e composição | usar forma/conector inadequado ou tratar o diagrama como prova de correção |
 | Código | “Como esta linguagem realiza o procedimento?” | implementação concreta | confundir compilação/execução com correção |
 
 ### 2.4 Pergunta prática → mecanismo inicial
@@ -553,7 +587,7 @@ Leitura textual:
 | Não confundir | Diferença |
 |---|---|
 | **Problema × algoritmo** | problema define o que é correto; algoritmo define como produzir uma saída |
-| **Algoritmo × programa** | algoritmo é o procedimento/ideia; programa é uma implementação executável em ambiente concreto |
+| **Algoritmo × programa** | algoritmo é o procedimento abstrato suficientemente definido; programa é uma implementação executável em ambiente concreto |
 | **Instância × problema geral** | instância é uma entrada concreta; problema descreve uma classe de entradas e saídas corretas |
 | **Pré-condição × validação** | pré-condição é parte do contrato assumido; validação é uma estratégia de implementação para detectar/recusar entrada |
 | **Pós-condição × saída de exemplo** | pós-condição é uma propriedade geral; exemplo é apenas uma instância |
@@ -562,6 +596,7 @@ Leitura textual:
 | **Determinismo × correção** | um algoritmo pode ser randomizado e ainda possuir contrato/correção adequados ao seu modelo |
 | **Invariante × valor imutável** | invariante é uma propriedade preservada; variáveis individuais podem mudar |
 | **Representação × algoritmo** | pseudocódigo, fluxograma e código são formas de expressar o procedimento, não o procedimento em si |
+| **Linha de fluxo × conector** | a linha/seta liga diretamente etapas; o conector referencia a continuação do fluxo em outro ponto da mesma página ou em outra página |
 
 ### 2.6 Microexemplos canônicos
 
@@ -622,9 +657,23 @@ A pré-condição descreve o domínio assumido. O `if` é uma decisão de implem
 Problema conceitual:
 
 ```text
-dado um conjunto com elementos duplicados,
+dada uma sequência que pode conter valores repetidos,
 retorne uma posição em que o valor alvo ocorre
 ```
+
+Contrato mínimo deste exemplo:
+
+```text
+PRE:
+o valor alvo ocorre na sequência
+
+POST:
+result é uma posição válida da sequência
+E
+o elemento na posição result é igual ao valor alvo
+```
+
+A pré-condição mantém o foco deste exemplo nas **múltiplas posições válidas**. Se o problema também precisar cobrir alvo ausente, a especificação deve definir explicitamente uma saída para “não encontrado”.
 
 Se o alvo aparece em várias posições, mais de uma resposta pode satisfazer a especificação. Um teste que exige uma única posição fixa pode estar testando uma implementação específica em vez do problema.
 
@@ -758,14 +807,14 @@ a saída correta é:
 
 ## 3.2 Algoritmo
 
-Algoritmo é o procedimento que tenta resolver o problema.
+Algoritmo é o procedimento proposto para resolver o problema. A análise de correção determina se esse procedimento de fato satisfaz a especificação.
 
 Exemplo conceitual:
 
 ```text
 max_so_far = first element
 
-for each remaining value:
+for each value after the first:
     if value > max_so_far:
         max_so_far = value
 
@@ -1249,7 +1298,7 @@ Mas algoritmos exigem precisão compatível com execução computacional.
 
 Especificação diz **o que** precisa ser verdadeiro.
 
-Algoritmo diz **como** tentar obtê-lo.
+Algoritmo descreve **como** produzir um resultado; a análise de correção determina se esse procedimento realmente satisfaz a especificação.
 
 [↑ Voltar ao índice](#índice)
 
@@ -1334,6 +1383,8 @@ Pseudocódigo pode omitir detalhes irrelevantes do runtime.
 
 A abstração do algoritmo precisa preservar apenas o estado necessário para explicar o comportamento.
 
+**Estado conceitual não exige mutação in-place.** Em um estilo imperativo, `max_so_far` pode ser atualizado na mesma variável; em um estilo funcional, cada passo pode produzir um novo valor/estado. O contrato e o invariante descrevem **propriedades da computação**, não obrigam uma estratégia específica de armazenamento ou mutação.
+
 [↑ Voltar ao índice](#índice)
 
 ---
@@ -1375,6 +1426,8 @@ para todo x em values:
 
 A pós-condição pode falar sobre um **resultado retornado**, como acima, ou sobre propriedades do **estado final** produzido pelo procedimento. O contrato é que determina qual observação importa.
 
+Quando o procedimento altera algo observável além do valor retornado — por exemplo, uma estrutura *in-place*, um arquivo, um registro persistido ou outro recurso externo — essa alteração pode ser descrita como **efeito colateral (*side effect*)**. Para raciocinar corretamente, o efeito relevante precisa aparecer no contrato/pós-condição em vez de ficar implícito.
+
 ## 9.3 Contrato
 
 Modelo:
@@ -1389,7 +1442,9 @@ POST
 
 Leitura:
 
-> se a pré-condição for satisfeita e o algoritmo cumprir seu contrato, a pós-condição deve valer ao final.
+> se a pré-condição vale no estado inicial e a execução termina, a pós-condição deve valer no estado final para que o procedimento seja correto em relação a esse contrato.
+
+Essa leitura corresponde ao núcleo da **correção parcial**; a [§10.5](#105-correção-parcial--correção-total-e) separa explicitamente correção parcial de **correção total**, que também exige justificar o término.
 
 ## 9.4 Pré-condição não é validação
 
@@ -1412,6 +1467,9 @@ Uma implementação pode verificar a pré-condição.
 
 Mas a existência da pré-condição independe da verificação.
 
+Quando uma API decide rejeitar entradas fora do contrato, **falhar cedo (*fail fast*)** com uma mensagem/exceção clara costuma melhorar o diagnóstico. `if`, exceções, asserções e mecanismos de *Design by Contract* são formas possíveis de materializar essa política; nenhum deles substitui a definição conceitual da pré-condição. Em particular, uma asserção pode servir a verificação interna e não deve ser confundida automaticamente com validação de entrada externa.
+
+<a id="95-pos-condicao-nao-e-saida-de-exemplo"></a>
 <a id="95-postcondição-não-é-saída-de-exemplo"></a>
 
 ## 9.5 Pós-condição não é “saída de exemplo”
@@ -1495,7 +1553,7 @@ Ainda assim, testes são fundamentais para software real.
 
 ## 10.4 Argumento de correção
 
-No nível introdutório, um argumento pode ser informal, mas precisa conectar:
+No nível introdutório, um argumento pode ser informal, mas precisa justificar a propriedade **para todas as entradas/estados cobertos pela pré-condição**, não apenas para uma instância favorável. A cadeia típica conecta:
 
 ```text
 estado inicial
@@ -1511,15 +1569,25 @@ Uma distinção clássica:
 
 ### Correção parcial
 
-Se o algoritmo terminar, a saída satisfaz a pós-condição.
+Sob um contrato `PRE → POST`, correção parcial significa:
+
+> **se a pré-condição vale no estado inicial e o algoritmo termina, então a pós-condição vale no estado final.**
+
+A correção parcial, sozinha, **não garante que o algoritmo termine**.
 
 ### Correção total
 
-Além da correção parcial:
+Correção total combina a garantia acima com término:
 
 ```text
-o algoritmo termina
+PRE satisfeita
++
+execução termina
++
+POST satisfeita no estado final
 ```
+
+Em outras palavras, para todas as entradas/estados cobertos pela pré-condição, o procedimento termina e produz um estado final que satisfaz a pós-condição.
 
 Essa distinção mostra por que:
 
@@ -1588,23 +1656,35 @@ Se `i` nunca muda, o algoritmo não progride para a condição de término.
 
 ## 11.3 Variante de loop `[E]`
 
-Uma técnica de raciocínio é identificar uma medida que progride rumo ao término.
+Uma técnica de raciocínio é identificar uma **medida de progresso** que pertence a um conjunto bem fundado e diminui estritamente rumo ao término. No caso introdutório mais comum, basta trabalhar com um inteiro natural/não negativo.
 
-Exemplo:
+Considere, por exemplo, um percurso finito em que `n` representa a quantidade total de elementos e `i` representa quantos elementos já foram processados:
+
+```text
+i = 0
+
+while i < n
+    processar elemento i
+    i = i + 1
+```
+
+Uma variante natural para esse loop é:
 
 ```text
 restante = n - i
 ```
 
-A cada iteração:
+Sob o invariante `0 <= i <= n`, temos:
 
 ```text
-restante diminui
+restante é um inteiro >= 0
++
+a cada iteração, restante diminui estritamente
 ```
 
-e possui limite inferior.
+Como não existe uma sequência infinita de inteiros não negativos estritamente decrescente, a medida não pode diminuir para sempre. Quando chega ao valor associado à condição de saída, o loop termina.
 
-Isso oferece argumento de término.
+> Apenas dizer “a medida diminui e possui limite inferior” é insuficiente em domínios contínuos: uma sequência real pode diminuir indefinidamente aproximando-se de um limite. O argumento precisa da propriedade de progresso adequada ao domínio usado.
 
 ## 11.4 Recursão
 
@@ -1637,14 +1717,31 @@ aguarda requisições
 
 pode ser projetado para permanecer ativo.
 
-Não trate o servidor inteiro como um único algoritmo finito com uma saída final obrigatória.
+Não trate automaticamente o servidor inteiro como um único algoritmo finito com uma saída final obrigatória.
 
-Ele executa continuamente algoritmos internos:
+Um servidor **pode** permanecer ativo enquanto executa repetidamente procedimentos finitos para tratar eventos ou requisições, por exemplo:
 
 ```text
 receber requisição
 → processar
 → responder
+```
+
+O processo global pode continuar ativo mesmo quando cada tratamento individual possui início, progresso e término próprios.
+
+**Extensão `[E]` — online × offline:** não confunda “processo de longa duração” com “algoritmo online”. Um algoritmo **offline** recebe a sequência inteira de entradas antecipadamente; um algoritmo **online** processa entradas à medida que elas chegam e precisa tomar decisões sem necessariamente conhecer o restante da sequência. Um servidor pode executar algoritmos online, offline ou ambos; são classificações diferentes.
+
+Microexemplo:
+
+```text
+OFFLINE
+→ receber a coleção values completa
+→ calcular MAXIMUM(values)
+
+ONLINE
+→ receber um valor por vez de um stream
+→ após o primeiro valor, manter current_max conforme os demais chegam
+→ não pressupor que o restante da sequência já seja conhecido
 ```
 
 [↑ Voltar ao índice](#índice)
@@ -1679,6 +1776,13 @@ O mesmo input pode gerar:
 - e, conforme o tipo de algoritmo, resultados diferentes segundo a garantia probabilística declarada.
 
 A presença de aleatoriedade, por si só, não autoriza resposta arbitrária. A especificação deve deixar claro se a correção é sempre garantida ou se existe probabilidade de erro controlada.
+
+**Extensão `[E]`:** duas categorias clássicas ajudam a nomear essas garantias:
+
+- **Las Vegas:** produz resultado correto; a aleatoriedade afeta principalmente o caminho e/ou o tempo de execução;
+- **Monte Carlo:** pode admitir probabilidade de erro controlada conforme o contrato/análise.
+
+Esses rótulos são apenas uma primeira orientação; análise probabilística formal fica fora do escopo do T02.
 
 ## 12.3 Randomização não significa “sem regras”
 
@@ -1719,9 +1823,9 @@ A característica curricular correta é:
 
 # 13. Invariantes — primeira introdução
 
-**Classificação neste capítulo:** introdução `[C]`; aprofundamento posterior.
+**Classificação curricular:** `[C] Obrigatório conhecer` — introdução neste capítulo; aprofundamento posterior.
 
-Uma invariante é uma propriedade que permanece verdadeira em pontos determinados da execução.
+Um invariante é uma propriedade que permanece verdadeira em pontos determinados da execução.
 
 Para `MAXIMUM`:
 
@@ -1739,9 +1843,11 @@ A propriedade que queremos preservar é:
 
 > antes de processar o próximo elemento, `max_so_far` é o maior valor do prefixo já processado.
 
+Após a inicialização `max_so_far = values[0]`, e **antes da primeira iteração**, o prefixo processado é `[7]`; portanto, o invariante já precisa ser verdadeiro nesse ponto.
+
 | Prefixo já processado | Próximo valor | `max_so_far` antes | Atualização | `max_so_far` depois | Invariante preservado? |
 |---|---:|---:|---|---:|---|
-| `[7]` | `2` | `7` | nenhuma | `7` | sim |
+| `[7]` — após inicialização | `2` | `7` | nenhuma | `7` | sim |
 | `[7, 2]` | `9` | `7` | `9 > 7` → atualizar | `9` | sim |
 | `[7, 2, 9]` | `4` | `9` | nenhuma | `9` | sim |
 | `[7, 2, 9, 4]` | — | `9` | percurso encerrado | `9` | sim; o prefixo é a entrada inteira |
@@ -1815,12 +1921,15 @@ Risco:
 ## 14.2 Linguagem natural estruturada
 
 ```text
-1. Verificar se existe pelo menos um elemento.
-2. Definir o primeiro como maior atual.
-3. Percorrer os elementos restantes.
-4. Atualizar o maior quando encontrar valor superior.
-5. Retornar o maior.
+PRE: a sequência recebida possui pelo menos um elemento.
+
+1. Definir o primeiro como maior atual.
+2. Percorrer os elementos restantes.
+3. Atualizar o maior quando encontrar valor superior.
+4. Retornar o maior.
 ```
+
+A linha `PRE` delimita o domínio assumido; ela **não é uma etapa de validação defensiva**. Se uma implementação decidir aceitar entrada externa e rejeitar vazio explicitamente, essa política deve ser especificada e implementada à parte, como discutido em §9.4.
 
 ## 14.3 Pseudocódigo
 
@@ -1828,10 +1937,12 @@ Risco:
 MAXIMUM(values)
 
     PRE: length(values) > 0
+    POST: result is an element of values
+          and for every x in values, result >= x
 
     max_so_far = values[0]
 
-    for each value in values[1...]
+    for each value after the first in values
         if value > max_so_far
             max_so_far = value
 
@@ -1840,12 +1951,18 @@ MAXIMUM(values)
 
 ## 14.4 Fluxograma
 
-Útil para visualizar:
+Fluxograma é uma representação gráfica do fluxo de um procedimento. Ele é especialmente útil quando a forma visual ajuda a perceber:
 
 - sequência;
-- decisão;
+- entrada e saída;
+- decisões e caminhos alternativos;
 - repetição;
-- entrada/saída.
+- continuidade entre trechos;
+- chamada de um subprocesso.
+
+O fluxograma **não é o algoritmo em si** e não prova correção. Ele expressa visualmente uma lógica que também poderia ser descrita em linguagem estruturada ou pseudocódigo.
+
+A notação, os símbolos, os conectores, as regras de construção e a conversão entre fluxograma e pseudocódigo são desenvolvidos na [§16](#16-fluxograma).
 
 ## 14.5 Código
 
@@ -1907,6 +2024,7 @@ Exemplo:
 ALGORITHM NAME(input)
 
     PRE: ...
+    POST: ...
 
     state = ...
 
@@ -1915,9 +2033,9 @@ ALGORITHM NAME(input)
             update state
 
     return state
-
-    POST: ...
 ```
+
+`PRE` e `POST` são **anotações de contrato**, não instruções executáveis. Mantê-las antes do corpo evita sugerir que a pós-condição seria um passo executado depois de `return`.
 
 ## 15.4 Pseudocódigo pode ser mais abstrato que código
 
@@ -1951,6 +2069,8 @@ Pseudocódigo pode abstrair sintaxe.
 
 Não deve esconder o problema computacional central.
 
+**Built-ins e bibliotecas não são “mágica”.** Em código de produção, uma operação como `max(values)` pode ser a escolha idiomática porque a biblioteca já encapsula um procedimento com contrato conhecido. Neste capítulo, o percurso é expandido de propósito para tornar visíveis estado, comparação, invariante e término. O problema surge quando uma operação é invocada **sem contrato conhecido** ou quando ela esconde justamente a etapa que deveria ser projetada/analisada.
+
 ## 15.6 Farrell: pseudocódigo × fluxograma
 
 *Programming Logic and Design* apresenta pseudocódigo e fluxograma como duas representações possíveis da mesma lógica e observa que normalmente não é necessário criar ambas para todo problema.
@@ -1963,63 +2083,554 @@ A escolha deve servir à compreensão.
 
 # 16. Fluxograma
 
-Fluxograma representa visualmente o fluxo.
+Fluxograma representa graficamente **passos e caminhos de controle** de um procedimento.
 
-Símbolos tradicionais incluem:
+No escopo deste guia, ele é estudado como ferramenta para raciocinar e comunicar algoritmos — não como linguagem de programação, não como prova de correção e não como substituto de uma especificação.
+
+A ISO 5807:1985 é a referência internacional publicada para símbolos e convenções de documentação de fluxogramas de dados, programas e sistemas. A página pública da ISO registra a norma como publicada e confirmada, com última revisão e confirmação em 2019, e informa que esta versão permanece vigente; o conteúdo integral, porém, não é exposto gratuitamente. Por isso, a tabela deste capítulo é o **vocabulário curricular canônico do Guia**, construído para programação a partir de convenções consolidadas e fontes efetivamente verificadas; ela **não afirma reproduzir integralmente o catálogo normativo da ISO**.
+
+## 16.1 O que é — e o que não é
+
+Um fluxograma responde visualmente a perguntas como:
 
 ```text
-TERMINAL
-→ início/fim
-
-PROCESSO
-→ operação
-
-ENTRADA/SAÍDA
-→ dados
-
-DECISÃO
-→ escolha
-
-SETA
-→ fluxo
+onde começa?
+↓
+qual operação acontece agora?
+↓
+existe entrada ou saída?
+↓
+há uma decisão?
+↓
+qual caminho é seguido?
+↓
+há repetição?
+↓
+o fluxo continua em outro ponto?
+↓
+quando termina?
 ```
 
-## 16.1 Exemplo conceitual
+Não confunda:
+
+```text
+ALGORITMO
+→ procedimento que resolve um problema segundo um contrato
+
+FLUXOGRAMA
+→ uma representação gráfica desse procedimento
+```
+
+Dois fluxogramas visualmente diferentes podem representar a mesma lógica. Inversamente, um fluxograma pode estar graficamente bem formado e ainda descrever um algoritmo incorreto.
+
+## 16.2 Anatomia — nós, linhas de fluxo e caminhos
+
+Um fluxograma de programa pode ser lido como uma composição de:
+
+```text
+NÓS
+→ representam eventos, operações, dados, decisões ou referências
+
+LINHAS DE FLUXO
+→ conectam diretamente os nós e indicam direção
+
+CAMINHOS
+→ sequências possíveis de nós percorridas durante a execução
+
+CONECTORES / REFERÊNCIAS
+→ indicam que o fluxo continua em outro ponto sem exigir uma linha longa atravessando o diagrama
+```
+
+Uma **decisão** cria caminhos alternativos. Uma **repetição** aparece quando um caminho retorna a um ponto anterior sob uma condição. Um **subprocesso** representa um conjunto de passos cuja lógica detalhada está definida separadamente.
+
+Sempre que possível, mantenha uma orientação predominante — por exemplo, de cima para baixo ou da esquerda para a direita — para reduzir ambiguidade de leitura.
+
+## 16.3 Tabela canônica de símbolos
+
+A tabela abaixo é a única referência detalhada de símbolos deste tópico. Panorama, LABs, exercícios e glossário remetem a ela em vez de repetir as definições.
+
+| Classe | Símbolo | Forma conceitual | Função / quando usar | Representação no Mermaid deste Guia |
+|---|---|---|---|---|
+| **Essencial** | Terminal | estádio / retângulo arredondado | marcar início ou fim de um fluxo | `([Início])`, `([Fim])` |
+| **Essencial** | Processo | retângulo | cálculo, atribuição, transformação ou operação | `[Calcular total]` |
+| **Essencial** | Entrada/Saída | paralelogramo | receber dados ou produzir/exibir dados | `[/Ler n/]`, `[/Exibir resultado/]` |
+| **Essencial** | Decisão | losango | avaliar condição e selecionar caminho | `{n > 0?}` |
+| **Essencial** | Linha de fluxo | linha com direção / seta | ligar diretamente etapas e indicar sequência | `A --> B` |
+| **Estrutural** | Conector na página | pequeno círculo identificado | continuar o fluxo em outro ponto da mesma página sem linha longa ou cruzamento excessivo | `((A))`, usando o mesmo identificador visual no ponto de continuação |
+| **Estrutural** | Conector fora da página | marcador de referência para outra página | indicar continuação em outra página/diagrama | não há mapeamento semântico 1:1 adotado pelo Guia; use marcador rotulado e indicação textual explícita |
+| **Estrutural** | Processo predefinido / subprocesso | retângulo com marcação lateral | chamar procedimento/módulo cuja lógica é definida separadamente | `[[VALIDAR ENTRADA]]` ou shape `subprocess` quando necessário |
+| **Complementar** | Documento | base ondulada | indicar documento produzido ou utilizado | shape `doc` |
+| **Complementar** | Múltiplos documentos | documentos empilhados | representar conjunto de documentos | shape `docs` |
+| **Complementar** | Entrada manual | quadrilátero de entrada manual | distinguir dado digitado/fornecido manualmente quando isso é relevante | shape `manual-input` |
+| **Complementar** | Preparação / inicialização | hexágono | destacar preparação, configuração ou inicialização quando a distinção melhora a leitura | shape `prepare` |
+| **Complementar** | Armazenamento / banco de dados | forma de armazenamento, frequentemente cilindro para banco | representar persistência quando ela é parte relevante do algoritmo/sistema | shape `database` ou outra forma de armazenamento apropriada |
+| **Complementar** | Display | forma de exibição | distinguir saída em tela quando essa distinção é relevante | shape `display` |
+| **Complementar** | Anotação / comentário | anotação associada ao fluxo | acrescentar explicação que não é uma etapa executada | shape `comment` |
+| **Complementar** | Atraso / espera | forma de delay | explicitar espera quando ela faz parte do comportamento modelado | shape `delay` |
+
+As formas complementares servem principalmente para **reconhecimento e escolha consciente**. Em lógica de programação, não é objetivo decorar catálogos extensos de símbolos especializados.
+
+> **Regra:** use a forma mais específica somente quando a distinção acrescentar informação. Um diagrama não melhora por possuir mais tipos de símbolos.
+
+### Visualização das formas no renderer do Guia
+
+As formas abaixo mostram como o Mermaid 11.17.2 materializa os símbolos que possuem correspondência direta usada neste capítulo:
+
+```mermaid
+flowchart LR
+    TERMINAL@{ shape: terminal, label: "Terminal" }
+    PROCESS@{ shape: process, label: "Processo" }
+    IO@{ shape: in-out, label: "Entrada / saída" }
+    DECISION@{ shape: decision, label: "Decisão" }
+    CONNECTOR((A))
+    SUBPROCESS@{ shape: subprocess, label: "Subprocesso" }
+```
+
+Símbolos complementares com mapeamento direto na versão local:
+
+```mermaid
+flowchart LR
+    DOC@{ shape: doc, label: "Documento" }
+    DOCS@{ shape: docs, label: "Múltiplos documentos" }
+    MANUAL@{ shape: manual-input, label: "Entrada manual" }
+    PREP@{ shape: prepare, label: "Preparação" }
+    DB@{ shape: database, label: "Banco / armazenamento" }
+    DISPLAY@{ shape: display, label: "Display" }
+    NOTE@{ shape: comment, label: "Anotação" }
+    WAIT@{ shape: delay, label: "Espera" }
+```
+
+Esses desenhos demonstram a **implementação gráfica deste site**. O significado conceitual continua sendo o definido na tabela, e não o nome interno da API do Mermaid.
+
+## 16.4 Núcleo essencial — como combinar forma e função
+
+O fluxo abaixo materializa os cinco elementos essenciais sem ainda introduzir conectores ou subprocessos:
 
 ```mermaid
 flowchart TD
-    A[Início] --> B[Inicializar maior com o primeiro valor]
-    B --> C{Há valor restante?}
-    C -- Não --> G[Retornar maior]
-    C -- Sim --> D[Obter o próximo valor]
-    D --> E{valor > maior?}
-    E -- Sim --> F[Atualizar maior]
-    E -- Não --> C
-    F --> C
+    START([Início]) --> INPUT[/Ler n/]
+    INPUT --> PROCESS[Calcular resto = n mod 2]
+    PROCESS --> DECISION{resto == 0?}
+    DECISION -- Sim --> OUTPUT_EVEN[/Exibir "par"/]
+    DECISION -- Não --> OUTPUT_ODD[/Exibir "ímpar"/]
+    OUTPUT_EVEN --> END([Fim])
+    OUTPUT_ODD --> END
 ```
 
-Leitura textual: depois da inicialização, cada iteração **consome/obtém um novo valor** antes da comparação. Esse passo de progresso é parte do algoritmo; omiti-lo faria o diagrama parecer capaz de testar indefinidamente o mesmo estado.
+Leitura:
 
-## 16.2 Vantagens
+1. **terminal** inicia o procedimento;
+2. **entrada/saída** recebe `n`;
+3. **processo** calcula o resto da divisão por `2`;
+4. **decisão** escolhe o caminho conforme o resto;
+5. **entrada/saída** apresenta `par` ou `ímpar`;
+6. ambos os caminhos convergem para o **terminal** final;
+7. as **linhas de fluxo** tornam a ordem e a direção explícitas.
 
-- mostra fluxo;
-- facilita decisões;
-- ajuda iniciantes a visualizar loops.
+Dentro da convenção adotada neste Guia, mantenha **forma e função consistentes**. Se “Ler `n`” for desenhado como processo genérico, por exemplo, a lógica ainda pode ser compreensível, mas a notação perde precisão comunicativa. Em ferramentas ou organizações externas, confirme a convenção usada antes de interpretar uma forma isoladamente.
 
-## 16.3 Limitações
+## 16.5 Conectores — linha de fluxo ≠ referência
+
+Uma linha de fluxo conecta diretamente duas etapas:
+
+```text
+A ─────→ B
+```
+
+Um conector representa **continuidade lógica sem desenhar essa ligação longa diretamente**.
+
+### Conector na mesma página
+
+É útil quando uma ligação atravessaria grande parte do diagrama ou criaria cruzamentos difíceis de seguir.
+
+Exemplo conceitual:
+
+```mermaid
+flowchart LR
+    P1[Processar primeira parte] --> C1((A))
+    C2((A)) --> P2[Continuar processamento]
+```
+
+Os marcadores `A` representam os dois pontos correspondentes da mesma continuidade. Eles **não são duas etapas executáveis**.
+
+### Conector fora da página
+
+Indica que o fluxo continua em outra página ou outro diagrama. Ferramentas de desenho podem oferecer uma **forma dedicada de referência fora da página**; no Visio, por exemplo, a referência pode ligar duas páginas e ter sua aparência configurada como saída, entrada, círculo ou seta.
+
+Para reconhecimento conceitual neste Guia, leia um marcador rotulado assim:
+
+```text
+PÁGINA A                              PÁGINA B
+
+[Processar]                           [Continuar]
+     |                                     ^
+     v                                     |
+[REF FORA: B]   ··· continuidade ···   [REF DE: A]
+```
+
+Os dois marcadores representam **a mesma continuidade lógica entre páginas**; eles não são etapas executáveis.
+
+No Mermaid usado pelo Guia, não force um shape que possua outro significado apenas para imitar uma geometria tradicional. Quando a continuidade entre páginas precisar ser documentada:
+
+```text
+1. identifique claramente a página/destino;
+2. use marcadores rotulados e pareados;
+3. escreva que se trata de continuidade fora da página;
+4. mantenha a correspondência inequívoca entre origem e destino.
+```
+
+Portanto:
+
+```text
+SETA / LINHA DE FLUXO
+→ conexão direta
+
+CONECTOR NA PÁGINA
+→ referência para outro ponto da mesma página
+
+CONECTOR FORA DA PÁGINA
+→ referência para outra página/diagrama
+```
+
+## 16.6 Processo predefinido / subprocesso
+
+Um subprocesso encapsula uma sequência que já possui definição própria.
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber valores/]
+    INPUT --> VALIDATE[[VALIDAR ENTRADA]]
+    VALIDATE --> PROCESS[Processar valores]
+    PROCESS --> END([Fim])
+```
+
+`VALIDAR ENTRADA` não significa “mágica”. Significa que existe outro procedimento com contrato conhecido que define o que essa chamada realiza.
+
+Isso prepara uma ponte para modularização:
+
+```text
+FLUXOGRAMA
+→ processo predefinido / subprocesso
+
+PSEUDOCÓDIGO
+→ chamada de procedimento/função
+
+CÓDIGO
+→ chamada concreta conforme linguagem/API
+```
+
+Não use subprocesso para esconder justamente a parte do algoritmo que deveria ser explicada. A regra de §15.5 sobre operações mágicas continua válida.
+
+## 16.7 Símbolos complementares e fronteira de escopo
+
+Documento, múltiplos documentos, entrada manual, preparação, armazenamento, display, anotação e atraso aparecem em ferramentas e diagramas reais. Eles são úteis quando o **tipo de interação** importa para a compreensão.
+
+Exemplo:
+
+```text
+“obter valor”
+```
+
+pode ser suficiente num algoritmo abstrato.
+
+Em outro contexto, distinguir:
+
+```text
+entrada manual
+→ leitura de banco de dados
+→ documento produzido
+→ exibição em tela
+```
+
+pode evitar uma ambiguidade importante.
+
+A fronteira curricular deste tópico é deliberada:
+
+```text
+DOMINAR
+→ símbolos essenciais
+→ conectores
+→ subprocesso
+→ composição de sequência, seleção e repetição
+
+RECONHECER E SABER ESCOLHER QUANDO NECESSÁRIO
+→ símbolos complementares
+
+FORA DO ESCOPO
+→ catálogos especializados de BPMN, UML, DFD, hardware ou processos administrativos
+```
+
+## 16.8 Sequência
+
+Na sequência, cada etapa leva à próxima sem escolha de caminho.
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Ler base e altura/]
+    INPUT --> PROCESS[Calcular área = base * altura]
+    PROCESS --> OUTPUT[/Exibir área/]
+    OUTPUT --> END([Fim])
+```
+
+A principal pergunta é:
+
+> **a ordem dos passos está explícita e corresponde ao algoritmo?**
+
+## 16.9 Seleção / decisão
+
+Seleção exige pelo menos uma condição e caminhos compatíveis com seus resultados.
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Ler idade/]
+    INPUT --> DECISION{idade >= 18?}
+    DECISION -- Sim --> ADULT[/Exibir "maior de idade"/]
+    DECISION -- Não --> MINOR[/Exibir "menor de idade"/]
+    ADULT --> END([Fim])
+    MINOR --> END
+```
+
+Boas práticas:
+
+- formule a condição de modo verificável;
+- rotule as saídas (`Sim`/`Não`, `Verdadeiro`/`Falso` ou equivalentes);
+- garanta que cada caminho tenha continuidade definida;
+- confirme se os caminhos voltam a convergir ou terminam separadamente.
+
+## 16.10 Repetição
+
+Repetição surge quando um caminho retorna a uma etapa anterior enquanto uma condição permitir.
+
+```mermaid
+flowchart TD
+    START([Início]) --> INIT[Definir i = 0]
+    INIT --> TEST{i < 3?}
+    TEST -- Não --> END([Fim])
+    TEST -- Sim --> OUTPUT[/Exibir i/]
+    OUTPUT --> UPDATE[Definir i = i + 1]
+    UPDATE --> TEST
+```
+
+O retorno visual precisa corresponder a **progresso real**. Se `i` não fosse atualizado, o diagrama poderia representar um loop infinito tão claramente quanto o pseudocódigo defeituoso de §11.2.
+
+## 16.11 Regras de construção e legibilidade
+
+Ao construir ou revisar um fluxograma de algoritmo:
+
+1. identifique início e término;
+2. escolha uma direção predominante de leitura;
+3. use linhas de fluxo com direção inequívoca;
+4. use o símbolo de acordo com a função da etapa;
+5. rotule as saídas de decisões;
+6. não deixe caminhos sem destino;
+7. evite cruzamentos e linhas excessivamente longas;
+8. use conectores quando eles reduzirem ruído visual;
+9. pareie conectores com identificadores inequívocos;
+10. use subprocessos para encapsular lógica já definida — não para esconder o problema central;
+11. mantenha granularidade consistente: não misture “somar 1” com “resolver todo o problema” no mesmo nível;
+12. preserve a equivalência com o contrato e com outras representações do algoritmo;
+13. divida diagramas grandes quando a visualização deixar de ajudar.
+
+Evite a conclusão incorreta:
+
+```text
+DIAGRAMA BONITO
+=
+ALGORITMO CORRETO
+```
+
+A correção continua dependendo do problema, do contrato e do comportamento representado.
+
+## 16.12 Exemplo progressivo — `MAXIMUM`
+
+O exemplo do capítulo pode ser transformado em fluxograma sem mudar o algoritmo.
+
+### Passo 1 — contrato relevante
+
+```text
+PRE:
+values não é vazio
+
+POST:
+result pertence a values
+E
+para todo x em values:
+    result >= x
+```
+
+### Passo 2 — operações necessárias
+
+```text
+iniciar
+→ receber a sequência values
+→ definir max_so_far com o primeiro elemento
+→ verificar se resta elemento não processado
+→ obter o próximo elemento da sequência já recebida
+→ comparar com max_so_far
+→ atualizar quando necessário
+→ repetir
+→ produzir resultado
+→ terminar
+```
+
+### Passo 3 — mapear função para forma
+
+| Operação | Símbolo apropriado |
+|---|---|
+| início/fim | terminal |
+| receber `values` / produzir resultado | entrada/saída |
+| selecionar primeiro/próximo elemento de `values` já recebido | processo |
+| inicializar/atualizar estado | processo |
+| perguntar se há próximo elemento | decisão |
+| comparar `value > max_so_far` | decisão |
+| voltar ao teste | linha de fluxo formando repetição |
+
+A distinção é intencional: **receber a coleção do exterior** é I/O; **acessar/avançar dentro da coleção já recebida** é processamento interno neste modelo. Se outra implementação realmente ler cada item de um stream/dispositivo no momento do consumo, então a etapa correspondente pode ser modelada como entrada.
+
+### Passo 4 — fluxograma
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber values/]
+    INPUT --> INIT[Definir max_so_far = primeiro elemento]
+    INIT --> REMAIN{Há elemento restante?}
+    REMAIN -- Não --> OUTPUT[/Produzir max_so_far/]
+    OUTPUT --> END([Fim])
+    REMAIN -- Sim --> NEXT[Definir value = próximo elemento de values]
+    NEXT --> GREATER{value > max_so_far?}
+    GREATER -- Sim --> UPDATE[Definir max_so_far = value]
+    GREATER -- Não --> REMAIN
+    UPDATE --> REMAIN
+```
+
+### Passo 5 — verificar progresso
+
+Cada passagem pelo caminho `Sim` de `Há elemento restante?` **consome um novo elemento** antes de retornar ao teste. Depois da inicialização com o primeiro elemento, “restante” refere-se aos elementos de `values` que ainda não foram processados. Esse detalhe evita representar uma repetição sem progresso.
+
+### Passo 6 — verificar término e pós-condição
+
+Quando não restam valores:
+
+```text
+prefixo processado = sequência inteira
++
+invariante preservado
+↓
+max_so_far é o máximo da entrada
+```
+
+O fluxograma tornou o caminho visual; o argumento de correção continua sendo lógico, não gráfico.
+
+## 16.13 Como ler e revisar um fluxograma
+
+Uma leitura sistemática evita “seguir setas” sem compreender o algoritmo.
+
+Pergunte, nessa ordem:
+
+```text
+1. Qual é o ponto inicial?
+2. Quais dados entram?
+3. Que estado é criado ou alterado?
+4. Onde existem decisões?
+5. O que cada saída da decisão significa?
+6. Existe caminho que retorna? Qual estado progride?
+7. Há conectores? Para onde cada um aponta?
+8. Há subprocessos? Seus contratos estão definidos?
+9. Todos os caminhos relevantes alcançam um término apropriado?
+10. O estado final satisfaz a pós-condição?
+```
+
+Esse roteiro também funciona como debugging de diagramas.
+
+## 16.14 Fluxograma ↔ pseudocódigo
+
+A conversão deve preservar **semântica**, não aparência.
+
+Pseudocódigo:
+
+```text
+ABS_VALUE(n)
+    if n < 0
+        return -n
+    return n
+```
+
+Fluxograma equivalente:
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber n/]
+    INPUT --> TEST{n < 0?}
+    TEST -- Sim --> NEG[Definir result = -n]
+    TEST -- Não --> KEEP[Definir result = n]
+    NEG --> OUTPUT[/Produzir result/]
+    KEEP --> OUTPUT
+    OUTPUT --> END([Fim])
+```
+
+Ao fazer a conversão inversa, a decisão em losango torna-se uma construção condicional; linhas que retornam a uma condição tendem a se tornar repetição; subprocessos tendem a se tornar chamadas de procedimentos/funções. O LAB-T02-05 usa outro problema (`IS_EVEN`) para verificar transferência, em vez de pedir apenas a reprodução deste exemplo.
+
+O teste de equivalência é:
+
+> **para as mesmas entradas e sob o mesmo contrato, as duas representações implicam os mesmos caminhos relevantes e resultados permitidos?**
+
+## 16.15 Mermaid × notação conceitual
+
+Neste projeto, Mermaid é o mecanismo de publicação dos diagramas dentro do Markdown.
+
+```text
+CONCEITO DE FLUXOGRAMA
+≠
+SINTAXE MERMAID
+```
+
+Mermaid 11.17.2, versionado localmente no projeto, oferece formas clássicas e formas expandidas. Algumas possuem correspondência direta com o vocabulário deste capítulo, como `process`, `decision`, `terminal`, `subprocess`, `document`, `manual-input`, `database`, `display`, `comment` e `delay`.
+
+Isso não torna o catálogo do Mermaid uma norma de fluxogramas. O software possui formas para muitos outros tipos de diagrama e pode nomear shapes segundo sua própria API.
+
+Regra do Guia:
+
+```text
+1. escolha primeiro o significado conceitual;
+2. depois escolha uma forma Mermaid compatível;
+3. se não houver correspondência semântica 1:1,
+   não atribua a uma forma outro significado apenas por semelhança visual;
+4. preserve explicação textual quando a forma sozinha não for suficiente.
+```
+
+Para publicação, nenhum conceito essencial, LAB ou exercício deve depender **somente** da imagem renderizada: mantenha descrição textual/contrato equivalente ao redor do diagrama. Isso melhora acessibilidade, revisão e resiliência quando o renderer não estiver disponível.
+
+## 16.16 Vantagens, limitações e quando usar
+
+### Vantagens
+
+- torna caminhos de decisão visíveis;
+- ajuda a perceber repetição e retorno;
+- explicita início, término e direção;
+- facilita discussão de fluxo com pessoas que ainda não dominam a sintaxe de uma linguagem;
+- pode revelar linhas cruzadas, caminhos órfãos ou ausência de progresso.
+
+### Limitações
 
 Fluxogramas grandes podem ficar:
 
 - extensos;
 - difíceis de editar;
-- difíceis de consultar.
+- difíceis de consultar;
+- visualmente mais complexos do que o pseudocódigo equivalente.
 
-## 16.4 Regra deste guia
+### Quando usar
 
-Fluxograma é:
+Use quando a representação visual **reduzir a carga de compreensão**.
+
+Prefira pseudocódigo ou outra representação quando o diagrama exigir dezenas de símbolos e conectores para expressar algo que permanece mais claro em texto estruturado.
+
+Regra final:
 
 ```text
-FERRAMENTA
+FLUXOGRAMA
+=
+FERRAMENTA DE REPRESENTAÇÃO
 ```
 
 não:
@@ -2027,8 +2638,6 @@ não:
 ```text
 PRÉ-REQUISITO PARA TER BOA LÓGICA
 ```
-
-Use quando a representação visual melhorar o entendimento.
 
 [↑ Voltar ao índice](#índice)
 
@@ -2086,7 +2695,7 @@ Porque:
 max_so_far = 0
 ```
 
-Essa inicialização introduz um valor que pode não pertencer à entrada e, portanto, pode violar o contrato antes mesmo do percurso produzir informação suficiente. O contraexemplo completo e sua análise já foram apresentados em [§10.6](#106-exemplo-de-algoritmo-incorreto).
+Essa inicialização introduz um valor que pode não pertencer à entrada e, portanto, pode violar o contrato antes mesmo do percurso produzir informação suficiente. Para `values = [-8, -2, -11]`, por exemplo, `0 ∉ values`, enquanto a pós-condição exige que o resultado pertença à sequência. O contraexemplo completo e sua análise já foram apresentados em [§10.6](#106-exemplo-de-algoritmo-incorreto).
 
 Aqui, o contraste com §17.5 é o ponto principal: inicializar com `values[0]` preserva desde o início a relação entre o estado e os dados reais do problema.
 
@@ -2096,10 +2705,12 @@ Aqui, o contraste com §17.5 é o ponto principal: inicializar com `values[0]` p
 MAXIMUM(values)
 
     PRE: length(values) > 0
+    POST: result is an element of values
+          and for every x in values, result >= x
 
     max_so_far = values[0]
 
-    for each value after the first
+    for each value after the first in values
         if value > max_so_far
             max_so_far = value
 
@@ -2162,9 +2773,11 @@ A cada passo, um elemento adicional é processado.
 
 ## 17.12 Complexidade — apenas intuição
 
-O algoritmo faz uma quantidade de comparações que cresce **linearmente com o número de elementos da entrada**: ao acrescentar elementos, o trabalho adicional cresce na mesma ordem do percurso.
+Para uma entrada não vazia com `n` elementos, esta implementação inicializa o estado com o primeiro elemento e compara cada um dos `n - 1` elementos restantes exatamente uma vez com `max_so_far`.
 
-A notação assintótica formal e a análise rigorosa desse crescimento ficam para Análise de Algoritmos.
+Assim, a quantidade de comparações cresce **linearmente com o número de elementos da entrada**: ao acrescentar elementos, o trabalho adicional cresce na mesma ordem do percurso.
+
+A notação assintótica formal e a análise rigorosa desse crescimento ficam para Análise de Algoritmos; o T02 registra apenas a intuição e o fato contável `n - 1`.
 
 [↑ Voltar ao índice](#índice)
 
@@ -2172,14 +2785,32 @@ A notação assintótica formal e a análise rigorosa desse crescimento ficam pa
 
 # 18. Transferência para quatro linguagens
 
-Todos os exemplos implementam o mesmo contrato conceitual:
+Todos os exemplos implementam a **mesma ideia algorítmica**:
 
 ```text
 entrada não vazia
 → maior elemento
 ```
 
-As implementações abaixo também detectam entrada vazia para tornar a violação do contrato explícita.
+Mas “inteiro” no contrato matemático e “valor representável” numa linguagem concreta não são automaticamente o mesmo domínio.
+
+Neste exemplo:
+
+- **Python `int`** possui precisão arbitrária, limitada na prática pelos recursos disponíveis;
+- **JavaScript `Number`** representa exatamente apenas uma faixa limitada de inteiros; valores fora da faixa de inteiros seguros podem deixar de ser distinguíveis;
+- **Java `int`** é um inteiro com sinal de 32 bits;
+- **Bash** avalia aritmética em inteiros de largura fixa disponíveis na implementação, sem checagem de overflow.
+
+| Implementação | Fronteira relevante neste exemplo |
+|---|---|
+| Python `int` | precisão arbitrária; limite prático de recursos |
+| JavaScript `Number` | inteiros seguros de `-(2^53 - 1)` a `2^53 - 1` |
+| Java `int` | `-2^31` a `2^31 - 1` |
+| Bash | largura fixa dependente da implementação; não assumir uma faixa portátil única |
+
+Portanto, as quatro versões preservam o mesmo **algoritmo conceitual** somente sobre a interseção do domínio que cada representação concreta consegue aceitar e comparar corretamente. Se o contrato exigir inteiros fora dessa fronteira, a implementação deve escolher outro tipo/representação — por exemplo, `BigInt` em JavaScript ou `long`/`BigInteger` em Java, conforme o requisito.
+
+As implementações abaixo também detectam entrada vazia para tornar a violação da pré-condição explícita.
 
 ## 18.1 Python
 
@@ -2190,7 +2821,8 @@ def find_max(values: list[int]) -> int:
 
     max_so_far = values[0]
 
-    for value in values[1:]:
+    for index in range(1, len(values)):
+        value = values[index]
         if value > max_so_far:
             max_so_far = value
 
@@ -2218,7 +2850,8 @@ function findMax(values) {
 
   let maxSoFar = values[0];
 
-  for (const value of values.slice(1)) {
+  for (let index = 1; index < values.length; index++) {
+    const value = values[index];
     if (value > maxSoFar) {
       maxSoFar = value;
     }
@@ -2274,7 +2907,7 @@ Saída reproduzida:
 
 ## 18.4 Bash
 
-> **Escopo do exemplo:** os argumentos usados abaixo representam inteiros válidos. Bash não fornece tipagem numérica aos parâmetros posicionais; em contexto aritmético, valores de variáveis são avaliados como expressões. Por isso, entrada externa deve ter presença e representação validadas antes de chegar a este ponto. A aritmética do Bash usa os maiores inteiros de largura fixa disponíveis na implementação e não verifica overflow.
+> **Escopo do exemplo:** a função aceita apenas a forma decimal canônica `0|[1-9][0-9]*|-[1-9][0-9]*`; assim, `-0`, `00`, `08`, expressões e outros conteúdos fora dessa forma são rejeitados **antes de qualquer valor fornecido pelo chamador entrar em contexto aritmético**. Essa validação de formato/base é importante porque Bash reavalia valores de variáveis como expressões em `(( ... ))`. A faixa continua limitada aos inteiros de largura fixa disponíveis na implementação, e Bash não verifica overflow de modo portável; portanto, **estar dentro da faixa representável permanece parte do domínio assumido** deste exemplo.
 
 ```bash
 #!/usr/bin/env bash
@@ -2285,13 +2918,21 @@ find_max() {
         return 2
     fi
 
-    local max_so_far=$1
-    shift
-
+    # Validar todos os valores antes de usar conteúdo externo em aritmética.
     local value
     for value in "$@"; do
+        if [[ ! $value =~ ^(0|[1-9][0-9]*|-[1-9][0-9]*)$ ]]; then
+            printf '%s\n' 'values must be canonical decimal integers' >&2
+            return 2
+        fi
+    done
+
+    local max_so_far="$1"
+    shift  # remove o primeiro argumento; "$@" passa a conter apenas os restantes
+
+    for value in "$@"; do
         if (( value > max_so_far )); then
-            max_so_far=$value
+            max_so_far="$value"
         fi
     done
 
@@ -2316,11 +2957,13 @@ Saída reproduzida:
 | Conceito | Python | JavaScript | Java | Bash |
 |---|---|---|---|---|
 | coleção do exemplo | `list[int]` | `Array` | `int[]` | argumentos posicionais |
-| vazio | falsy list | `length === 0` | `length == 0` | `$# == 0` |
+| detecção de vazio | `if not values` | `length === 0` | `length == 0` | `$# == 0` |
 | estado mutável | `max_so_far` | `maxSoFar` | `maxSoFar` | `max_so_far` |
-| iteração | `for value` | `for...of` | `for` por índice | `for value in "$@"` |
-| erro | `ValueError` | `RangeError` | `IllegalArgumentException` | stderr + exit status |
+| percurso sem copiar a coleção | `range` + índice | `for` + índice | `for` + índice | `for value in "$@"` |
+| sinalização da violação | `ValueError` | `RangeError` | `IllegalArgumentException` | stderr + exit status |
 | resultado | `return int` | `return Number` | `return int` | stdout |
+
+<!-- qa: os quatro exemplos executáveis da §18 devem permanecer cobertos por regressão automatizada/build sempre que esta fonte for alterada -->
 
 Bash ilustra novamente que:
 
@@ -2382,6 +3025,7 @@ Pré-condição é parte do contrato.
 
 Um `if` é uma forma possível de verificar a condição em uma implementação.
 
+<a id="197-pos-condicao-e-um-exemplo"></a>
 <a id="197-postcondição-é-um-exemplo"></a>
 
 ## 19.7 “Pós-condição é um exemplo”
@@ -2404,15 +3048,7 @@ Não.
 
 ## 19.10 “Inicializar máximo com zero funciona”
 
-Só sob pré-condições adicionais.
-
-Sem elas:
-
-```text
-[-8, -2, -11]
-```
-
-destrói a correção.
+Só sob pré-condições adicionais. Sem elas, a inicialização pode introduzir um valor que nem pertence à entrada e destruir a correção. O contraexemplo canônico e seu mecanismo já estão fechados na [§10.6](#106-exemplo-de-algoritmo-incorreto) e na [§17.6](#176-inicialização-incorreta), evitando repetir aqui toda a demonstração.
 
 ## 19.11 “Algoritmo correto automaticamente é eficiente”
 
@@ -2428,7 +3064,7 @@ Um algoritmo pode ser correto e impraticavelmente lento.
 
 # 20. Como raciocinar sobre um algoritmo
 
-Use este roteiro.
+Use este roteiro. Para consulta operacional ainda mais compacta, veja também o [§24 — Checklist de consulta rápida](#24-checklist-de-consulta-rápida).
 
 ## 20.1 Qual é o problema?
 
@@ -2456,7 +3092,7 @@ Cada passo aproxima do término?
 
 ## 20.6 Qual propriedade deve permanecer verdadeira?
 
-Existe uma invariante útil?
+Existe um invariante útil?
 
 ## 20.7 Qual é a condição de término?
 
@@ -2764,6 +3400,20 @@ dada uma sequência e um valor alvo,
 retorne uma posição válida em que o alvo aparece
 ```
 
+Contrato mínimo:
+
+```text
+PRE:
+target ocorre em values
+
+POST:
+result é um índice válido de values
+E
+values[result] == target
+```
+
+Se `target` puder estar ausente, o problema precisa declarar separadamente qual resultado representa “não encontrado”.
+
 Entrada:
 
 ```text
@@ -2795,6 +3445,8 @@ values[result] == target
 ```
 
 Se a especificação disser “retorne a primeira ocorrência”, então `0` passa a ser obrigatório. O ponto central é que **o oracle de teste deve validar o problema realmente especificado**.
+
+**Extensão `[E]`:** em *property-based testing*, a mesma ideia pode ser automatizada gerando muitas entradas e verificando **propriedades do contrato** em vez de comparar sempre com uma única saída fixa. Isso amplia a busca por contraexemplos, mas continua sendo teste — não substitui um argumento/prova geral de correção.
 
 ### Evidência de fechamento
 
@@ -2893,7 +3545,7 @@ values = []
 
 **Como observar**
 
-Leia primeiro o contrato, não o stack trace.
+Comece pelo contrato para decidir se a entrada pertence ao domínio; depois use o stack trace e a observação da execução para localizar eventual falha de implementação.
 
 **Como interpretar**
 
@@ -3054,8 +3706,16 @@ resultado deve ser 0
 Especificação real:
 
 ```text
-retornar uma posição em que target ocorre
+PRE:
+target ocorre em values
+
+POST:
+result é um índice válido de values
+E
+values[result] == target
 ```
+
+Se o domínio também admitir `target` ausente, a especificação deve definir explicitamente o resultado correspondente.
 
 **Hipóteses**
 
@@ -3305,7 +3965,7 @@ O algoritmo retorna `0`, embora `0` nem pertença à entrada. A correção é in
 MAXIMUM(values)
     max = values[0]
 
-    for each x in values[1..]
+    for each x after the first in values
         if x > max
             max = x
 
@@ -3373,14 +4033,15 @@ divide(1, 0)
 <details>
 <summary><strong>Solução-modelo possível</strong></summary>
 
-Contrato parcial simples:
+Contrato com domínio restrito aos números racionais:
 
 ```text
-PRE:  b != 0
-POST: result * b == a, dentro do modelo numérico adotado
+DOMÍNIO: a, b e result pertencem aos números racionais
+PRE:     b != 0
+POST:    result * b == a
 ```
 
-> **Escopo deste LAB:** adote aritmética exata como modelo conceitual. Em representações de ponto flutuante, arredondamento pode tornar igualdade exata uma pós-condição inadequada; esse mecanismo será aprofundado posteriormente.
+> **Escopo deste LAB:** adote aritmética racional exata como modelo conceitual. Assim, por exemplo, `divide(5, 2)` pode produzir exatamente `5/2`. Em representações de ponto flutuante, arredondamento pode tornar igualdade exata uma pós-condição inadequada; esse mecanismo será aprofundado posteriormente.
 
 Nesse contrato, `b == 0` é uma **violação de pré-condição** e não uma entrada válida da operação. Outra API poderia deliberadamente aceitar qualquer `b` e retornar um resultado/erro estruturado; seria **outro contrato**.
 
@@ -3422,7 +4083,7 @@ Crie uma tabela com:
 | iteração | valor | `count` antes | condição `value > 0` | `count` depois |
 |---:|---:|---:|---|---:|
 
-Depois formule uma invariante.
+Depois formule um invariante.
 
 ### Procedimento
 
@@ -3458,7 +4119,7 @@ Invariante possível:
 
 ### Variação / transferência
 
-Troque o predicado por “valor par” e formule a nova invariante.
+Troque o predicado por “valor par” e formule o novo invariante.
 
 ---
 
@@ -3468,15 +4129,15 @@ Troque o predicado por “valor par” e formule a nova invariante.
 
 ### Objetivo
 
-Comparar representações sem confundir representação com o algoritmo representado.
+Comparar representações sem confundir a notação com o algoritmo representado e demonstrar conversão nos dois sentidos entre pseudocódigo e fluxograma.
 
 ### Pré-requisitos
 
-- §§14–16 — linguagem natural, pseudocódigo e fluxograma.
+- §§14–16 — linguagem natural, pseudocódigo, símbolos, conectores e construção de fluxogramas.
 
 ### Estado inicial
 
-Escolha um algoritmo curto, por exemplo: determinar se um inteiro é par.
+Algoritmo curto: determinar se um inteiro é par.
 
 ### Tarefa
 
@@ -3487,19 +4148,47 @@ Represente o mesmo procedimento em:
 3. pseudocódigo;
 4. fluxograma.
 
+Depois:
+
+5. identifique os tipos de símbolo realmente usados no fluxograma;
+6. justifique por que cada forma corresponde à função representada;
+7. percorra visualmente os caminhos para uma entrada par e uma ímpar;
+8. converta o fluxograma novamente para pseudocódigo sem consultar o pseudocódigo original;
+9. compare as duas versões e verifique se preservam o mesmo contrato.
+
 ### Procedimento
 
-Preserve o mesmo contrato e compare apenas a forma de representação.
+1. fixe primeiro o contrato;
+2. descreva a lógica sem escolher símbolos;
+3. mapeie cada função para a tabela canônica da §16.3;
+4. desenhe o fluxo;
+5. rotule as saídas da decisão;
+6. garanta que os dois caminhos chegam ao término;
+7. execute manualmente os casos de teste;
+8. faça a conversão inversa.
 
 ### O que observar
 
 - qual representação evidencia melhor a decisão;
-- qual é mais rápida de editar;
-- se alguma notação adicionou detalhe acidental da linguagem.
+- se a forma escolhida comunica corretamente a função;
+- se o fluxograma acrescentou detalhe visual sem mudar a lógica;
+- se algum caminho foi criado ou perdido durante a conversão;
+- se a notação introduziu detalhe acidental da ferramenta.
 
 ### Testes / autoverificação
 
-Use pelo menos `2`, `3`, `0` e `-4`. Todas as representações devem implicar as mesmas respostas.
+Use pelo menos `2`, `3`, `0`, `-4` e `-3`. Todas as representações devem implicar as mesmas respostas. O caso `-3` ajuda a detectar implementações que tentam reconhecer ímpar com `resto == 1` em vez de testar paridade por `resto == 0`.
+
+Checklist mínimo do fluxograma:
+
+```text
+[ ] terminal inicial
+[ ] entrada n
+[ ] decisão n MOD 2 == 0?
+[ ] dois caminhos rotulados
+[ ] saída verdadeiro/falso
+[ ] terminal final
+```
 
 <details>
 <summary><strong>Solução-modelo possível</strong></summary>
@@ -3522,15 +4211,42 @@ IS_EVEN(n)
     return false
 ```
 
-Um fluxograma equivalente possui: início → entrada `n` → decisão `n MOD 2 == 0?` → saída verdadeiro/falso → fim.
+Fluxograma:
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber n/]
+    INPUT --> TEST{n MOD 2 == 0?}
+    TEST -- Sim --> TRUE[/Produzir verdadeiro/]
+    TEST -- Não --> FALSE[/Produzir falso/]
+    TRUE --> END([Fim])
+    FALSE --> END
+```
+
+Símbolos utilizados:
+
+- terminal — início/fim;
+- entrada/saída — receber `n` e produzir a resposta;
+- decisão — testar `n MOD 2 == 0?`;
+- linhas de fluxo — conectar as etapas e indicar direção.
+
+Conversão inversa possível:
+
+```text
+IS_EVEN(n)
+    if n MOD 2 == 0
+        return true
+    else
+        return false
+```
+
+A forma textual não precisa ser idêntica ao pseudocódigo inicial. A equivalência está no contrato e nos dois caminhos possíveis.
 
 </details>
 
 ### Variação / transferência
 
-Escolha uma segunda representação como principal e explique por que ela é mais adequada ao seu objetivo de comunicação.
-
----
+Divida deliberadamente um fluxograma maior em dois trechos e use um **conector na página** para preservar a continuidade. Depois explique por que o conector melhora — ou não melhora — a leitura.
 
 <a id="-laboratório-6--transferência"></a>
 <a id="lab-t02-06"></a>
@@ -3759,7 +4475,7 @@ for each value:
     total = total + value
 ```
 
-proponha uma invariante.
+proponha um invariante.
 
 <details>
 <summary><strong>Resposta comentada</strong></summary>
@@ -3793,10 +4509,12 @@ Reescreva o algoritmo `MAXIMUM` sem utilizar nenhuma palavra reservada específi
 ```text
 MAXIMUM(values)
     PRE: values is not empty
+    POST: result is an element of values
+          and for every x in values, result >= x
 
     max_so_far = first element of values
 
-    for each remaining value in values
+    for each value after the first in values
         if value > max_so_far
             max_so_far = value
 
@@ -3858,11 +4576,12 @@ Sem começar pelo código, produza:
 2. pré-condições e pós-condição;
 3. estado necessário;
 4. pseudocódigo;
-5. uma invariante para o percurso;
+5. um invariante para o percurso;
 6. um rastreamento manual para `values = [2, 7, -1, 7]` e `target = 2`;
 7. um argumento de término;
 8. um contraexemplo para uma versão defeituosa que inicializa `count = 1`;
-9. uma frase separando aquilo que pertence ao algoritmo daquilo que pertenceria à linguagem de implementação.
+9. uma frase separando aquilo que pertence ao algoritmo daquilo que pertenceria à linguagem de implementação;
+10. um fluxograma equivalente ao pseudocódigo, com formas coerentes com suas funções.
 
 <details>
 <summary><strong>Solução-modelo comentada</strong></summary>
@@ -3899,6 +4618,24 @@ COUNT_GREATER(values, target)
     return count
 ```
 
+Fluxograma equivalente:
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber values e target/]
+    INPUT --> INIT[Definir count = 0]
+    INIT --> REMAIN{Há elemento restante?}
+    REMAIN -- Não --> OUTPUT[/Produzir count/]
+    OUTPUT --> END([Fim])
+    REMAIN -- Sim --> NEXT[Definir value = próximo elemento de values]
+    NEXT --> TEST{value > target?}
+    TEST -- Sim --> INC[Definir count = count + 1]
+    TEST -- Não --> REMAIN
+    INC --> REMAIN
+```
+
+O diagrama e o pseudocódigo preservam a mesma inicialização, o mesmo teste por elemento, a mesma atualização condicional e a mesma condição de término.
+
 Invariante possível:
 
 > antes de processar o próximo elemento, `count` é exatamente a quantidade de elementos maiores que `target` no prefixo já processado.
@@ -3912,7 +4649,7 @@ Rastreamento:
 | `[2, 7, -1]` | `-1` | `1` |
 | `[2, 7, -1, 7]` | `7` | `2` |
 
-Ao terminar, o prefixo processado é a sequência inteira; portanto, a invariante implica a pós-condição. O percurso termina porque processa uma sequência finita e avança um elemento por iteração.
+Ao terminar, o prefixo processado é a sequência inteira; portanto, o invariante implica a pós-condição. O percurso termina porque processa uma sequência finita e avança um elemento por iteração.
 
 Contraexemplo para `count = 1`:
 
@@ -3924,6 +4661,180 @@ target = 10
 O resultado correto é `0`, mas a inicialização defeituosa já começa em `1`. Se o contrato escolhido excluísse sequência vazia, outro contraexemplo seria `values = [0]`, `target = 10`.
 
 A lógica de contar e o contrato pertencem ao **algoritmo**; sintaxe de loop, tipos concretos, mecanismo de retorno e tratamento de erro pertencem à **linguagem/ambiente de implementação**.
+
+</details>
+
+## 22.14 Escolha o símbolo adequado
+
+Associe cada operação ao símbolo **mais informativo** dentro do vocabulário da §16.3:
+
+A. começar o algoritmo  
+B. calcular `total = a + b`  
+C. receber `idade`  
+D. testar `idade >= 18?`  
+E. continuar em outro ponto distante da mesma página  
+F. executar `VALIDATE_INPUT()` já definido separadamente  
+G. indicar continuação em outra página  
+H. acrescentar uma observação que não é executada
+
+<details>
+<summary><strong>Resposta comentada</strong></summary>
+
+A. terminal;  
+B. processo;  
+C. entrada/saída;  
+D. decisão;  
+E. conector na página;  
+F. processo predefinido/subprocesso;  
+G. conector fora da página;  
+H. anotação/comentário.
+
+Uma forma mais genérica às vezes ainda seria legível, mas a pergunta pede a forma que comunica melhor a função.
+
+</details>
+
+## 22.15 Linha de fluxo, conectores e subprocesso
+
+Classifique cada caso como:
+
+```text
+LINHA DE FLUXO
+CONECTOR NA PÁGINA
+CONECTOR FORA DA PÁGINA
+SUBPROCESSO
+```
+
+1. duas etapas adjacentes possuem relação direta;
+2. um retorno cruzaria praticamente todo o diagrama;
+3. a continuação está na página seguinte;
+4. uma etapa chama um procedimento com contrato já definido.
+
+Depois explique por que **conector** e **subprocesso** não são sinônimos.
+
+<details>
+<summary><strong>Resposta comentada</strong></summary>
+
+1. linha de fluxo;  
+2. conector na página;  
+3. conector fora da página;  
+4. subprocesso.
+
+Conector apenas referencia a continuidade do **mesmo fluxo** em outro ponto. Subprocesso representa uma **unidade de lógica definida separadamente** e chamada pelo fluxo atual.
+
+</details>
+
+## 22.16 Depure o fluxograma
+
+Considere a intenção: contar de `0` até `2` e terminar.
+
+```mermaid
+flowchart TD
+    START([Início]) --> INIT[Definir i = 0]
+    INIT --> TEST{i < 3?}
+    TEST -- Sim --> OUTPUT[/Exibir i/]
+    OUTPUT --> TEST
+    TEST -- Não --> END([Fim])
+```
+
+Identifique o defeito lógico e corrija o diagrama.
+
+<details>
+<summary><strong>Resposta comentada</strong></summary>
+
+O caminho `Sim` retorna ao teste sem alterar `i`. A condição permanece verdadeira indefinidamente.
+
+Uma correção:
+
+```mermaid
+flowchart TD
+    START([Início]) --> INIT[Definir i = 0]
+    INIT --> TEST{i < 3?}
+    TEST -- Sim --> OUTPUT[/Exibir i/]
+    OUTPUT --> UPDATE[Definir i = i + 1]
+    UPDATE --> TEST
+    TEST -- Não --> END([Fim])
+```
+
+O primeiro diagrama era sintaticamente renderizável e visualmente organizado, mas representava algoritmo sem progresso.
+
+</details>
+
+## 22.17 Fluxograma ↔ pseudocódigo
+
+Converta o fluxograma abaixo para pseudocódigo:
+
+```mermaid
+flowchart TD
+    START([Início]) --> INPUT[/Receber x/]
+    INPUT --> TEST{x < 0?}
+    TEST -- Sim --> NEG[Definir x = -x]
+    TEST -- Não --> OUTPUT[/Produzir x/]
+    NEG --> OUTPUT
+    OUTPUT --> END([Fim])
+```
+
+Depois reconstrua um fluxograma a partir do pseudocódigo produzido, **liste os caminhos possíveis** e confirme qual pós-condição deve valer em cada término. Compare então os caminhos das duas representações.
+
+<details>
+<summary><strong>Resposta comentada</strong></summary>
+
+Pseudocódigo possível:
+
+```text
+ABS_VALUE(x)
+    if x < 0
+        x = -x
+    return x
+```
+
+A conversão pode mudar a aparência da representação, mas precisa preservar: uma única decisão, a atualização apenas para negativos e a mesma saída final.
+
+Considere `x_initial` como o valor recebido antes de qualquer atualização. Os dois caminhos são:
+
+```text
+CAMINHO 1
+x_initial < 0
+→ definir x = -x_initial
+→ produzir x
+
+CAMINHO 2
+x_initial >= 0
+→ manter x = x_initial
+→ produzir x
+```
+
+Em ambos os términos, deve valer a mesma pós-condição:
+
+```text
+result = |x_initial|
+```
+
+Equivalentemente, para entrada inteira, `result >= 0` e o resultado corresponde ao valor absoluto da entrada original. Assim, o fluxograma reconstruído e o pseudocódigo são equivalentes apenas se preservarem esses dois caminhos e essa pós-condição comum.
+
+</details>
+
+## 22.18 Visualmente válido, logicamente incorreto
+
+Um fluxograma usa símbolos corretos, setas claras e possui início/fim. No entanto, para encontrar o maior valor de uma sequência não vazia, ele começa com:
+
+```text
+max_so_far = 0
+```
+
+Explique por que **qualidade gráfica não prova correção algorítmica** e forneça um contraexemplo mínimo.
+
+<details>
+<summary><strong>Resposta comentada</strong></summary>
+
+A representação pode estar formalmente organizada e ainda expressar uma inicialização incompatível com o domínio. Para:
+
+```text
+[-1]
+```
+
+o procedimento pode retornar `0`, que nem pertence à entrada.
+
+A correção é iniciar com um elemento válido da própria sequência, por exemplo `values[0]`, sob a pré-condição de sequência não vazia.
 
 </details>
 
@@ -3947,7 +4858,10 @@ Como o tópico é `[D]`, a meta vai além de reconhecer definições. Cada item 
 - [ ] término — §11, PR-T02-04, EX 22.6–22.7;
 - [ ] determinismo quando aplicável — §12, EX 22.9;
 - [ ] pseudocódigo — §15, PR-T02-05, EX 22.10;
-- [ ] fluxograma — §16, LAB-T02-05;
+- [ ] fluxograma como representação, não como algoritmo — §§14.4 e 16.1, EX 22.18;
+- [ ] função dos símbolos essenciais e estruturais — §16.3, EX 22.14–22.15;
+- [ ] linha de fluxo × conector — §16.5, EX 22.15;
+- [ ] Mermaid × notação conceitual — §16.15;
 - [ ] invariante em nível introdutório — §13, LAB-T02-04, EX 22.8.
 
 ## Você deve conseguir aplicar
@@ -3959,22 +4873,31 @@ Como o tópico é `[D]`, a meta vai além de reconhecer definições. Cada item 
 - [ ] encontrar contraexemplo — PR-T02-02, LAB-T02-02, EX 22.11;
 - [ ] detectar inicialização inválida — §17.6, TS-T02-01;
 - [ ] identificar condição de término — §11, PR-T02-04, TS-T02-03;
-- [ ] integrar contrato, estado, invariante, rastreamento, término e busca de contraexemplo em um único problema — EX 22.13.
+- [ ] escolher símbolos coerentes com a função representada — §16.3, EX 22.14;
+- [ ] representar sequência, seleção e repetição — §§16.8–16.10, LAB-T02-05;
+- [ ] usar conectores quando melhorarem a legibilidade — §16.5, LAB-T02-05;
+- [ ] representar chamada de subprocesso sem esconder operação central — §16.6, EX 22.15;
+- [ ] integrar contrato, estado, invariante, rastreamento, término, fluxograma e busca de contraexemplo em um único problema — EX 22.13.
 
 ## Você deve conseguir depurar
 
 - [ ] distinguir algoritmo errado de implementação errada — §7, PR-T02-02;
 - [ ] encontrar entrada que quebra uma hipótese — LAB-T02-02, TS-T02-01;
 - [ ] localizar violação de pré-condição — TS-T02-02;
-- [ ] identificar loop sem progresso — TS-T02-03, EX 22.7;
+- [ ] identificar loop sem progresso — TS-T02-03, EX 22.7 e 22.16;
+- [ ] detectar caminho sem destino, decisão sem rotulagem útil ou conector ambíguo — §§16.5 e 16.11;
+- [ ] explicar por que um fluxograma visualmente correto pode representar lógica incorreta — §16.11, EX 22.18;
 - [ ] explicar por que teste isolado não prova correção — §10.3, TS-T02-06.
 
 ## Você deve conseguir transferir
 
 - [ ] descrever o algoritmo sem linguagem — §§14–15, LAB-T02-05;
-- [ ] implementá-lo em duas linguagens — §18, LAB-T02-06;
+- [ ] converter pseudocódigo → fluxograma sem alterar o contrato — §16.14, LAB-T02-05;
+- [ ] converter fluxograma → pseudocódigo preservando caminhos — §16.14, LAB-T02-05, EX 22.17;
+- [ ] interpretar símbolos complementares sem tratá-los como núcleo obrigatório — §16.7;
+- [ ] implementar o algoritmo em duas linguagens — §18, LAB-T02-06;
 - [ ] reconhecer diferenças semânticas — §18.5, LAB-T02-06;
-- [ ] explicar como o mesmo estado conceitual aparece em implementações diferentes — §§8 e 18.5.
+- [ ] explicar como o mesmo estado conceitual aparece em representações e implementações diferentes — §§8, 16 e 18.5.
 
 ## Nível 5 — dominar/ensinar
 
@@ -3991,10 +4914,13 @@ qual invariante?
 qual término?
 qual argumento de correção?
 quais contraexemplos foram procurados?
-qual parte pertence ao algoritmo e qual pertence à linguagem?
+qual representação comunica melhor esta parte?
+se houver fluxograma, cada forma e conector possui função inequívoca?
+fluxograma e pseudocódigo descrevem o mesmo comportamento?
+qual parte pertence ao algoritmo e qual pertence à linguagem/ferramenta?
 ```
 
-Uma evidência forte de nível 5 é conseguir orientar outra pessoa em `PR-T02-01` a `PR-T02-06` sem entregar a solução pronta, explicar o mecanismo das falhas `TS-T02-01` a `TS-T02-06` e resolver o desafio integrador `22.13` justificando cada parte do raciocínio.
+Uma evidência forte de nível 5 é conseguir orientar outra pessoa em `PR-T02-01` a `PR-T02-06` sem entregar a solução pronta, explicar o mecanismo das falhas `TS-T02-01` a `TS-T02-06`, revisar um fluxograma usando §16.13 e resolver o desafio integrador `22.13` justificando cada parte do raciocínio.
 
 [↑ Voltar ao índice](#índice)
 
@@ -4018,8 +4944,25 @@ Antes de aceitar um procedimento como algoritmo bem especificado:
 [ ] O estado final satisfaz a pós-condição?
 [ ] Procurei contraexemplos?
 [ ] Diferenciei teste de argumento de correção?
+[ ] Diferenciei erro de sintaxe/runtime de erro algorítmico?
 [ ] A representação não esconde a parte difícil?
+[ ] Se usei built-in/API, conheço o contrato da operação encapsulada?
 [ ] A descrição depende desnecessariamente de uma linguagem?
+```
+
+Se a representação escolhida for um fluxograma, acrescente:
+
+```text
+[ ] Início e término estão claramente identificados?
+[ ] Cada forma corresponde à função da etapa?
+[ ] As decisões possuem saídas compreensíveis e caminhos completos?
+[ ] O sentido das linhas de fluxo é inequívoco?
+[ ] Conectores estão identificados e pareados sem ambiguidade?
+[ ] O diagrama evita cruzamentos/linhas longas quando um conector melhoraria a leitura?
+[ ] Subprocessos referenciam lógica realmente definida em outro lugar?
+[ ] Repetições possuem progresso e caminho de saída?
+[ ] Fluxograma e pseudocódigo/contrato descrevem o mesmo comportamento?
+[ ] Existe descrição textual equivalente para que o raciocínio não dependa apenas da imagem renderizada?
 ```
 
 [↑ Voltar ao índice](#índice)
@@ -4030,28 +4973,39 @@ Antes de aceitar um procedimento como algoritmo bem especificado:
 
 | Termo | Definição |
 |---|---|
-| **Algoritmo** | Procedimento computacional bem definido para transformar entradas/estado em resultados segundo uma especificação. |
-| **Correção** | Propriedade de produzir resultados que satisfazem a especificação para o domínio considerado. |
-| **Correção parcial** | Se o algoritmo termina, a pós-condição é satisfeita. |
-| **Correção total** | Correção parcial mais garantia de término. |
+| **Algoritmo** | Procedimento computacional bem definido proposto para transformar entradas/estado em resultados segundo uma especificação. |
+| **Algoritmo offline** | Algoritmo que recebe a sequência/conjunto relevante de entradas antecipadamente antes de processá-la. |
+| **Algoritmo online** | Algoritmo que processa entradas à medida que chegam, sem pressupor conhecimento antecipado de toda a sequência futura. |
+| **Conector** | Referência que indica continuidade do fluxo em outro ponto da mesma página ou em outra página, sem representar uma etapa executável. |
 | **Contrato** | Conjunto explícito de condições e propriedades que delimitam o uso correto de um algoritmo, incluindo pré-condições e pós-condições quando aplicável. |
+| **Correção** | Propriedade de produzir resultados que satisfazem a especificação para o domínio considerado. |
+| **Correção parcial** | Sob `PRE → POST`: se a pré-condição vale no estado inicial e o algoritmo termina, então a pós-condição vale no estado final; não garante término por si só. |
+| **Correção total** | Correção parcial mais garantia de término para as entradas/estados cobertos pela pré-condição. |
 | **Determinístico** | Com entrada/estado inicial iguais, as escolhas do procedimento são determinadas. |
 | **Domínio de entrada** | Conjunto de entradas consideradas válidas para o problema/contrato. |
 | **Efetividade** | Propriedade de os passos serem executáveis no modelo de computação adotado. |
-| **Estado** | Informação relevante da execução em determinado instante. |
+| **Efeito colateral (*side effect*)** | Alteração observável além do valor retornado, como modificar estrutura, arquivo, banco ou outro estado externo declarado pelo contrato. |
 | **Especificação** | Descrição do problema e das propriedades que uma solução correta deve satisfazer, sem determinar necessariamente como a solução será construída. |
+| **Estado** | Informação relevante da execução em determinado instante. |
 | **Finitude** | Término após quantidade finita de passos para entradas do domínio assumido. |
-| **Fluxograma** | Representação gráfica do fluxo de um procedimento. |
+| **Fail fast** | Estratégia de detectar e sinalizar uma condição inválida o mais cedo possível, antes que a execução prossiga com estado inadequado; é uma decisão de implementação e não substitui a definição do contrato. |
+| **Fluxograma** | Representação gráfica dos passos e caminhos de controle de um procedimento. |
 | **Heurística** | Estratégia prática que busca solução útil sem necessariamente oferecer as mesmas garantias de um algoritmo exato/ótimo. |
 | **Instância** | Entrada concreta de um problema geral. |
 | **Invariante** | Propriedade que permanece verdadeira em pontos definidos da execução. |
+| **Las Vegas (algoritmo randomizado)** | Categoria em que a resposta produzida é correta; a aleatoriedade pode afetar o caminho ou o tempo de execução. |
+| **Linha de fluxo** | Ligação direcionada que conecta diretamente etapas de um fluxograma e indica a sequência do caminho. |
+| **Modelo de computação** | Conjunto de estados e operações suficientemente definido para dizer o que cada passo do algoritmo pode executar; neste T02 é usado em sentido informal. |
+| **Monte Carlo (algoritmo randomizado)** | Categoria que admite probabilidade de erro controlada conforme a especificação/análise. |
 | **Oracle de teste (test oracle)** | Regra ou mecanismo usado para decidir se o resultado observado de um teste satisfaz a especificação esperada. |
 | **Pós-condição** | Propriedade que deve valer no estado final correto. |
 | **Pré-condição** | Propriedade assumida/esperada antes da execução. |
 | **Problema computacional** | Especificação da relação entre entradas e resultados corretos. |
+| **Processo predefinido / subprocesso** | Etapa que chama uma unidade de lógica definida separadamente, com comportamento/contrato conhecido no nível de abstração usado. |
 | **Programa** | Implementação executável em linguagem/ambiente concreto. |
 | **Pseudocódigo** | Representação estruturada de algoritmo sem gramática universal obrigatória. |
 | **Randomizado** | Algoritmo que incorpora escolhas aleatórias à execução. |
+| **Sentinela** | Valor ou condição especial usado para sinalizar fim/controle de uma sequência quando esse papel faz parte do protocolo do algoritmo; precisa ser escolhido sem colidir indevidamente com dados válidos. |
 | **Término** | Propriedade de a execução alcançar um estado final segundo o contrato. |
 | **Variante** | Medida que progride em direção ao término, útil para raciocinar sobre loops/recursão. |
 
@@ -4135,7 +5089,107 @@ Uso:
 
 ---
 
-## 26.5 Fontes locais efetivamente consultadas
+## 26.5 Normas e documentação oficial
+
+### ISO 5807:1985
+
+**Information processing — Documentation symbols and conventions for data, program and system flowcharts, program network charts and system resources charts.**
+
+- página oficial:
+  - https://www.iso.org/standard/11955.html
+
+Uso nesta versão:
+
+- confirmar a existência, o escopo e o estado publicado/confirmado da norma;
+- registrar a última revisão e confirmação em 2019 indicada pela página oficial e que esta versão permanece vigente;
+- fundamentar que fluxogramas de programas possuem símbolos e convenções documentais próprios;
+- delimitar a relação do assunto com fluxogramas de dados, programas e sistemas.
+
+> **Limite de evidência:** a página pública da ISO expõe metadados, resumo e amostra, não o texto integral da norma. Este tópico, portanto, **não afirma reproduzir exaustivamente todos os símbolos da ISO 5807** nem transcreve conteúdo normativo protegido. A tabela da §16.3 é o vocabulário curricular do Guia para algoritmos, reconciliado com fontes didáticas e documentação oficial de ferramentas.
+
+### Microsoft Support — fluxograma básico no Visio
+
+- documentação oficial:
+  - https://support.microsoft.com/pt-br/visio/create-a-basic-flowchart-in-visio
+- continuação fora da página:
+  - https://support.microsoft.com/en-us/visio/continue-a-flowchart-on-a-separate-page
+
+Uso nesta versão:
+
+- convenções práticas correntes para início/fim, processo, decisão, subprocesso e entrada/saída;
+- distinção entre referência/conector na página e referência fora da página;
+- uso de referência na página para evitar conectores excessivamente longos.
+
+A documentação do Visio é usada como **referência prática de ferramenta**, não como norma substituta da ISO.
+
+### Mermaid — Flowcharts Syntax
+
+- documentação oficial:
+  - https://mermaid.js.org/syntax/flowchart.html
+
+Uso nesta versão:
+
+- sintaxe usada para publicar os diagramas do Guia;
+- nós, arestas/linhas e direção do flowchart;
+- formas clássicas e formas expandidas disponíveis desde Mermaid 11.3.0;
+- mapeamentos de implementação como `process`, `decision`, `terminal`, `subprocess`, `document`, `manual-input`, `database`, `display`, `comment` e `delay`.
+
+O projeto versiona localmente Mermaid **11.17.2**. A documentação do Mermaid sustenta apenas a **implementação gráfica**; ela não define a semântica normativa de fluxogramas.
+
+- release oficial da versão utilizada:
+  - https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.17.2
+
+### Python — tipos numéricos
+
+- documentação oficial de tipos embutidos:
+  - https://docs.python.org/pt-br/3/library/stdtypes.html
+
+Uso nesta versão:
+
+- fundamentar que `int` em Python possui precisão arbitrária, limitada na prática pelos recursos disponíveis.
+
+### ECMAScript — `Number.MAX_SAFE_INTEGER`
+
+- especificação oficial:
+  - https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.max_safe_integer
+
+Uso nesta versão:
+
+- delimitar a faixa de inteiros que o tipo `Number` distingue com segurança;
+- justificar a ressalva de domínio da implementação JavaScript da §18.
+
+### Java — tipos integrais
+
+- Java Language Specification:
+  - https://docs.oracle.com/javase/specs/jls/se27/html/jls-4.html#jls-4.2.1
+
+Uso nesta versão:
+
+- fundamentar que `int` é um inteiro com sinal de 32 bits e delimitar o domínio concreto do exemplo Java.
+
+### NIST — Dictionary of Algorithms and Data Structures (DADS)
+
+- dicionário oficial:
+  - https://xlinux.nist.gov/dads/
+- algoritmo offline:
+  - https://xlinux.nist.gov/dads/HTML/offline.html
+- algoritmo online:
+  - https://xlinux.nist.gov/dads/HTML/online.html
+- algoritmo Las Vegas:
+  - https://xlinux.nist.gov/dads/HTML/lasVegas.html
+- algoritmo Monte Carlo:
+  - https://xlinux.nist.gov/dads/HTML/monteCarlo.html
+
+Uso nesta versão:
+
+- terminologia complementar `online/offline` usada na extensão da §11.5;
+- distinção introdutória entre algoritmos randomizados Las Vegas e Monte Carlo na §12.2.
+
+> **Fronteira:** DADS é uma referência terminológica/técnica do NIST, não uma especificação normativa do currículo nem substitui as fontes acadêmicas usadas para correção e invariantes.
+
+---
+
+## 26.6 Fontes locais efetivamente consultadas
 
 Os materiais abaixo estão disponíveis na File Library e foram **abertos e efetivamente consultados** para esta versão. A presença de outros livros na biblioteca não é tratada como consulta nem como autoridade automática.
 
@@ -4169,7 +5223,8 @@ Joyce Farrell — Programming Logic and Design 10-ed_2024.pdf
 Localizadores e uso:
 
 - Capítulo 1, §1.3 — ciclo de desenvolvimento;
-- Capítulo 1, §1.4 — pseudocódigo e símbolos de fluxograma;
+- Capítulo 1, §1.4 — pseudocódigo, desenho de fluxogramas, terminal, entrada/saída, processo, linhas de fluxo, decisão e chamadas de módulo (Figura 1-7);
+- Capítulo 1, §1.4 — orientação predominante do fluxo e equivalência de lógica entre pseudocódigo e fluxograma;
 - Capítulo 1, §1.5 — término por sentinela e exemplo de loop infinito;
 - Capítulo 3 — sequência, seleção e repetição como estruturas de controle.
 
@@ -4212,7 +5267,7 @@ Localizadores e uso:
 
 ---
 
-## 26.6 Como as fontes foram usadas
+## 26.7 Como as fontes foram usadas
 
 ```text
 TAXONOMIA v2.1.0
@@ -4231,22 +5286,51 @@ CLRS
 → correção
 
 Stanford CS161
-→ contraprova acadêmica de correção/invariantes
+→ corroboração acadêmica complementar sobre correção/invariantes
+
+ISO 5807:1985 — página oficial pública
+→ escopo e vigência da norma de símbolos/convenções
+→ sem alegar reprodução integral do catálogo normativo
+
+Microsoft Support / Visio
+→ convenções práticas de formas
+→ referências na página e fora da página
+
+Mermaid 11.17.2 / documentação e release oficiais
+→ sintaxe de renderização dos flowcharts no site
+→ versão local explicitamente rastreada
+→ não tratado como norma de fluxogramas
 
 Farrell
 → representação didática
 → pseudocódigo/fluxograma
-→ lógica fundamental
+→ símbolos fundamentais, flowlines e chamadas de módulo
+→ sequência, seleção e repetição
 
 Skiena
 → problema × instância
 → especificação e contraexemplos
 → correção × eficiência
 
+Python — documentação oficial
+→ precisão arbitrária de `int`
+
+ECMAScript — especificação oficial
+→ `Number.MAX_SAFE_INTEGER`
+→ limites de representação exata do exemplo JavaScript
+
+Java Language Specification
+→ faixa e semântica de `int`
+
 GNU Bash Reference Manual
 → aritmética do shell
+→ regras de base para constantes
 → parâmetros posicionais
 → exit status e limites do exemplo Bash
+
+NIST DADS
+→ terminologia online/offline
+→ terminologia Las Vegas/Monte Carlo
 ```
 
 O enquadramento determinístico do MIT 6.006 é usado como modelo introdutório; ele não é transformado em afirmação de que todo algoritmo possível precisa ser determinístico.
@@ -4268,12 +5352,30 @@ Skiena
 → ideia do algoritmo acima da aparência da notação
 → contraexemplos simples para refutar incorreção
 
+ISO 5807:1985 (página oficial pública)
+→ escopo normativo de símbolos e convenções de fluxogramas
+→ referência de fronteira, sem reprodução integral da norma
+
+Microsoft Support / Visio
+→ convenções práticas atuais para formas e referências/conectores
+
+Mermaid
+→ implementação visual dos diagramas no site
+→ separação explícita entre ferramenta e conceito
+
 Farrell
 → pseudocódigo × fluxograma como representações
+→ símbolos e leitura didática de fluxogramas
 → clareza da lógica antes da linguagem
 
 Stanford CS161
 → reforço independente para correção e loop invariants
+
+Python / ECMAScript / Java / GNU Bash — fontes oficiais
+→ fronteiras concretas de representação e aritmética nas quatro implementações
+
+NIST DADS
+→ terminologia complementar para algoritmos online/offline e randomizados
 
 TAXONOMIA v2.1.0
 → fronteira curricular e classificação
@@ -4285,6 +5387,8 @@ A contribuição de cada fonte foi usada apenas onde ela acrescenta função rea
 
 ---
 
+<!-- publication: source-only; histórico editorial não exibido na página didática -->
+
 # 27. Histórico de versões
 
 <details>
@@ -4292,6 +5396,13 @@ A contribuição de cada fonte foi usada apenas onde ela acrescenta função rea
 
 | Versão | Data | Alterações |
 |---|---|---|
+| **0.4.10** | 2026-09-30 | Patch microscópico final sobre a v0.4.9: corrige no Resumo executivo a ordem conceitual entre algoritmo, programa/implementação, execução e resultado, alinhando-a ao fluxo canônico já apresentado em §1 (`PROBLEMA → ESPECIFICAÇÃO → ALGORITMO → IMPLEMENTAÇÃO → EXECUÇÃO → RESULTADO`); atualiza `last_reviewed`; preserva integralmente contratos, algoritmos, exemplos, Mermaid, referências, âncoras, taxonomia, PR/TS/LABs e demais conteúdos da v0.4.9. |
+| **0.4.9** | 2026-09-29 | Patch microscópico de fechamento sobre a v0.4.8: restringe a forma decimal canônica do exemplo Bash para rejeitar `-0` e outras grafias não canônicas antes da aritmética; explicita números racionais como domínio do LAB-T02-03 de divisão exata; substitui “procedimento/ideia” por formulação compatível com a definição rigorosa de algoritmo; corrige “a nova invariante” para “o novo invariante”; substitui “contraprova acadêmica” por “corroboração acadêmica complementar” na síntese de fontes; preserva contratos, Mermaid, referências, âncoras, taxonomia e escopo curricular. |
+| **0.4.8** | 2026-09-29 | Patch final de segurança e consistência sobre a v0.4.7: valida previamente todos os argumentos do exemplo Bash antes de qualquer conteúdo externo entrar em contexto aritmético, rejeitando formatos não decimais/canônicos e documentando a fronteira de faixa/overflow; completa o contrato do exemplo de múltiplas saídas em §2.6, `PR-T02-06` e `TS-T02-05`; separa pré-condição de validação em §14.2; completa `PRE`/`POST` e padroniza o percurso do `MAXIMUM` em §14.3 e ocorrências equivalentes; adiciona `-3` ao LAB-T02-05 como regressão para paridade negativa; documenta `shift` no Bash; torna o diagnóstico de `TS-T02-02` menos absoluto; preserva Mermaid, referências, âncoras, taxonomia e escopo curricular. |
+| **0.4.7** | 2026-09-29 | Revisão final de fechamento da v0.4.6: contextualiza `n` e `i` no exemplo de variante de §11.3; adiciona microexemplo online/offline sem ampliar o núcleo curricular; alinha a definição introdutória de Las Vegas à garantia de correção; corrige o rótulo residual e explicita o sentido de “elemento restante” no fluxograma `MAXIMUM`; alinha os pseudocódigos de §17.7 e §22.10 à convenção `PRE`/`POST`; completa o gabarito do exercício 22.17 com os dois caminhos e a pós-condição comum; adiciona `Fail fast` ao glossário; preserva compatibilidade de âncoras, referências, taxonomia, contratos, PR/TS/LABs e escopo do T02. |
+| **0.4.6** | 2026-09-29 | Revisão de fechamento da v0.4.5: corrige “conjunto com duplicados” para sequência com valores repetidos; fortalece a variante de término com medida bem fundada; reposiciona `POST` como contrato não executável; explicita correção geral em §10.4; adiciona imutabilidade conceitual, efeitos colaterais, fail-fast/asserções, built-ins encapsulados, online/offline e Las Vegas/Monte Carlo como extensões delimitadas; torna explícita a inicialização do invariante; melhora o exemplo de decisão em fluxograma; corrige a semântica I/O × acesso interno nos fluxogramas `MAXIMUM` e `COUNT_GREATER`; reforça acessibilidade textual de Mermaid; registra `n - 1` comparações; remove cópias desnecessárias em Python/JavaScript; reforça Bash e a comparação entre linguagens; adiciona aliases ASCII sem quebrar âncoras antigas; reduz redundância do contraexemplo `max = 0`; amplia checklist/glossário; registra confirmação ISO 2019 e NIST DADS; preserva taxonomia, contratos, PR/TS/LABs e escopo do T02. |
+| **0.4.5** | 2026-09-29 | Fecha a auditoria integral da v0.4.4: corrige correção parcial/total com pré-condição explícita; delimita o domínio numérico das quatro implementações; fecha o fluxo lógico do Panorama; remove circularidade do contrato; amplia o ensino do conector fora da página; elimina duplicação `IS_EVEN`; reposiciona retornos ao índice; padroniza “invariante”; qualifica convenções de formas; reforça Bash; atualiza referências oficiais de Python/ECMAScript/Java/Mermaid; ordena e corrige o glossário. A publicação mantém o histórico como metadado editorial do Markdown, não como conteúdo didático da página. |
+| **0.4.4** | 2026-09-29 | Amplia a cobertura de fluxogramas sem alterar a taxonomia: consolida símbolos essenciais, conectores na página/fora da página, subprocessos e símbolos complementares; introduz construção por sequência/seleção/repetição, regras de legibilidade, leitura/revisão e conversão fluxograma ↔ pseudocódigo; corrige o exemplo `MAXIMUM` com terminais, I/O, progresso e fim explícitos; atualiza Panorama, LAB-T02-05, desafio integrador, exercícios 22.14–22.18, evidências de domínio, checklist, glossário e referências; adiciona ISO 5807, Microsoft Support e Mermaid como fontes com papéis explicitamente delimitados. |
 | **0.4.3** | 2026-09-16 | Fecha explicitamente a ponte invariante → término → pós-condição; amplia pós-condições para propriedades do estado final, não apenas valores retornados; define melhor “passo executável” no modelo informal; conecta correção parcial ao caso de não término; esclarece `Nível A` × `difficulty`; adiciona desafio integrador 22.13 e atualiza evidências de domínio. |
 | **0.4.2** | 2026-09-16 | Remove notação assintótica prematura da intuição de complexidade; torna o invariante visual por rastreamento de prefixos; padroniza “pós-condição”; torna `[C]`/`[E]` autocontidos; esclarece modelo de computação em nível informal; reforça a semântica e o exit status do exemplo Bash; liga múltiplas saídas corretas a PR/TS e separa estruturalmente Troubleshooting dos Problemas Reais sem renumerar o capítulo. |
 | **0.4.1** | 2026-09-16 | Normaliza a convenção interna de pseudocódigo; adiciona ponteiro antecipado para a rota de primeira passagem; inclui Contrato, Especificação e oracle de teste no glossário; reduz repetição expositiva do contraexemplo `max = 0` por referências cruzadas; explicita aritmética exata no LAB 3; preserva PR-*, TS-*, LABs, exercícios, exemplos executáveis e capacidades da v0.4.0. |
@@ -4305,4 +5416,4 @@ A contribuição de cada fonte foi usada apenas onde ela acrescenta função rea
 
 ---
 
-**Fim — Fundamentos de Algoritmos v0.4.3**
+**Fim — Fundamentos de Algoritmos v0.4.10**
