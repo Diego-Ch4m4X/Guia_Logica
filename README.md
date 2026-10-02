@@ -458,12 +458,12 @@ A publicação é automatizada por GitHub Actions e GitHub Pages. O workflow exe
 | Gate Global | **concluído** |
 | Publicação Web | **Home + T01–T35** |
 | GitHub Actions | **ativo** |
-| GitHub Pages | **publicado (`v1.2.0`)** |
-| Smoke da versão publicada | **PASS (`v1.2.0`)** |
+| GitHub Pages | **publicado (`v1.3.0`)** |
+| Smoke da versão publicada | **PASS (`v1.3.0`)** |
 | Baseline Web anterior | **`v1.2.0`** |
-| Versão preparada | **`v1.3.0`** |
+| Versão publicada | **`v1.3.0`** |
 | QA local `v1.3.0` | **PASS** |
-| CI / deploy / smoke `v1.3.0` | **pendente de push/PR** |
+| CI / deploy / smoke `v1.3.0` | **PASS** |
 
 ---
 

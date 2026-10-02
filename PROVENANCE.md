@@ -892,4 +892,4 @@ Contratos de regressão:
 
 A baseline `v1.2.0` permanece preservada como referência histórica.
 
-**Estado corrente:** QA local da `v1.3.0` aprovado para preflight, build, validação estrutural, 102/102 testes de contrato, conformidade HTML, sintaxe JavaScript, artefato Pages e QA de browser isolado do `logic-reference` em desktop/mobile. A release está pronta para commit/push; CI, deploy e smoke de produção da `v1.3.0` permanecem pendentes até a execução do workflow remoto.
+**Estado corrente:** `v1.3.0` integrada à `main` pelo PR #24 por merge commit `76b7317bd4efa4ffa97fff4108ab412e00ffcd0e`, com pais `541a98202bd451870711fd0cba74e74a45d1dfec` e `9ab20fd26969cd6eb6adebdd62c89d9145551dc9`. O QA local foi aprovado para preflight, build, validação estrutural, 102/102 testes de contrato, conformidade HTML, sintaxe JavaScript, artefato Pages, links externos e QA de browser do `logic-reference` em desktop/mobile. O workflow remoto de produção #71 (`36967797045`) concluiu Build/Validate, deploy do GitHub Pages e smoke de produção com PASS. A `v1.3.0` está publicada e tecnicamente encerrada.
