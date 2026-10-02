@@ -335,6 +335,42 @@ function decorateDisclosure(html) {
   });
 }
 
+function normalizedDisclosureSummary(block) {
+  const match = String(block).match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
+  if (!match) return '';
+  return decodeText(match[1])
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function classifyPromotableLabDisclosure(block) {
+  const summary = normalizedDisclosureSummary(block);
+  if (/^Critérios de aceite$/iu.test(summary)) return 'criteria';
+  if (/^Dica$/iu.test(summary)) return 'hint';
+  if (/^Solução de referência\b/iu.test(summary)) return 'solution';
+  return null;
+}
+
+function disclosureBody(block) {
+  return String(block)
+    .replace(/^<details\b[^>]*>/i, '')
+    .replace(/<\/details>\s*$/i, '')
+    .replace(/<summary\b[^>]*>[\s\S]*?<\/summary>/i, '')
+    .trim();
+}
+
+function extractPromotableLabDisclosures(html) {
+  const promoted = [];
+  const body = String(html).replace(/<details\b[^>]*>[\s\S]*?<\/details>/gi, block => {
+    const kind = classifyPromotableLabDisclosure(block);
+    if (!kind) return block;
+    promoted.push({ kind, block, content:disclosureBody(block) });
+    return '';
+  });
+  return { body, promoted };
+}
+
 function decorateExerciseBody(html) {
   const decorated = decorateDisclosure(html);
   return decorated.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (whole, content) => {
@@ -573,8 +609,9 @@ export function headingsFromHtml(html) {
 function panelHtmlGeneric(section, part, level) {
   if (!section) return '';
   const extra = part === 'procedure' ? ' lab-panel--procedure' : part === 'criteria' ? ' lab-panel--criteria' : '';
-  const heading = `<h${level} id="${escapeAttribute(section.id)}">${LAB_ICONS[part]}<span class="lab-panel-heading-text">${escapeHtml(section.title)}</span></h${level}>`;
-  return `<section class="lab-panel${extra}" data-lab-part="${part}">${heading}${section.content}</section>`;
+  const headingId = section.id ? ` id="${escapeAttribute(section.id)}"` : '';
+  const heading = `<h${level}${headingId}>${LAB_ICONS[part]}<span class="lab-panel-heading-text">${escapeHtml(section.title)}</span></h${level}>`;
+  return `<section class="lab-panel${extra}" data-lab-part="${part}">${heading}${decorateDisclosure(section.content)}</section>`;
 }
 
 function sectionHtmlGeneric(section, part, level) {
@@ -698,7 +735,7 @@ export function wrapLabsSemantic(html, topicId) {
     if (structured) {
       const byPart = new Map(mapped.map(({ section, part }) => [part, { ...section }]));
       let disclosures = '';
-      const criteria = byPart.get('criteria');
+      let criteria = byPart.get('criteria');
       if (criteria) {
         const disclosureAt = criteria.content.indexOf('<details');
         if (disclosureAt >= 0) {
@@ -706,6 +743,33 @@ export function wrapLabsSemantic(html, topicId) {
           criteria.content = criteria.content.slice(0, disclosureAt);
         }
       }
+
+      const promoted = [];
+      for (const { part } of mapped) {
+        if (part === 'criteria') continue;
+        const section = byPart.get(part);
+        if (!section) continue;
+        const extracted = extractPromotableLabDisclosures(section.content);
+        if (!extracted.promoted.length) continue;
+        section.content = extracted.body.replace(/\s+$/, '');
+        promoted.push(...extracted.promoted);
+      }
+
+      const promotedCriteria = promoted.filter(item => item.kind === 'criteria');
+      if (criteria && promotedCriteria.length) {
+        criteria.content += promotedCriteria.map(item => item.content).join('');
+      } else if (!criteria && promotedCriteria.length) {
+        criteria = {
+          id:'',
+          title:'Critérios de aceite',
+          content:promotedCriteria.map(item => item.content).join(''),
+        };
+      }
+
+      disclosures += promoted
+        .filter(item => item.kind === 'hint' || item.kind === 'solution')
+        .map(item => item.block)
+        .join('');
       disclosures = applyT25LabContentCompatibility(decorateDisclosure(disclosures), topicId, parsed.activityIndex);
 
       const summary = ['objective','prerequisites','state','task']
