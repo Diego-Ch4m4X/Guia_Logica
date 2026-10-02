@@ -103,3 +103,17 @@ test('structured LAB grids adapt to cardinality and structural weight without to
   assert.match(activities, /\.learning-activity \.activity-disclosure>summary\{[^{}]*overflow-wrap:anywhere[^{}]*\}/);
   assert.doesNotMatch(activities, /\bT(?:0[1-9]|[12]\d|3[0-5])\b/i, 'LAB CSS must not branch on a topic id');
 });
+
+test('logic-reference presentation has one CSS owner and no topic coupling', async () => {
+  const names = (await readdir(cssDir)).filter(name => name.endsWith('.css'));
+  const selector = /\.logic-(?:reference|control|toggle|operation|table)\b/;
+  for (const name of names.filter(name => name !== 'logic-reference.css')) {
+    assert.doesNotMatch(withoutComments(await css(name)), selector, `${name} must not own logic-reference presentation`);
+  }
+  const reference = withoutComments(await css('logic-reference.css'));
+  assert.match(reference, /\.logic-reference\{/);
+  assert.match(reference, /@container technicalArticle/);
+  assert.match(reference, /\.logic-reference-controls\[hidden\]\{display:none\}/);
+  assert.doesNotMatch(reference, /\bT(?:0[1-9]|[12]\d|3[0-5])\b/i);
+  assert.doesNotMatch(reference, /!\s*important\b/i);
+});

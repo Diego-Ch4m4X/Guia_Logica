@@ -130,5 +130,18 @@
       "SEO validation gates",
       "root discovery integration"
     ]
+  },
+  "contentUiRelease": {
+    "version": "1.3.0",
+    "classification": "MINOR",
+    "date": "2026-10-02",
+    "supersedes": "1.2.0",
+    "scope": [
+      "T02 Fundamentos de Algoritmos v0.4.10",
+      "T05 Expressoes e Operadores v0.4.9",
+      "diretiva generica logic-reference com fallback HTML estatico e progressive enhancement",
+      "gates de regressao para ownership CSS, renderer e runtime"
+    ],
+    "fixturesPreserved": true
   }
 }

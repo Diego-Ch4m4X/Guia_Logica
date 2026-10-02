@@ -857,4 +857,39 @@ A sincronização `1.1.2 → 1.2.0` altera nos módulos JavaScript somente os ca
 
 A baseline `v1.1.2` permanece preservada como referência histórica.
 
-**Estado corrente:** linha `v1.2.0` preparada para QA completo e publicação após aprovação dos gates.
+**Estado da release:** `v1.2.0` preservada como baseline Web anterior à atualização de conteúdo/UI `v1.3.0`.
+
+---
+
+## 36. Atualização T02/T05 e referência lógica interativa — v1.3.0 — 2026-10-02
+
+A versão `v1.3.0` é classificada como **MINOR** sobre `v1.2.0`. O escopo combina atualização canônica de conteúdo e uma capacidade de publicação nova, sem refatoração geral do site.
+
+Conteúdo atualizado:
+
+- `T02_FUNDAMENTOS_DE_ALGORITMOS_v0.4.3.md` → `T02_FUNDAMENTOS_DE_ALGORITMOS_v0.4.10.md`;
+- `T05_EXPRESSOES_E_OPERADORES_v0.4.1.md` → `T05_EXPRESSOES_E_OPERADORES_v0.4.9.md`;
+- os demais 33 tópicos permanecem fora do escopo editorial desta release.
+
+Capacidade de publicação adicionada:
+
+- diretiva Markdown genérica `logic-reference`, validada por contrato JSON estrito;
+- fallback HTML estático para Português + Booleano, preservando estudo do conteúdo sem JavaScript;
+- progressive enhancement independente para idioma (`pt-BR`/`en`) e representação (`boolean`/`bit`);
+- suporte a `AND`, `OR`, `NOT` e `XOR` sem hardcode por tópico;
+- `logic-reference.css` como proprietário único da apresentação do componente;
+- `logic-reference.js` como runtime isolado, sem reconstrução de conteúdo por `innerHTML`;
+- testes preventivos para parser, renderer, fallback, cardinalidade das operações, ownership CSS e independência dos controles.
+
+Contratos de regressão:
+
+- `Home`, T25 golden e fixtures históricas permanecem imutáveis;
+- 35/35 tópicos e 36 URLs canônicas continuam obrigatórios;
+- `0 !important`;
+- nenhum seletor `logic-reference` pode ser proprietário em outro CSS;
+- nenhuma implementação de `logic-reference` pode depender de `T05` ou de qualquer `Txx`;
+- a versão do pacote continua sendo a única fonte operacional para cache-busters dos assets.
+
+A baseline `v1.2.0` permanece preservada como referência histórica.
+
+**Estado corrente:** QA local da `v1.3.0` aprovado para preflight, build, validação estrutural, 102/102 testes de contrato, conformidade HTML, sintaxe JavaScript, artefato Pages e QA de browser isolado do `logic-reference` em desktop/mobile. A release está pronta para commit/push; CI, deploy e smoke de produção da `v1.3.0` permanecem pendentes até a execução do workflow remoto.

@@ -176,6 +176,8 @@ async function renderTopic(topic, topics, base, topicTpl, partials) {
     GUIDE_CONTENT:guide,
     ARTICLE_HEAD:articleHead(topic),
     TOPIC_OVERVIEW:topicOverview(topic, topic.sourceBody),
+    TOPIC_EXTRA_STYLES:built.html.includes('data-logic-reference=""') ? `\n  <link rel="stylesheet" href="../../assets/css/logic-reference.css?v=${ASSET_VERSION}">` : '',
+    TOPIC_EXTRA_SCRIPTS:built.html.includes('data-logic-reference=""') ? `\n<script src="../../assets/js/logic-reference.js?v=${ASSET_VERSION}" type="module"></script>` : '',
     TOPIC_CONTENT:built.html,
     RELATED_CONTENT:related(topic, topics),
     TOC_CONTENT:buildToc(renderedHeadings, 'dynamicToc'),

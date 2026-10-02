@@ -68,7 +68,7 @@ test('golden fixtures remain byte-for-byte frozen', async () => {
 
 test('derived search index is non-empty and only targets published site paths', async () => {
   const search = await readJson('dist/data/search-index.json');
-  assert.equal(search.length, 11555);
+  assert.equal(search.length, 11611);
   for (const entry of search) {
     assert.equal(typeof entry.url, 'string');
     assert.ok(entry.url.startsWith('index.html') || entry.url.startsWith('topicos/t'), `unexpected search target: ${entry.url}`);

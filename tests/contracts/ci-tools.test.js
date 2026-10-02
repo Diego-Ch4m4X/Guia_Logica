@@ -65,7 +65,7 @@ test('local runtime supports source and package roots without pilot contracts', 
 
 test('reviewed external restrictions are exact URL and status only', async () => {
   const reviewed = JSON.parse(await read('scripts/external-link-exceptions.json')).reviewed;
-  assert.equal(reviewed.length, 3);
+  assert.equal(reviewed.length, 4);
   for (const item of reviewed) {
     assert.match(item.url, /^https:\/\//);
     assert.equal(item.classification, 'automation-restricted');
